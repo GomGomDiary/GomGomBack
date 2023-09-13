@@ -1,3 +1,6 @@
+# sercret data
+.env
+
 # compiled output
 /dist
 /node_modules
