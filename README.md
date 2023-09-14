@@ -25,7 +25,7 @@ git clone https://github.com/GomGomDiary/GomGomBack.git
 2. Install the dependencies:
 
 ```bash
-cd your-repo-name
+cd GomGomBack
 npm install
 ```
 
