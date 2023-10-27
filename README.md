@@ -11,8 +11,8 @@
 
 ## Prerequisites
 
-- Node.js v16.16.0 or higher
-- NestJS CLI v9.1.8
+- Node.js [v18.8.0](https://github.com/GomGomDiary/GomGomBack/blob/main/.tool-versions) or higher
+- NestJS CLI v9.1.8 or higher
 
 ## Installation
 
@@ -29,24 +29,25 @@ cd GomGomBack
 npm install
 ```
 
-## Usage
+3. fill `.env.[production | development]` file
 
-1. run development server
-```
-npm run start:dev
-```
+See the [`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example).
 
-2. check the server status
-```
-curl localhost:${PORT}
-```
+For reference, there is no difference between `.env.development`, `.env.production files`.
 
 ## Contribution rule
 
-1. copy the commit template 
-```
+- refer to [.gitmessage.txt](https://github.com/GomGomDiary/GomGomBack/blob/main/.gitmessage.txt)
+
+The command below will be helpful when commit.
+
+```example
 git config commit.template .gitmessage.txt
 ```
+- push to **develop** or **feature** branch, not main
+
+- also, pull request targets **develop** branch
+
 
 ## Deployment
 
