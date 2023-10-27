@@ -1,5 +1,7 @@
 # sercret data
-.env
+.env.development
+.env.production
+
 
 # compiled output
 /dist
