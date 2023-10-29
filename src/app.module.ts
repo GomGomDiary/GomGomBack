@@ -6,6 +6,8 @@ import { DiaryModule } from './diary/diary.module';
 
 import config from './config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AopModule } from '@toss/nestjs-aop';
+import { CookieDecorator } from './common/cookie/cookie-test.decorator';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
     }),
     DiaryModule,
+    AopModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CookieDecorator],
 })
 export class AppModule {}
