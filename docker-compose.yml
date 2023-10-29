@@ -1,0 +1,18 @@
+#############
+# Development
+#############
+
+version: "3"
+
+services:
+  develop:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./src:/usr/src/app/src
+    ports:
+      - "8765:${PORT:-8765}"
+    env_file:
+      - .env.development
+
