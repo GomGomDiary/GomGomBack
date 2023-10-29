@@ -1,0 +1,11 @@
+node_modules
+build
+Dockerfile*
+docker-compose*
+
+*.md
+
+.env*
+.git*
+.tool-versions
+.DS_Store
