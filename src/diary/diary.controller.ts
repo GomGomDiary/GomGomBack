@@ -1,17 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Res,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { DiaryPostDto } from './dto/diary.post.dto';
 import { Cookie } from 'src/common/cookie/cookie.decorator';
 import { Response } from 'express';
-import { CookieCheckPipe } from 'src/common/pipe/cookieCheck.pipe';
+import { MongoDBIdPipe } from 'src/common/pipe/cookieObjectId.pipe';
+import { EmptyPipe } from 'src/common/pipe/empty.pipe';
+import { AnswerPostDto } from './dto/answer.post.dto';
 
 // AS-IS
 // POST /question
@@ -33,23 +27,41 @@ export class DiaryController {
   @Post('question')
   async postQuestion(
     @Body() body: DiaryPostDto,
-    @Cookie('diaryUser', CookieCheckPipe) userId: string,
-    @Res() res: Response,
+    @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.diaryService.postQuestion({ body, userId, res });
-  }
-  @Get('answer/:questionId')
-  async getAnswer(@Param('questionId') questionId: string) {
-    return this.diaryService.getAnswer();
+    return this.diaryService.postQuestion({ clientId, body, res });
   }
 
-  @Get('answerers/:questionId')
-  async getAnswerers(@Param('questionId') questionId: string) {
-    return this.diaryService.getAnswerers(questionId);
+  @Get('answerers/:diaryId')
+  async getAnswerers(
+    @Param('diaryId', MongoDBIdPipe) diaryId: string,
+    @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
+  ) {
+    return this.diaryService.getAnswerers({ diaryId, clientId });
   }
 
-  @Post('answer/:questionId')
-  async postAnswer(@Param('questionId') questionId: string, @Body() body: any) {
-    return this.diaryService.postAnswer({ questionId, answer: body });
+  @Get('answer/:diaryId/:answerId')
+  async getAnswer(
+    @Param('diaryId', MongoDBIdPipe) diaryId: string,
+    @Param('answerId', MongoDBIdPipe) answerId: string,
+    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) clientId: string,
+  ) {
+    return this.diaryService.getAnswer({ diaryId, answerId, clientId });
+  }
+
+  @Post('answer/:diaryId')
+  async postAnswer(
+    @Param('diaryId') diaryId: string,
+    @Body() body: AnswerPostDto,
+    @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.diaryService.postAnswer({
+      diaryId,
+      clientId,
+      answer: body,
+      res,
+    });
   }
 }

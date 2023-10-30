@@ -11,6 +11,8 @@ async function bootstrap() {
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
+  // TODO
+  // app.enableShutdownHooks();
   await app.listen(port);
 }
 bootstrap();
