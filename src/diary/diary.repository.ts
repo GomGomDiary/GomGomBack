@@ -6,12 +6,17 @@ import {
 import { Diary } from './diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DiaryPostDto } from './dto/diary.post.dto';
 
 @Injectable()
 export class DiaryRepository {
   constructor(
     @InjectModel(Diary.name) private readonly diaryModel: Model<Diary>,
   ) {}
+
+  createWithId(id: string, body: DiaryPostDto) {
+    return this.diaryModel.create({ _id: id, ...body });
+  }
 
   async checkDuplication({ questionId, clientId }) {
     try {
@@ -24,7 +29,7 @@ export class DiaryRepository {
     }
   }
 
-  async create(diary: any) {
+  async create(diary: DiaryPostDto) {
     return await this.diaryModel.create(diary);
   }
 
@@ -44,8 +49,11 @@ export class DiaryRepository {
     }
   }
 
-  async exist(id: string) {
+  async existAsQuestioner(id: string) {
     return !!(await this.diaryModel.exists({ _id: id }));
+  }
+  async existAsAnswerer(id: string) {
+    return !!(await this.diaryModel.exists({ 'answerList._id': id }));
   }
 
   async findAnswerers(questionId: string) {
@@ -83,5 +91,19 @@ export class DiaryRepository {
     } catch (err) {
       throw new NotFoundException('Diary not found');
     }
+  }
+
+  async updateOne(id: string, body: DiaryPostDto) {
+    return await this.diaryModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: body,
+      },
+      {
+        fields: '_id',
+      },
+    );
   }
 }

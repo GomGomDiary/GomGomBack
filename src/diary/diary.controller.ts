@@ -1,5 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Res,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DiaryService } from './diary.service';
+import { DiaryPostDto } from './dto/diary.post.dto';
+import { Cookie } from 'src/common/cookie/cookie.decorator';
+import { Response } from 'express';
+import { CookieCheckPipe } from 'src/common/pipe/cookieCheck.pipe';
 
 // AS-IS
 // POST /question
@@ -19,8 +31,12 @@ import { DiaryService } from './diary.service';
 export class DiaryController {
   constructor(private readonly diaryService: DiaryService) {}
   @Post('question')
-  async postQuestion(@Body() body: any) {
-    return this.diaryService.postQuestion(body);
+  async postQuestion(
+    @Body() body: DiaryPostDto,
+    @Cookie('diaryUser', CookieCheckPipe) userId: string,
+    @Res() res: Response,
+  ) {
+    return this.diaryService.postQuestion({ body, userId, res });
   }
   @Get('answer/:questionId')
   async getAnswer(@Param('questionId') questionId: string) {
