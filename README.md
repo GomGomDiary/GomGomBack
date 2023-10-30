@@ -22,24 +22,29 @@
 git clone https://github.com/GomGomDiary/GomGomBack.git
 ```
 
-2. Install the dependencies:
-
-```bash
-cd GomGomBack
-npm install
-```
-
-3. fill `.env.[production | development]` file
+2. fill `.env.[production | development]` file
 
 See the [`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example).
 
 For reference, there is no difference between `.env.development`, `.env.production files`.
 
+3. run docker compose using [docker-development.sh]()
+```
+bash docker-development.sh
+```
+or
+```
+chmod 744 docker-development.sh
+./docker-development.sh
+```
+
+
+
 ## Contribution rule
 
 - refer to [.gitmessage.txt](https://github.com/GomGomDiary/GomGomBack/blob/main/.gitmessage.txt)
 
-The command below will be helpful when commit.
+The below command may be helpful when commit.
 
 ```example
 git config commit.template .gitmessage.txt
