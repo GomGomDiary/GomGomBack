@@ -18,10 +18,10 @@ export class DiaryRepository {
     return this.diaryModel.create({ _id: id, ...body });
   }
 
-  async checkDuplication({ questionId, clientId }) {
+  async checkDuplication(diaryId: string, clientId: string) {
     try {
       return !!(await this.diaryModel.findOne({
-        _id: questionId,
+        _id: diaryId,
         'answerList._id': clientId,
       }));
     } catch (err) {
@@ -33,9 +33,9 @@ export class DiaryRepository {
     return await this.diaryModel.create(diary);
   }
 
-  async findById(id: string) {
+  async findById(diaryId: string) {
     try {
-      return await this.diaryModel.findById(id).orFail();
+      return await this.diaryModel.findById(diaryId).orFail();
     } catch (err) {
       throw new NotFoundException('Diary not found');
     }
@@ -49,18 +49,26 @@ export class DiaryRepository {
     }
   }
 
-  async existAsQuestioner(id: string) {
+  async existAsDiaryOwner(id: string) {
     return !!(await this.diaryModel.exists({ _id: id }));
   }
+
   async existAsAnswerer(id: string) {
     return !!(await this.diaryModel.exists({ 'answerList._id': id }));
   }
 
-  async findAnswerers(questionId: string) {
+  async existAsDirayAnswerer(diaryId: string, cookieId: string) {
+    return !!(await this.diaryModel.exists({
+      _id: diaryId,
+      'answerList._id': cookieId,
+    }));
+  }
+
+  async findAnswerers(diaryId: string) {
     try {
       return await this.diaryModel
         .findOne(
-          { _id: questionId },
+          { _id: diaryId },
           {
             'answerList.answers': 0,
           },
@@ -71,18 +79,18 @@ export class DiaryRepository {
     }
   }
 
-  async findAnswerByClientId({ questionId, clientId }) {
+  async findAnswerByAnswerId(diaryId: string, answerId: string) {
     try {
-      await this.diaryModel
+      return await this.diaryModel
         .findOne(
           {
-            _id: questionId,
-            'answerList._id': clientId,
+            _id: diaryId,
+            'answerList._id': answerId,
           },
           {
             answerList: {
               $elemMatch: {
-                _id: clientId,
+                _id: answerId,
               },
             },
           },
@@ -93,16 +101,13 @@ export class DiaryRepository {
     }
   }
 
-  async updateOne(id: string, body: DiaryPostDto) {
+  async updateOne(diaryId: string, body: DiaryPostDto) {
     return await this.diaryModel.updateOne(
       {
-        _id: id,
+        _id: diaryId,
       },
       {
         $set: body,
-      },
-      {
-        fields: '_id',
       },
     );
   }
