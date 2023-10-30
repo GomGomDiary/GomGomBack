@@ -33,7 +33,6 @@ export class Diary extends Document {
 
   @Prop({
     type: [AnswerSchema],
-    // _id: true,
   })
   answerList: Answer[];
 }
