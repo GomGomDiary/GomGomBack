@@ -2,6 +2,10 @@ name: cicd
 on:
   push:
     branches: [feature/*]
+    paths:
+      - "src/**"
+      - ".github/workflows/**"
+      - ".aws/**"
 
 env:
   AWS_REGION : ap-northeast-2
