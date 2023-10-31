@@ -4,8 +4,6 @@ on:
     branches: [feature/*]
     paths:
       - "src/**"
-      - ".github/workflows/**"
-      - ".aws/**"
 
 env:
   AWS_REGION : ap-northeast-2
@@ -25,7 +23,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Git clone the repository
@@ -67,4 +67,3 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
-
