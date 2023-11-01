@@ -15,6 +15,7 @@ describe('DiaryController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    console.log(process.env.MONGO_URI);
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         AppModule,
@@ -27,10 +28,13 @@ describe('DiaryController (e2e)', () => {
         }),
       ],
     }).compile();
-
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
     await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   let diaryId;
