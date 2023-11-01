@@ -32,3 +32,6 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "${GREEN}gomgom_production_container is running${NC}"
+fi
+
+echo "gomgom_production_container is running"
