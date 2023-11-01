@@ -1,0 +1,21 @@
+#############
+# Development
+#############
+
+version: "3"
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.dev
+    environment: 
+      MONGO_URI: mongodb://mongo:27017/test
+    command: npm run test:e2e
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    ports:
+      - '27018:27017'
