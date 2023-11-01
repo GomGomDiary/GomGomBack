@@ -1,6 +1,7 @@
 # sercret data
 .env.development
 .env.production
+.env.test
 
 
 # compiled output
