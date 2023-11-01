@@ -1,13 +1,15 @@
 
 
-# GomGomBack
+# GomGomDiary Backend
 
 <!-- [![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/build.yml/badge.svg)](https://github.com/your-username/your-repo-name/actions/workflows/build.yml) -->
 <!-- ![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/main.yml/badge.svg?branch=feature-1) -->
 
-- Node (Typescript, NestJS)
-- MongoDB
-- Railway
+- NodeJS (Typescript)
+	- NestJS
+	- [express](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( use in the past... )
+- MongoDB ([Atlas](https://www.mongodb.com/cloud/atlas/))
+- [AWS ECS](https://aws.amazon.com/ecs/)
 
 ## Prerequisites
 
@@ -26,9 +28,9 @@ git clone https://github.com/GomGomDiary/GomGomBack.git
 
 See the [`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example).
 
-For reference, there is no difference between `.env.development`, `.env.production files`.
+For reference, there is no difference between `.env.development`, `.env.production`.
 
-3. run docker compose using [docker-development.sh]()
+3. run docker compose using [docker-development.sh](https://github.com/GomGomDiary/GomGomBack/blob/main/docker-development.sh)
 ```
 bash docker-development.sh
 ```
@@ -44,16 +46,21 @@ chmod 744 docker-development.sh
 
 - refer to [.gitmessage.txt](https://github.com/GomGomDiary/GomGomBack/blob/main/.gitmessage.txt)
 
-The below command may be helpful when commit.
+	- The below command may be helpful when commit.
 
-```example
-git config commit.template .gitmessage.txt
-```
+	```example
+	$ git config commit.template .gitmessage.txt
+	```
+	- Test 
+	```
+	$ git commit --allow-empty
+	```
+
 - push to **develop** or **feature** branch, not main
 
-- also, pull request targets **develop** branch
+- Also, pull request targets **develop** branch
 
 
 ## Deployment
 
-This project is deployed by [Railway](https://railway.app/).
+This project is deployed by [ECS](https://aws.amazon.com/ecs).

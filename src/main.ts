@@ -11,13 +11,13 @@ async function bootstrap() {
   const port = configService.get<number>('PORT');
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   const logger = new Logger();
+
+  logger.log(`PORT: ${port}`);
   const env = configService.get<string>('NODE_ENV');
 
   if (env === 'development') {
     mongoose.set('debug', true);
   }
-
-  logger.log(`PORT: ${port}`);
 
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
