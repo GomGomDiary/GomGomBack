@@ -49,7 +49,7 @@ export class DiaryRepository {
     }
   }
 
-  async existAsDiaryOwner(id: string) {
+  async checkOwnership(id: string) {
     return !!(await this.diaryModel.exists({ _id: id }));
   }
 
@@ -57,7 +57,7 @@ export class DiaryRepository {
     return !!(await this.diaryModel.exists({ 'answerList._id': id }));
   }
 
-  async existAsDirayAnswerer(diaryId: string, cookieId: string) {
+  async existAsDiaryAnswerer(diaryId: string, cookieId: string) {
     return !!(await this.diaryModel.exists({
       _id: diaryId,
       'answerList._id': cookieId,

@@ -16,7 +16,7 @@ export class DiaryService {
     clientId: string;
     res: Response;
   }) {
-    const isDiaryOwner = await this.diaryRepository.existAsDiaryOwner(clientId);
+    const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
     // if Questioner (can be Answerer)
     // update Diary
     // soft delete
@@ -59,7 +59,7 @@ export class DiaryService {
   }
 
   async getAnswerers({ diaryId, clientId }) {
-    const isDiaryOwner = diaryId === clientId ? true : false;
+    const isDiaryOwner = diaryId === clientId;
 
     const answerers = await this.diaryRepository.findAnswerers(diaryId);
 
