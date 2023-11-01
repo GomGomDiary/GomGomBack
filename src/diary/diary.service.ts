@@ -3,10 +3,14 @@ import { DiaryRepository } from './diary.repository';
 import { DiaryPostDto } from './dto/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DiaryService {
-  constructor(private readonly diaryRepository: DiaryRepository) {}
+  constructor(
+    private readonly diaryRepository: DiaryRepository,
+    private readonly configService: ConfigService,
+  ) {}
   async postQuestion({
     body,
     clientId,
@@ -16,25 +20,31 @@ export class DiaryService {
     clientId: string;
     res: Response;
   }) {
-    const isDiaryOwner = await this.diaryRepository.existAsDiaryOwner(clientId);
-    // if Questioner (can be Answerer)
+    const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
+    // if Questioner
     // update Diary
     // soft delete
     if (isDiaryOwner) {
       await this.diaryRepository.updateOne(clientId, body);
-      return;
+      return res.status(204).end();
     }
     // if Answerer o (Questioner x)
     // create Diary
     const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
     if (isAnswerer) {
       await this.diaryRepository.createWithId(clientId, body);
-      return;
+      return res.status(204).end();
     }
     // if Newbie (Questioner x, Answerer x)
     // create Diary && set cookie
     const diary = await this.diaryRepository.create(body);
-    res.cookie('diaryUser', diary._id);
+    res
+      .cookie(
+        'diaryUser',
+        diary._id.toString(),
+        this.configService.get('COOKIE_OPTION'),
+      )
+      .end();
   }
 
   async getAnswer({
@@ -59,13 +69,13 @@ export class DiaryService {
   }
 
   async getAnswerers({ diaryId, clientId }) {
-    const isDiaryOwner = diaryId === clientId ? true : false;
+    const isDiaryOwner = diaryId === clientId;
 
     const answerers = await this.diaryRepository.findAnswerers(diaryId);
 
     // check clientId is in diary answer
     // const isAnswererAboutDiaryId =
-    // await this.diaryRepository.existAsDirayAnswerer(diaryId, clientId);
+    // await this.diaryRepository.existAsDiaryAnswerer(diaryId, clientId);
 
     const answererWithPermission = answerers.answerList.map((answer) => {
       let isPermission = false;
@@ -115,11 +125,14 @@ export class DiaryService {
     }
 
     let id: mongoose.Types.ObjectId;
-    console.log(id);
     // if Newbie
     if (!clientId) {
       id = new mongoose.Types.ObjectId();
-      res.cookie('diaryUser', id.toString());
+      res.cookie(
+        'diaryUser',
+        id.toString(),
+        this.configService.get('COOKIE_OPTION'),
+      );
       // set cookie
     } else {
       id = new mongoose.Types.ObjectId(clientId);

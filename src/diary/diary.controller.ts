@@ -28,7 +28,7 @@ export class DiaryController {
   async postQuestion(
     @Body() body: DiaryPostDto,
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.diaryService.postQuestion({ clientId, body, res });
   }

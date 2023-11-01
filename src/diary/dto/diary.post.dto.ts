@@ -3,7 +3,7 @@ import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 export class DiaryPostDto {
   @IsNotEmpty()
   @IsArray()
-  question: [];
+  question: any[];
 
   @IsNotEmpty()
   @IsString()
