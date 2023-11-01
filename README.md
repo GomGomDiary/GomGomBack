@@ -28,7 +28,7 @@ git clone https://github.com/GomGomDiary/GomGomBack.git
 
 See the [`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example).
 
-For reference, there is no difference between `.env.development`, `.env.production`.
+For reference, there is no difference field between `.env.development`, `.env.production`.
 
 3. run docker compose using [docker-development.sh](https://github.com/GomGomDiary/GomGomBack/blob/main/docker-development.sh)
 ```
