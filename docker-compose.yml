@@ -12,7 +12,7 @@ services:
     volumes:
       - ./src:/usr/src/app/src
     ports:
-      - "8765:${PORT:-8765}"
+      - "8765:8765"
     env_file:
       - .env.development
 

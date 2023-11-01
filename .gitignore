@@ -1,9 +1,12 @@
 # sercret data
-.env
+.env.development
+.env.production
+.env.test
+
 
 # compiled output
-/dist
-/node_modules
+dist
+node_modules
 
 # Logs
 logs
