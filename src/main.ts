@@ -21,7 +21,6 @@ async function bootstrap() {
 
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
-
   // TODO
   // app.enableShutdownHooks();
   await app.listen(port);
