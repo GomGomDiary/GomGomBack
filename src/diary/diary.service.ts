@@ -26,21 +26,25 @@ export class DiaryService {
     // soft delete
     if (isDiaryOwner) {
       await this.diaryRepository.updateOne(clientId, body);
-      return;
+      return res.status(204).end();
     }
     // if Answerer o (Questioner x)
     // create Diary
     const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
     if (isAnswerer) {
       await this.diaryRepository.createWithId(clientId, body);
-      return;
+      return res.status(204).end();
     }
     // if Newbie (Questioner x, Answerer x)
     // create Diary && set cookie
     const diary = await this.diaryRepository.create(body);
     res
-      .cookie('diaryUser', diary._id, this.configService.get('COOKIE_OPTION'))
-      .sendStatus(201);
+      .cookie(
+        'diaryUser',
+        diary._id.toString(),
+        this.configService.get('COOKIE_OPTION'),
+      )
+      .end();
   }
 
   async getAnswer({
