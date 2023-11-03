@@ -37,11 +37,15 @@ describe('DiaryController (e2e)', () => {
     await app.close();
   });
 
-  let diaryId;
-
   describe('/diary (POST)', () => {
-    it('with no cookie', async () => {
-      const newBieResponse = await request(app.getHttpServer())
+    let diaryId, newBieResponse;
+
+    beforeEach(async () => {
+      /**
+       * 해당 beforeEach 실행 시
+       * question 1개를 만들게 됩됩니다.
+       */
+      newBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
         .send({
           question: ['name', 'age', 'food', 'hobby'],
@@ -49,13 +53,15 @@ describe('DiaryController (e2e)', () => {
           challenge: 'first',
           countersign: 'first',
         });
-      expect(newBieResponse.statusCode).toBe(201);
-
       const cookie = newBieResponse.header['set-cookie'][0];
       diaryId = cookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
+    });
+
+    it('with no cookie', async () => {
+      expect(newBieResponse.statusCode).toBe(201);
     });
 
     it('with cookie', async () => {
@@ -69,13 +75,92 @@ describe('DiaryController (e2e)', () => {
           countersign: 'New',
         });
       expect(oldBieResponse.statusCode).toBe(204);
+      // 상태값?
     });
   });
 
-  let clientId1, clientId2;
-
   describe('/diary/answer/:diaryId (POST)', () => {
-    it('with no cookie (make clientId1)', async () => {
+    let diaryId, clientId1, answererResponse;
+
+    beforeEach(async () => {
+      const newBieResponse = await request(app.getHttpServer())
+        .post('/diary/question')
+        .send({
+          question: ['name', 'age', 'food', 'hobby'],
+          questioner: 'first',
+          challenge: 'first',
+          countersign: 'first',
+        });
+      const diaryIdCookie = newBieResponse.header['set-cookie'][0];
+      diaryId = diaryIdCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+
+      answererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .send({
+          answers: ['name', 12, 'food', 'hobby'],
+          answerer: 'client1',
+        });
+
+      const clientCookie = answererResponse.header['set-cookie'][0];
+      // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
+      clientId1 = clientCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+    });
+
+    it('with no cookie', async () => {
+      expect(answererResponse.statusCode).toBe(201);
+    });
+
+    it('with cookie when duplication answer', async () => {
+      const makeDuplicationAnswer = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .set('Cookie', [`diaryUser=${clientId1}`])
+        .send({
+          answers: ['name', 12, 'food', 'hobby'],
+          answerer: 'client1',
+        });
+      expect(makeDuplicationAnswer.statusCode).toBe(409);
+    });
+
+    it('with cookie when answer oneself', async () => {
+      const selfResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .set('Cookie', [`diaryUser=${diaryId}`])
+        .send({
+          answers: ['name', 12, 'food', 'hobby'],
+          answerer: 'client1',
+        });
+      expect(selfResponse.statusCode).toBe(400);
+    });
+  });
+
+  describe('/diary/answerers/:diaryId (GET)', () => {
+    let diaryId, clientId1, clientId2;
+
+    beforeEach(async () => {
+      /**
+       * 해당 beforeEach 실행 시
+       * question 1개에 answer 2개가 붙어있는 구조를 갖게 됩니다.
+       */
+      const newBieResponse = await request(app.getHttpServer())
+        .post('/diary/question')
+        .send({
+          question: ['name', 'age', 'food', 'hobby'],
+          questioner: 'first',
+          challenge: 'first',
+          countersign: 'first',
+        });
+      const diaryIdCookie = newBieResponse.header['set-cookie'][0];
+      diaryId = diaryIdCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+
       const firstAnswererResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .send({
@@ -83,38 +168,13 @@ describe('DiaryController (e2e)', () => {
           answerer: 'client1',
         });
 
-      expect(firstAnswererResponse.statusCode).toBe(201);
-      const cookie = firstAnswererResponse.header['set-cookie'][0];
+      const clientCookie = firstAnswererResponse.header['set-cookie'][0];
       // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
-      clientId1 = cookie
+      clientId1 = clientCookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
-    });
 
-    it('with cookie when duplication answer', async () => {
-      const duplicationResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
-        .set('Cookie', [`diaryUser=${clientId1}`])
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
-        });
-      expect(duplicationResponse.statusCode).toBe(409);
-    });
-
-    it('with cookie when answer oneself', async () => {
-      const duplicationResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
-        .set('Cookie', [`diaryUser=${diaryId}`])
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
-        });
-      expect(duplicationResponse.statusCode).toBe(400);
-    });
-
-    it('with no cookie (make clientId2)', async () => {
       const secondAnswererResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .send({
@@ -122,25 +182,24 @@ describe('DiaryController (e2e)', () => {
           answerer: 'client2',
         });
 
-      expect(secondAnswererResponse.statusCode).toBe(201);
       const cookie = secondAnswererResponse.header['set-cookie'][0];
-      // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
       clientId2 = cookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
     });
-  });
-
-  describe('/diary/answerers/:diaryId (GET)', () => {
-    let resultJson;
 
     describe('with no cookie', () => {
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer()).get(
+      let result, resultJson;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer()).get(
           `/diary/answerers/${diaryId}`,
         );
         resultJson = JSON.parse(result.text);
+      });
+
+      it('statusCode must be 200', async () => {
         expect(result.statusCode).toBe(200);
       });
 
@@ -162,11 +221,16 @@ describe('DiaryController (e2e)', () => {
     });
 
     describe('with clientId1 cookie', () => {
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer())
+      let result, resultJson;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer())
           .get(`/diary/answerers/${diaryId}`)
           .set('Cookie', [`diaryUser=${clientId1}`]);
         resultJson = JSON.parse(result.text);
+      });
+
+      it('statusCode must be 200', async () => {
         expect(result.statusCode).toBe(200);
       });
 
@@ -191,11 +255,16 @@ describe('DiaryController (e2e)', () => {
     });
 
     describe('with diaryId cookie', () => {
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer())
+      let result, resultJson;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer())
           .get(`/diary/answerers/${diaryId}`)
           .set('Cookie', [`diaryUser=${diaryId}`]);
         resultJson = JSON.parse(result.text);
+      });
+
+      it('statusCode must be 200', async () => {
         expect(result.statusCode).toBe(200);
       });
 
@@ -219,24 +288,82 @@ describe('DiaryController (e2e)', () => {
       });
     });
   });
+
   describe('/diary/answer/:diaryId/:answerId (GET)', () => {
+    let diaryId, clientId1, clientId2;
+
+    beforeEach(async () => {
+      /**
+       * 해당 beforeEach 실행 시
+       * question 1개에 answer 2개가 붙어있는 구조를 갖게 됩니다.
+       */
+      const newBieResponse = await request(app.getHttpServer())
+        .post('/diary/question')
+        .send({
+          question: ['name', 'age', 'food', 'hobby'],
+          questioner: 'first',
+          challenge: 'first',
+          countersign: 'first',
+        });
+      const diaryIdCookie = newBieResponse.header['set-cookie'][0];
+      diaryId = diaryIdCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+
+      const firstAnswererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .send({
+          answers: ['name', 12, 'food', 'hobby'],
+          answerer: 'client1',
+        });
+
+      const clientCookie = firstAnswererResponse.header['set-cookie'][0];
+      // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
+      clientId1 = clientCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+
+      const secondAnswererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .send({
+          answers: ['name', 12, 'food', 'hobby'],
+          answerer: 'client2',
+        });
+
+      const cookie = secondAnswererResponse.header['set-cookie'][0];
+      clientId2 = cookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+    });
+
     describe('with no cookie', () => {
-      it('statusCode must be 400', async () => {
-        const result = await request(app.getHttpServer()).get(
+      let result;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer()).get(
           `/diary/answer/${diaryId}/${clientId1}`,
         );
+      });
+      it('statusCode must be 400', async () => {
         expect(result.statusCode).toBe(400);
       });
     });
 
     describe('with diaryId cookie', () => {
-      let resultJson;
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer())
+      let result, resultJson;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer())
           .get(`/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${diaryId}`]);
-        expect(result.statusCode).toBe(200);
         resultJson = JSON.parse(result.text);
+      });
+
+      it('statusCode must be 200', async () => {
+        expect(result.statusCode).toBe(200);
       });
 
       it('answerList _id must be clientId1', () => {
@@ -245,21 +372,30 @@ describe('DiaryController (e2e)', () => {
     });
 
     describe('with clientId cookie that has no permission', () => {
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer())
+      let result;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer())
           .get(`/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${clientId2}`]);
+      });
+
+      it('statusCode must be 200', async () => {
         expect(result.statusCode).toBe(400);
       });
     });
 
     describe('with clientId cookie that has permission', () => {
-      let resultJson;
-      it('statusCode must be 200', async () => {
-        const result = await request(app.getHttpServer())
+      let result, resultJson;
+
+      beforeEach(async () => {
+        result = await request(app.getHttpServer())
           .get(`/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${clientId1}`]);
         resultJson = JSON.parse(result.text);
+      });
+
+      it('statusCode must be 200', async () => {
         expect(result.statusCode).toBe(200);
       });
 
