@@ -1,7 +1,6 @@
 name: cicd
 on:
   push:
-    branches: [main]
     paths:
       - "src/**"
 
@@ -28,6 +27,7 @@ jobs:
 
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     steps:
