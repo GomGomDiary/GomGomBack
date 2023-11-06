@@ -25,7 +25,6 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalFilters(new HttpExceptionFilter());
-  // TODO
 
   await app.listen(port);
 }
