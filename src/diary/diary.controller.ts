@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { DiaryPostDto } from './dto/diary.post.dto';
-import { Cookie } from 'src/common/cookie/cookie.decorator';
+import { Cookie } from 'src/common/decorator/cookie.decorator';
 import { Response } from 'express';
 import { MongoDBIdPipe } from 'src/common/pipe/cookieObjectId.pipe';
 import { EmptyPipe } from 'src/common/pipe/empty.pipe';
@@ -21,7 +21,10 @@ import { AnswerPostDto } from './dto/answer.post.dto';
 // POST /diary/answer/:questionId
 // GET /cookie
 
-@Controller('diary')
+@Controller({
+  version: '1',
+  path: 'diary',
+})
 export class DiaryController {
   constructor(private readonly diaryService: DiaryService) {}
   @Post('question')

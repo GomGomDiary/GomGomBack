@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import mongoose from 'mongoose';
 
 async function bootstrap() {
@@ -21,6 +22,9 @@ async function bootstrap() {
 
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
   // TODO
   // app.enableShutdownHooks();
   await app.listen(port);
