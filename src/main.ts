@@ -19,6 +19,7 @@ async function bootstrap() {
   if (env === 'development') {
     mongoose.set('debug', true);
   }
+  if (env === 'development') mongoose.set('debug', true);
 
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
