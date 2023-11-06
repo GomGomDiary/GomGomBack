@@ -8,7 +8,7 @@ env:
   AWS_REGION : ap-northeast-2
   ECR_REPOSITORY: gomgomdiary
   ECS_CLUSTER: gomgom_cluster
-  ECS_SERVICE: gomgom_service
+  ECS_SERVICE: gomgom_service2
   ECS_TASK_DEFINITION: ./.aws/task-definition.json
   CONTAINER_NAME: gomgom
 
@@ -37,7 +37,7 @@ jobs:
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::000931910764:role/gomgomdiary_gomgomback_oidc
+          role-to-assume: arn:aws:iam::988606121037:role/gomgomdiary_gomgomback_oidc
           role-session-name: rolesession
           aws-region: ${{ env.AWS_REGION }}
 
@@ -70,3 +70,20 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Report status to discord
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: |-
+            :harmony: Successfully deployed
+            Commit: `${{ github.sha }}`
+
+      - name: Report failure to discord
+        uses: tsickert/discord-webhook@v5.3.0
+        if: failure()
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          content: |-
+            :broken_heart: [Failed to deploy](<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}>)
+            Commit: `${{ github.sha }}`
