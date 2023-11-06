@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { DiaryRepository } from './diary.repository';
 import { DiaryPostDto } from './dto/diary.post.dto';
 import { Response } from 'express';
@@ -26,14 +31,14 @@ export class DiaryService {
     // soft delete
     if (isDiaryOwner) {
       await this.diaryRepository.updateOne(clientId, body);
-      return res.status(204).end();
+      return res.status(HttpStatus.NO_CONTENT).end();
     }
     // if Answerer o (Questioner x)
     // create Diary
     const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
     if (isAnswerer) {
       await this.diaryRepository.createWithId(clientId, body);
-      return res.status(204).end();
+      return res.status(HttpStatus.NO_CONTENT).end();
     }
     // if Newbie (Questioner x, Answerer x)
     // create Diary && set cookie
