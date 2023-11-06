@@ -17,6 +17,7 @@ async function bootstrap() {
   const env = configService.get<string>('NODE_ENV');
 
   if (env === 'development') mongoose.set('debug', true);
+  if (env === 'production') app.enableShutdownHooks();
 
   app.use(cookieParser(cookieSecret));
   app.useGlobalPipes(new ValidationPipe());
