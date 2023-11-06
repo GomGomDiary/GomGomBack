@@ -83,6 +83,10 @@ describe('DiaryController (e2e)', () => {
     let diaryId, clientId1, answererResponse;
 
     beforeEach(async () => {
+      /**
+       * 해당 beforeEach 실행 시
+       * question 1개, answer 1개를 만들게 됩니다.
+       */
       const newBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
         .send({
