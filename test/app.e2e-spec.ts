@@ -80,12 +80,17 @@ describe('DiaryController (e2e)', () => {
   });
 
   describe('/diary/answer/:diaryId (POST)', () => {
-    let diaryId, clientId1, answererResponse;
+    let diaryId, clientId1, answererResponse, token;
 
     beforeEach(async () => {
       /**
+       * 개요
        * 해당 beforeEach 실행 시
        * question 1개, answer 1개를 만들게 됩니다.
+       */
+
+      /**
+       * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
@@ -95,19 +100,41 @@ describe('DiaryController (e2e)', () => {
           challenge: 'first',
           countersign: 'first',
         });
+
+      /**
+       * diaryId cookie 파싱
+       */
       const diaryIdCookie = newBieResponse.header['set-cookie'][0];
       diaryId = diaryIdCookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
 
-      answererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+      /**
+       * answerer 인증
+       */
+      const tokenResponse = await request(app.getHttpServer())
+        .post(`/diary/countersign/${diaryId}`)
         .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
+          countersign: 'first',
         });
 
+      /**
+       * token 파싱
+       */
+      token = tokenResponse.body.diaryToken;
+
+      /**
+       * answer 생성 with token
+       */
+      answererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(clientId1_Answer);
+
+      /**
+       * answererId cookie 파싱
+       */
       const clientCookie = answererResponse.header['set-cookie'][0];
       // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
       clientId1 = clientCookie
@@ -124,32 +151,33 @@ describe('DiaryController (e2e)', () => {
       const makeDuplicationAnswer = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${clientId1}`])
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
-        });
+        .set('Authorization', `Bearer ${token}`)
+        .send(clientId1_Answer);
       expect(makeDuplicationAnswer.statusCode).toBe(409);
     });
 
-    it('with cookie when answer oneself', async () => {
+    it('with cookie when answer yourself', async () => {
       const selfResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${diaryId}`])
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
-        });
+        .set('Authorization', `Bearer ${token}`)
+        .send(clientId1_Answer);
       expect(selfResponse.statusCode).toBe(400);
     });
   });
 
   describe('/diary/answerers/:diaryId (GET)', () => {
-    let diaryId, clientId1, clientId2;
+    let diaryId, clientId1, clientId2, token;
 
     beforeEach(async () => {
       /**
+       * 개요
        * 해당 beforeEach 실행 시
        * question 1개에 answer 2개가 붙어있는 구조를 갖게 됩니다.
+       */
+
+      /**
+       * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
@@ -159,19 +187,41 @@ describe('DiaryController (e2e)', () => {
           challenge: 'first',
           countersign: 'first',
         });
+
+      /**
+       * diaryId 파싱
+       */
       const diaryIdCookie = newBieResponse.header['set-cookie'][0];
       diaryId = diaryIdCookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
 
-      const firstAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+      /**
+       * answerer 인증
+       */
+      const tokenResponse = await request(app.getHttpServer())
+        .post(`/diary/countersign/${diaryId}`)
         .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
+          countersign: 'first',
         });
 
+      /**
+       * token 파싱
+       */
+      token = tokenResponse.body.diaryToken;
+
+      /**
+       * answer1 생성
+       */
+      const firstAnswererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(clientId1_Answer);
+
+      /**
+       * cookie 파싱
+       */
       const clientCookie = firstAnswererResponse.header['set-cookie'][0];
       // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
       clientId1 = clientCookie
@@ -179,13 +229,20 @@ describe('DiaryController (e2e)', () => {
         .slice('diaryUser='.length)
         .replace(/;/g, '');
 
+      /**
+       * answer2 생성
+       */
       const secondAnswererResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           answers: ['name', 12, 'food', 'hobby'],
           answerer: 'client2',
         });
 
+      /**
+       * cookie 파싱
+       */
       const cookie = secondAnswererResponse.header['set-cookie'][0];
       clientId2 = cookie
         .match(/diaryUser=.+?;/)[0]
@@ -197,6 +254,9 @@ describe('DiaryController (e2e)', () => {
       let result, resultJson;
 
       beforeEach(async () => {
+        /**
+         * answerer 정보 요청
+         */
         result = await request(app.getHttpServer()).get(
           `/diary/answerers/${diaryId}`,
         );
@@ -294,12 +354,17 @@ describe('DiaryController (e2e)', () => {
   });
 
   describe('/diary/answer/:diaryId/:answerId (GET)', () => {
-    let diaryId, clientId1, clientId2;
+    let diaryId, clientId1, clientId2, token;
 
     beforeEach(async () => {
       /**
+       * 개요
        * 해당 beforeEach 실행 시
        * question 1개에 answer 2개가 붙어있는 구조를 갖게 됩니다.
+       */
+
+      /**
+       * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
@@ -309,19 +374,41 @@ describe('DiaryController (e2e)', () => {
           challenge: 'first',
           countersign: 'first',
         });
+
+      /**
+       * diaryId 파싱
+       */
       const diaryIdCookie = newBieResponse.header['set-cookie'][0];
       diaryId = diaryIdCookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
         .replace(/;/g, '');
 
-      const firstAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+      /**
+       * answerer 인증
+       */
+      const tokenResponse = await request(app.getHttpServer())
+        .post(`/diary/countersign/${diaryId}`)
         .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client1',
+          countersign: 'first',
         });
 
+      /**
+       * token 파싱
+       */
+      token = tokenResponse.body.diaryToken;
+
+      /**
+       * answer1 생성
+       */
+      const firstAnswererResponse = await request(app.getHttpServer())
+        .post(`/diary/answer/${diaryId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(clientId1_Answer);
+
+      /**
+       * cookie 파싱
+       */
       const clientCookie = firstAnswererResponse.header['set-cookie'][0];
       // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
       clientId1 = clientCookie
@@ -329,13 +416,20 @@ describe('DiaryController (e2e)', () => {
         .slice('diaryUser='.length)
         .replace(/;/g, '');
 
+      /**
+       * answer2 생성
+       */
       const secondAnswererResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           answers: ['name', 12, 'food', 'hobby'],
           answerer: 'client2',
         });
 
+      /**
+       * cookie 파싱
+       */
       const cookie = secondAnswererResponse.header['set-cookie'][0];
       clientId2 = cookie
         .match(/diaryUser=.+?;/)[0]
@@ -371,7 +465,7 @@ describe('DiaryController (e2e)', () => {
       });
 
       it('answerList _id must be clientId1', () => {
-        expect(resultJson.answerList[0]._id).toEqual(clientId1);
+        expect(resultJson.answer._id).toEqual(clientId1);
       });
     });
 
@@ -385,7 +479,7 @@ describe('DiaryController (e2e)', () => {
       });
 
       it('statusCode must be 200', async () => {
-        expect(result.statusCode).toBe(400);
+        expect(result.statusCode).toBe(401);
       });
     });
 
@@ -403,12 +497,12 @@ describe('DiaryController (e2e)', () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('answerList _id must be clientId1', () => {
-        expect(resultJson.answerList[0]._id).toEqual(clientId1);
+      it('answer _id must be clientId1', () => {
+        expect(resultJson.answer._id).toEqual(clientId1);
       });
 
-      it('answerList answers must be answers of clientId1 answer', () => {
-        expect(resultJson.answerList[0].answers).toStrictEqual(
+      it('answers must be answers of clientId1 answer', () => {
+        expect(resultJson.answer.answers).toStrictEqual(
           clientId1_Answer.answers,
         );
       });

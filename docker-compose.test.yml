@@ -11,6 +11,9 @@ services:
       dockerfile: ./Dockerfile.dev
     environment: 
       MONGO_URI: mongodb://mongo:27017/test
+      JWT_SECRET: 1234
+      COOKIE_SECRET: 1234
+      NODE_ENV: test
     command: npm run test:e2e
     depends_on:
       - mongo
