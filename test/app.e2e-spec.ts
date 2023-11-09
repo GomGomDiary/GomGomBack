@@ -479,7 +479,7 @@ describe('DiaryController (e2e)', () => {
       });
 
       it('statusCode must be 200', async () => {
-        expect(result.statusCode).toBe(400);
+        expect(result.statusCode).toBe(401);
       });
     });
 
