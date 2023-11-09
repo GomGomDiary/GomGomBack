@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 export class MongoDBIdPipe implements PipeTransform {
   transform(userId: string) {
     if (!!userId && !mongoose.Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid user id');
+      throw new BadRequestException('Invalid diaryUser id');
     }
     return userId;
   }
