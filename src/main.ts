@@ -64,6 +64,7 @@ async function bootstrap() {
       'diaryUser',
     )
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
