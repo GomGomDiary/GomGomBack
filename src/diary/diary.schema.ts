@@ -10,7 +10,7 @@ export class Answer extends Document {
   @Prop()
   answerer: string;
   @Prop()
-  answers: any[];
+  answers: string[];
 }
 
 const AnswerSchema = SchemaFactory.createForClass(Answer);

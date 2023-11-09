@@ -3,12 +3,15 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { DiaryRepository } from './diary.repository';
 import { DiaryPostDto } from './dto/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
+import { AnswerPostDto } from './dto/answer.post.dto';
+import { Answer } from './diary.schema';
 
 @Injectable()
 export class DiaryService {
@@ -16,6 +19,13 @@ export class DiaryService {
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
   ) {}
+
+  async getQuestion(diaryId: string) {
+    const questionsWithId = await this.diaryRepository.findQuestion(diaryId);
+    const question = questionsWithId.question;
+    return { ...questionsWithId.toJSON(), questionLength: question.length };
+  }
+
   async postQuestion({
     body,
     clientId,
@@ -63,14 +73,24 @@ export class DiaryService {
   }) {
     // clientId !== diaryId && clientId !== answerId
     if (clientId !== diaryId && clientId !== answerId) {
-      throw new BadRequestException('Invalid Access');
+      throw new UnauthorizedException('You are not allowed to see this');
     }
-    const answer = await this.diaryRepository.findAnswerByAnswerId(
+    const answerListWithId = await this.diaryRepository.findAnswerByAnswerId(
       diaryId,
       answerId,
     );
 
-    return answer;
+    const question = await this.diaryRepository.findField(diaryId, {
+      question: 1,
+      questioner: 1,
+    });
+    const answer = answerListWithId.answerList[0];
+    const response = {
+      question: { ...question.toJSON() },
+      answer: { ...answer.toJSON() },
+    };
+
+    return response;
   }
 
   async getAnswerers({ diaryId, clientId }) {
@@ -114,11 +134,11 @@ export class DiaryService {
   }: {
     diaryId: string;
     clientId: string;
-    answer: any;
+    answer: AnswerPostDto;
     res: Response;
   }) {
     if (diaryId === clientId) {
-      throw new BadRequestException('Invalid Access');
+      throw new BadRequestException('Cannot post answer yourself');
     }
 
     const isDuplication = await this.diaryRepository.checkDuplication(
@@ -144,8 +164,17 @@ export class DiaryService {
     }
 
     const diary = await this.diaryRepository.findById(diaryId);
-    diary.answerList.push({ ...answer, _id: id });
+
+    if (diary.question.length !== answer.answers.length) {
+      throw new BadRequestException('answer length !== question length');
+    }
+
+    diary.answerList.push({ ...answer, _id: id } as Answer);
 
     await this.diaryRepository.save([diary]);
+  }
+
+  async getChallenge(diaryId: string) {
+    return await this.diaryRepository.findField(diaryId, { challenge: 1 });
   }
 }

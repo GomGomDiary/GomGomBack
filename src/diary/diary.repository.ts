@@ -14,10 +14,6 @@ export class DiaryRepository {
     @InjectModel(Diary.name) private readonly diaryModel: Model<Diary>,
   ) {}
 
-  createWithId(id: string, body: DiaryPostDto) {
-    return this.diaryModel.create({ _id: id, ...body });
-  }
-
   async checkDuplication(diaryId: string, clientId: string) {
     try {
       return !!(await this.diaryModel.findOne({
@@ -29,31 +25,19 @@ export class DiaryRepository {
     }
   }
 
-  async create(diary: DiaryPostDto) {
-    return await this.diaryModel.create(diary);
-  }
-
-  async findById(diaryId: string) {
-    try {
-      return await this.diaryModel.findById(diaryId).orFail();
-    } catch (err) {
-      throw new NotFoundException('Diary not found');
-    }
-  }
-
-  async save(documents: any[]) {
-    try {
-      return await this.diaryModel.bulkSave(documents);
-    } catch (err) {
-      throw new InternalServerErrorException(err);
-    }
-  }
-
   async checkOwnership(id: string) {
     if (!id) {
       return false;
     }
     return !!(await this.diaryModel.exists({ _id: id }));
+  }
+
+  async create(diary: DiaryPostDto) {
+    return await this.diaryModel.create(diary);
+  }
+
+  async createWithId(id: string, body: DiaryPostDto) {
+    return await this.diaryModel.create({ _id: id, ...body });
   }
 
   async existAsAnswerer(id: string) {
@@ -105,6 +89,54 @@ export class DiaryRepository {
         .orFail();
     } catch (err) {
       throw new NotFoundException('Diary not found');
+    }
+  }
+
+  async findQuestion(diaryId: string) {
+    try {
+      return await this.diaryModel
+        .findOne(
+          {
+            _id: diaryId,
+          },
+          {
+            question: 1,
+          },
+        )
+        .orFail();
+    } catch (err) {
+      throw new NotFoundException('Diary not found');
+    }
+  }
+
+  async findById(diaryId: string) {
+    try {
+      return await this.diaryModel.findById(diaryId).orFail();
+    } catch (err) {
+      throw new NotFoundException('Diary not found');
+    }
+  }
+
+  async findField(diaryId: string, field: object) {
+    try {
+      return await this.diaryModel
+        .findOne(
+          {
+            _id: diaryId,
+          },
+          field,
+        )
+        .orFail();
+    } catch (err) {
+      throw new NotFoundException('Diary not found');
+    }
+  }
+
+  async save(documents: any[]) {
+    try {
+      return await this.diaryModel.bulkSave(documents);
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
   }
 
