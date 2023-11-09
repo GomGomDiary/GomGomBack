@@ -13,7 +13,6 @@ async function bootstrap() {
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   const logger = new Logger();
 
-  logger.log(`PORT: ${port}`);
   const env = configService.get<string>('NODE_ENV');
 
   if (env === 'development') mongoose.set('debug', true);
@@ -26,6 +25,7 @@ async function bootstrap() {
   });
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  logger.log(`PORT: ${port}`);
   await app.listen(port);
 }
 bootstrap();
