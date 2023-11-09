@@ -1,19 +1,9 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { PickType } from '@nestjs/swagger';
+import { Diary } from '../diary.schema';
 
-export class DiaryPostDto {
-  @IsNotEmpty()
-  @IsArray()
-  question: any[];
-
-  @IsNotEmpty()
-  @IsString()
-  questioner: string;
-
-  @IsNotEmpty()
-  @IsString()
-  challenge: string;
-
-  @IsNotEmpty()
-  @IsString()
-  countersign: string;
-}
+export class DiaryPostDto extends PickType(Diary, [
+  'question',
+  'questioner',
+  'challenge',
+  'countersign',
+]) {}

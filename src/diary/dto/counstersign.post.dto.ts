@@ -1,8 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { PickType } from '@nestjs/swagger';
+import { Diary } from '../diary.schema';
 
-// TODO 중복
-export class CountersignPostDto {
-  @IsNotEmpty()
-  @IsString()
-  countersign: string;
-}
+export class CountersignPostDto extends PickType(Diary, ['countersign']) {}
