@@ -16,7 +16,7 @@ fi
 
 if [ -z "${DEVELOP_CONTAINER}" ]; then
 	echo "gomgom_develop container is not running";
-	docker-compose -p gomgom up -d
+	docker-compose -p gomgom up -d --build
 else
 	echo -e "${GREEN}gomgom_develop container(${DEVELOP_CONTAINER_ID}) is running.${NC} Stop it? [y/n]";
 	read answer
