@@ -27,6 +27,10 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+  app.enableCors({
+    origin: ['https://gomgomdiary.site', 'http://localhost:3000'],
+    credentials: true,
+  });
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.use(
@@ -51,17 +55,6 @@ async function bootstrap() {
         in: 'header',
       },
       'Token',
-    )
-    .addCookieAuth(
-      'diaryUser',
-      {
-        name: 'diaryUser',
-        type: 'http',
-        in: 'header',
-        description: 'diaryUser cookie',
-        scheme: 'bearer',
-      },
-      'diaryUser',
     )
     .build();
 
