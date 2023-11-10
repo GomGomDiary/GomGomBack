@@ -5,7 +5,7 @@ export default () => ({
   MONGO_URI: process.env.MONGO_URI as string,
   COOKIE_SECRET: process.env.COOKIE_SECRET ?? '1234',
   COOKIE_OPTION: {
-    domain: '.gomgomdiary.site',
+    domain: 'gomgomdiary.site',
     httpOnly: true,
     signed: NODE_ENV === 'production' ? true : false,
     expires: new Date(253402300000000),
