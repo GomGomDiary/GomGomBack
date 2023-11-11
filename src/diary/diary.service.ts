@@ -53,13 +53,17 @@ export class DiaryService {
     // if Newbie (Questioner x, Answerer x)
     // create Diary && set cookie
     const diary = await this.diaryRepository.create(body);
-    res
-      .cookie(
-        'diaryUser',
-        diary._id.toString(),
-        this.configService.get('COOKIE_OPTION'),
-      )
-      .end();
+    if (this.configService.get('NODE_ENV') === 'production') {
+      return res
+        .cookie(
+          'diaryUser',
+          diary._id.toString(),
+          this.configService.get('COOKIE_OPTION'),
+        )
+        .end();
+    }
+
+    res.cookie('diaryUser', diary._id.toString()).end();
   }
 
   async getAnswer({
@@ -153,11 +157,15 @@ export class DiaryService {
     // if Newbie
     if (!clientId) {
       id = new mongoose.Types.ObjectId();
-      res.cookie(
-        'diaryUser',
-        id.toString(),
-        this.configService.get('COOKIE_OPTION'),
-      );
+      if (this.configService.get('NODE_ENV') === 'production') {
+        res.cookie(
+          'diaryUser',
+          id.toString(),
+          this.configService.get('COOKIE_OPTION'),
+        );
+      } else {
+        res.cookie('diaryUser', id.toString());
+      }
       // set cookie
     } else {
       id = new mongoose.Types.ObjectId(clientId);
