@@ -183,6 +183,9 @@ export class DiaryService {
   }
 
   async getChallenge(diaryId: string) {
-    return await this.diaryRepository.findField(diaryId, { challenge: 1 });
+    return await this.diaryRepository.findField(diaryId, {
+      challenge: 1,
+      questioner: 1,
+    });
   }
 }
