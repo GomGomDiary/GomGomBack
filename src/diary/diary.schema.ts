@@ -10,8 +10,8 @@ const options: SchemaOptions = {
 @Schema(options)
 export class Answer extends Document {
   @ApiProperty({
-    example: ['answer1', 'answer2', 'answer3'],
-    description: 'answer list',
+    example: 'yoyoo',
+    description: 'nickname',
     required: true,
   })
   @IsNotEmpty()
@@ -20,8 +20,8 @@ export class Answer extends Document {
   answerer: string;
 
   @ApiProperty({
-    example: 'yoyoo',
-    description: 'nickname',
+    example: ['answer1', 'answer2', 'answer3'],
+    description: 'answer list',
     required: true,
   })
   @IsNotEmpty()

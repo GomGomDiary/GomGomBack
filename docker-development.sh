@@ -4,7 +4,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 
-DEVELOP_CONTAINER=$(docker ps | grep gomgom_develop)
+DEVELOP_CONTAINER=$(docker ps | grep gomgom.develop)
 DEVELOP_CONTAINER_ID=`echo ${DEVELOP_CONTAINER} | awk '{print $1}'`
 
 # .env.development file check

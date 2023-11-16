@@ -117,7 +117,12 @@ export class DiaryRepository {
     }
   }
 
-  async findField(diaryId: string, field: object) {
+  async findField(
+    diaryId: string,
+    field: {
+      [key in keyof Diary]?: number | string;
+    },
+  ) {
     try {
       return await this.diaryModel
         .findOne(
@@ -134,7 +139,7 @@ export class DiaryRepository {
 
   async save(documents: any[]) {
     try {
-      return await this.diaryModel.bulkSave(documents);
+      return this.diaryModel.bulkSave(documents);
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
