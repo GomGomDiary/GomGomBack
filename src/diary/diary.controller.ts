@@ -154,7 +154,7 @@ export class DiaryController {
   })
   @ApiBadRequestResponse({
     description:
-      'request body field가 충분하지 않거나 cookie에 존재하는 diaryUser의 id가 적절하지 않을 경우 400을 응답합니다.',
+      'request body field가 충분하지 않거나 cookie에 존재하는 diaryUser의 id가 적절하지 않을 경우, 또는 자기 자신의 diary에 answer를 제출할 경우 400을 응답합니다.',
   })
   @ApiUnauthorizedResponse({
     description: 'token에 문제가 있을 경우 401을 응답합니다.',
@@ -164,7 +164,7 @@ export class DiaryController {
   })
   @ApiResponse({
     status: 409,
-    description: 'diaryId, answerId가 동일할 경우 409을 응답합니다.',
+    description: '이미 답변한 경우 409를 응답합니다.',
   })
   @UseGuards(AuthGuard)
   @Post('answer/:diaryId')
