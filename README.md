@@ -5,16 +5,28 @@
 > 바쁜 일상 속 사랑하는 누군가에 대해 곰곰이 고민하는 시간을 주는 GomGomDiary입니다.
 
 ## Project Architecuture
-![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/665dcfcb-b32a-49d5-b70e-3c5aa064c34a)
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/1471ce6d-5464-4182-8fae-126b11760cbf)
 
 ## 기술 스택
-<img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=NestJS&logoColor=white"><img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white"><img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white"><img src="https://img.shields.io/badge/Amazon ECS-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+- Backend
 
-- NodeJS ( Typescript )
-	- NestJS
-	- [express](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
-- MongoDB ( [Atlas로 사용 중 입니다.](https://www.mongodb.com/cloud/atlas/) )
-- [AWS ECS](https://aws.amazon.com/ecs/)
+<img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=NestJS&logoColor=white"><img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white">
+
+- Database
+  
+<img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
+
+- Infra
+  
+<img src="https://img.shields.io/badge/Amazon ECS-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+
+- CI/CD
+
+<img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+
+- 참고
+  - [ExpressJS + Typescript](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
+  - MongoDB ( [Atlas](https://www.mongodb.com/cloud/atlas/)로 사용 중 입니다. )
 
 ## Prerequisites
 - Docker (20.10.14)
@@ -59,7 +71,7 @@
 
 ### Pull Request
 1. 해당 프로젝트를 fork합니다.
-2. 새 브랜치를 만들어주세요. ( `git checkout -b feature/fooBar` )
+2. 새 브랜치를 만들어주세요. ( ex: `git checkout -b feature/foo` )
 3. 작업 후 푸쉬한 다음 해당 프로젝트로 PR을 보내주세요.
    
 ### commit form
@@ -87,3 +99,4 @@ main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디
 
 ## TIL
 개발하며 배우고 정리한 지식들은 [여기에](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4) 정리했습니다.
+
