@@ -55,7 +55,7 @@ export class DiaryRepository {
     }));
   }
 
-  async findAnswerers(diaryId: string) {
+  async findDiaryWithoutAnswers(diaryId: string) {
     try {
       return await this.diaryModel
         .findOne(

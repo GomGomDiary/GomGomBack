@@ -100,7 +100,7 @@ export class DiaryService {
   async getAnswerers({ diaryId, clientId }) {
     const isDiaryOwner = diaryId === clientId;
 
-    const diary = await this.diaryRepository.findAnswerers(diaryId);
+    const diary = await this.diaryRepository.findDiaryWithoutAnswers(diaryId);
     // check clientId is in diary answer
     // const isAnswererAboutDiaryId =
     // await this.diaryRepository.existAsDiaryAnswerer(diaryId, clientId);
