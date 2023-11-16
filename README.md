@@ -1,7 +1,8 @@
 # GomGomDiary Backend
 
 ## Project Architecuture
-![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/665dcfcb-b32a-49d5-b70e-3c5aa064c34a)
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/ecb0cffe-4e5f-4219-b211-c2938e61d9ea)
+
 
 <!-- [![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/build.yml/badge.svg)](https://github.com/your-username/your-repo-name/actions/workflows/build.yml) -->
 <!-- ![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/main.yml/badge.svg?branch=feature-1) -->
