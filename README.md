@@ -1,12 +1,16 @@
 # GomGomDiary Backend
 
+## Project Architecuture
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/665dcfcb-b32a-49d5-b70e-3c5aa064c34a)
+
 <!-- [![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/build.yml/badge.svg)](https://github.com/your-username/your-repo-name/actions/workflows/build.yml) -->
 <!-- ![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/main.yml/badge.svg?branch=feature-1) -->
 
-- NodeJS (Typescript)
+## 기술 스택
+- NodeJS ( Typescript )
 	- NestJS
 	- [express](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
-- MongoDB ([Atlas로 사용 중 입니다.](https://www.mongodb.com/cloud/atlas/))
+- MongoDB ( [Atlas로 사용 중 입니다.](https://www.mongodb.com/cloud/atlas/) )
 - [AWS ECS](https://aws.amazon.com/ecs/)
 
 ## Prerequisites
@@ -19,11 +23,7 @@
 
 1. Clone the repository:
 
-	```bash
-	git clone https://github.com/GomGomDiary/GomGomBack.git
-	```
-
-2. fill `.env.[production | development | test]` file
+2. touch `.env.[production | development | test]` file, fill.
 
 	[`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example) 참고해주세요.
 
@@ -31,7 +31,7 @@
 
 3. run docker compose using [docker-development.sh](https://github.com/GomGomDiary/GomGomBack/blob/main/docker-development.sh)
 	
-	매번 docker-compose 명령어를 입력하는게 귀찮아 `alias`를 사용했다가, 이마저도 불편해져서 쉘스크립트를 만들었습니다.
+	매번 docker-compose 명령어를 입력하는게 귀찮아 `alias`를 사용했다가, 이마저도 불편해서 쉘스크립트를 만들었습니다.
 
 	아래 명령어를 참고해주세요.
 	```
@@ -44,20 +44,21 @@
 	```
 ## 주의 사항
 ### 환경 변수
-- 개발 시 환경변수가 업데이트 될 수 있습니다. 아래 룰을 따라주면 문제가 생기지 않습니다.
-	- `.env.development`, `.env.test`, `.env.example`, `.env.production`에 field를 추가시켜주세요.
+- 개발 시 환경변수가 업데이트 될 수 있습니다. 이 때, 아래 룰을 따라주세요.
+	- `.env.development`, `.env.test`, `.env.example`에 field를 추가시켜주세요.
 	- `docker-compose.test.yaml`에 environment를 추가시켜주세요.
-	- `JWT secret`과 같은 secret 중요도가 높은 변수라면 아래 지침을 따라주세요.
-		- [aws secret manager](https://ap-northeast-2.console.aws.amazon.com/secretsmanager)에 키 값을 추가해주세요
-		- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [secrets](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L28)를 업데이트 해주세요.
-	- `PORT`와 같은 secret 중요도가 낮은 변수라면 아래 지침을 따라주세요.
-		- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서[environment](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L16)를 업데이트 해주세요.
+	  - `.env.development`는 개발 시, `.env.test`는 로컬에서 테스트를 돌릴 시, `docker-compose.test.yaml`은 CI에서 필요합니다.
+	>  `JWT secret`과 같은 secret 중요도가 높은 변수라면...
+	- [aws secret manager](https://ap-northeast-2.console.aws.amazon.com/secretsmanager)에 키 값을 추가해주세요
+	- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [secrets](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L28)를 업데이트 해주세요.
+	> `PORT`와 같은 secret 중요도가 낮은 변수라면...
+	- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [environment](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L16)를 업데이트 해주세요.
 
 ## Contribution rule
 
 ### commit form
 - [.gitmessage.txt](https://github.com/GomGomDiary/GomGomBack/blob/main/.gitmessage.txt)를 참고해주세요.
-	- 아래 명령어는 템플릿을 사용할 수 있게 해줍니다.
+	- 아래 명령어는 커밋 시 템플릿을 사용할 수 있게 해줍니다.
 		```example
 		$ git config commit.template .gitmessage.txt
 		```
@@ -68,12 +69,16 @@
 
 - push to **dev** or **feature** branch, not main
 
-- pull request targets **dev** branch
-	- pr 생성 / synchronize시
-
 
 ## Deployment
 
 main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디렉토리에서 일어났으면 ECS로 배포됩니다. [참고](https://github.com/GomGomDiary/GomGomBack/blob/main/.github/workflows/cicd.yml#L5)
 
-배포가 성공, 실패했을 경우 전부 discord로 webhook을 쏴줍니다.
+성공 / 실패에 대한 상태는 github action이 webhook으로 discord에 쏴줍니다.
+
+> 성공
+<img width="291" alt="image" src="https://github.com/GomGomDiary/GomGomBack/assets/75563378/e537a7dc-454d-4e9d-8f12-6fd373f90ecf">
+
+> 실패
+<img width="291" alt="image" src="https://github.com/GomGomDiary/GomGomBack/assets/75563378/fd9cfc75-b6cd-4c05-8b79-39697b203a0a">
+
