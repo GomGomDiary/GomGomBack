@@ -267,6 +267,10 @@ describe('DiaryController (e2e)', () => {
         expect(result.statusCode).toBe(200);
       });
 
+      it('questioner must be exist', () => {
+        expect(resultJson.questioner).toBeDefined();
+      });
+
       it('answererList.length must be 2', () => {
         expect(resultJson.answererList.length).toBe(2);
         expect(resultJson.answererList[0]._id).toEqual(clientId1);

@@ -100,13 +100,12 @@ export class DiaryService {
   async getAnswerers({ diaryId, clientId }) {
     const isDiaryOwner = diaryId === clientId;
 
-    const answerers = await this.diaryRepository.findAnswerers(diaryId);
-
+    const diary = await this.diaryRepository.findAnswerers(diaryId);
     // check clientId is in diary answer
     // const isAnswererAboutDiaryId =
     // await this.diaryRepository.existAsDiaryAnswerer(diaryId, clientId);
 
-    const answererWithPermission = answerers.answerList.map((answer) => {
+    const answererWithPermission = diary.answerList.map((answer) => {
       let isPermission = false;
       if (isDiaryOwner) {
         // if DiaryOwner, give permission all answer
@@ -124,6 +123,7 @@ export class DiaryService {
 
     const response = {
       _id: diaryId,
+      questioner: diary.questioner,
       answererList: answererWithPermission,
     };
 
