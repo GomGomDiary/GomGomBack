@@ -22,7 +22,8 @@
 
 - CI/CD
 
-<img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"><img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+
 
 - 참고
   - [ExpressJS + Typescript](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
@@ -99,4 +100,5 @@ main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디
 
 ## TIL
 개발하며 배우고 정리한 지식들은 [여기에](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4) 정리했습니다.
+
 
