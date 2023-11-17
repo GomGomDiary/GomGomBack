@@ -20,6 +20,61 @@ export class DiaryService {
     private readonly configService: ConfigService,
   ) {}
 
+  private setDiaryCookies(res: Response, value: string) {
+    /**
+     *  diaryAddress cookieOption ( for production client )
+     *  {
+     *        domain: 'gomgomdiary.site',
+     *        expires: new Date(253402300000000),
+     *        secure : true,
+     *  };
+     *
+     *  diaryUser cookieOption ( for production server )
+     *  {
+     *        httpOnly: true,
+     *        signed: true,
+     *        domain: 'gomgomdiary.site',
+     *        expires: new Date(253402300000000),
+     *        secure : true,
+     *  };
+     *
+     *  diaryAddress cookieOption ( for development client )
+     *  {
+     *        expires: new Date(253402300000000),
+     *  };
+     *
+     *  diaryUser cookieOption ( for development server )
+     *  {
+     *        httpOnly: true,
+     *        expires: new Date(253402300000000),
+     *  };
+     */
+
+    if (this.configService.get('NODE_ENV') === 'production') {
+      res.cookie('diaryUser', value, {
+        httpOnly: true,
+        signed: true,
+        domain: 'gomgomdiary.site',
+        expires: new Date(253402300000000),
+        secure: true,
+      });
+      res.cookie('diaryAddress', value, {
+        domain: 'gomgomdiary.site',
+        expires: new Date(253402300000000),
+        secure: true,
+      });
+      return;
+    }
+
+    res.cookie('diaryUser', value, {
+      httpOnly: true,
+      expires: new Date(253402300000000),
+    });
+    res.cookie('diaryAddress', value, {
+      expires: new Date(253402300000000),
+    });
+  }
+
   async getQuestion(diaryId: string) {
     const questionsWithId = await this.diaryRepository.findQuestion(diaryId);
     const question = questionsWithId.question;
@@ -53,17 +108,10 @@ export class DiaryService {
     // if Newbie (Questioner x, Answerer x)
     // create Diary && set cookie
     const diary = await this.diaryRepository.create(body);
-    if (this.configService.get('NODE_ENV') === 'production') {
-      return res
-        .cookie(
-          'diaryUser',
-          diary._id.toString(),
-          this.configService.get('COOKIE_OPTION'),
-        )
-        .end();
-    }
 
-    res.cookie('diaryUser', diary._id.toString()).end();
+    this.setDiaryCookies(res, diary._id.toString());
+
+    res.end();
   }
 
   async getAnswer({
@@ -157,16 +205,9 @@ export class DiaryService {
     // if Newbie
     if (!clientId) {
       id = new mongoose.Types.ObjectId();
-      if (this.configService.get('NODE_ENV') === 'production') {
-        res.cookie(
-          'diaryUser',
-          id.toString(),
-          this.configService.get('COOKIE_OPTION'),
-        );
-      } else {
-        res.cookie('diaryUser', id.toString());
-      }
+
       // set cookie
+      this.setDiaryCookies(res, id.toString());
     } else {
       id = new mongoose.Types.ObjectId(clientId);
     }
