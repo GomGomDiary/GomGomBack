@@ -38,7 +38,7 @@
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the repository.
 
 2. touch `.env.[development | test]` file, and fill.
 
