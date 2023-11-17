@@ -5,7 +5,7 @@
 > 바쁜 일상 속 사랑하는 누군가에 대해 곰곰이 고민하는 시간을 주는 GomGomDiary입니다.
 
 ## Project Architecuture
-![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/1471ce6d-5464-4182-8fae-126b11760cbf)
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/e8a33057-3164-42de-b328-cd08497a2a91)
 
 ## 기술 스택
 - Backend
