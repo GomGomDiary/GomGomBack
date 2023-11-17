@@ -1,33 +1,48 @@
+![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/cicd.yml/badge.svg)
+![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/code-review.yml/badge.svg)
+
 # GomGomDiary Backend
+> 바쁜 일상 속 사랑하는 누군가에 대해 곰곰이 고민하는 시간을 주는 GomGomDiary입니다.
 
 ## Project Architecuture
-![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/665dcfcb-b32a-49d5-b70e-3c5aa064c34a)
-
-<!-- [![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/build.yml/badge.svg)](https://github.com/your-username/your-repo-name/actions/workflows/build.yml) -->
-<!-- ![Build Status](https://github.com/GomGomDiary/GomGomBack/actions/workflows/main.yml/badge.svg?branch=feature-1) -->
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/1471ce6d-5464-4182-8fae-126b11760cbf)
 
 ## 기술 스택
-- NodeJS ( Typescript )
-	- NestJS
-	- [express](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
-- MongoDB ( [Atlas로 사용 중 입니다.](https://www.mongodb.com/cloud/atlas/) )
-- [AWS ECS](https://aws.amazon.com/ecs/)
+- Backend
+
+<img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=NestJS&logoColor=white"><img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white">
+
+- Database
+  
+<img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
+
+- Infra
+  
+<img src="https://img.shields.io/badge/Amazon ECS-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+
+- CI/CD
+
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"><img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+
+
+- 참고
+  - [ExpressJS + Typescript](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
+  - MongoDB ( [Atlas](https://www.mongodb.com/cloud/atlas/)로 사용 중 입니다. )
 
 ## Prerequisites
-
+- Docker (20.10.14)
+- docker-compose (1.29.2)
 - Node.js [v18.8.0](https://github.com/GomGomDiary/GomGomBack/blob/main/.tool-versions) or higher
 - NestJS CLI v9.1.8
 	- v10 이상에서 사용시 vim 에디터에 문제가 생겨 다운그레이드 시켰습니다.
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the repository.
 
-2. touch `.env.[production | development | test]` file, fill.
+2. touch `.env.[development | test]` file, and fill.
 
 	[`.env.example`](https://github.com/GomGomDiary/GomGomBack/blob/main/.env.example) 참고해주세요.
-
-	`.env.development`, `.env.production`, `.env.test` 는 전부 동일한 field를 갖고 있습니다.
 
 3. run docker compose using [docker-development.sh](https://github.com/GomGomDiary/GomGomBack/blob/main/docker-development.sh)
 	
@@ -35,27 +50,31 @@
 
 	아래 명령어를 참고해주세요.
 	```
-	bash docker-development.sh
+	$ bash docker-development.sh
 	```
 	or
 	```
-	chmod 744 docker-development.sh
-	./docker-development.sh
+	$ chmod 744 docker-development.sh; ./docker-development.sh
 	```
 ## 주의 사항
 ### 환경 변수
-- 개발 시 환경변수가 업데이트 될 수 있습니다. 이 때, 아래 룰을 따라주세요.
-	- `.env.development`, `.env.test`, `.env.example`에 field를 추가시켜주세요.
-	- `docker-compose.test.yaml`에 environment를 추가시켜주세요.
-	  - `.env.development`는 개발 시, `.env.test`는 로컬에서 테스트를 돌릴 시, `docker-compose.test.yaml`은 CI에서 필요합니다.
-	>  `JWT secret`과 같은 secret 중요도가 높은 변수라면...
-	- [aws secret manager](https://ap-northeast-2.console.aws.amazon.com/secretsmanager)에 키 값을 추가해주세요
-	- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [secrets](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L28)를 업데이트 해주세요.
-	> `PORT`와 같은 secret 중요도가 낮은 변수라면...
-	- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [environment](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L16)를 업데이트 해주세요.
+개발 시 환경변수가 업데이트 될 수 있습니다. 이 때, 아래 룰을 따라주세요.
+- `.env.development`, `.env.test`, `.env.example`에 field를 추가시켜주세요.
+- `docker-compose.test.yaml`에 environment를 추가시켜주세요.
+- `.env.development`는 개발 시, `.env.test`는 로컬에서 테스트를 돌릴 시, `docker-compose.test.yaml`은 CI에서 필요합니다.
+>  `JWT secret`과 같은 secret 중요도가 높은 변수라면...
+- [aws secret manager](https://ap-northeast-2.console.aws.amazon.com/secretsmanager)에 키 값을 추가해주세요
+- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [secrets](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L28)를 업데이트 해주세요.
+> `PORT`와 같은 secret 중요도가 낮은 변수라면...
+- [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [environment](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L16)를 업데이트 해주세요.
 
 ## Contribution rule
 
+### Pull Request
+1. 해당 프로젝트를 fork합니다.
+2. 새 브랜치를 만들어주세요. ( ex: `git checkout -b feature/foo` )
+3. 작업 후 푸쉬한 다음 해당 프로젝트로 PR을 보내주세요.
+   
 ### commit form
 - [.gitmessage.txt](https://github.com/GomGomDiary/GomGomBack/blob/main/.gitmessage.txt)를 참고해주세요.
 	- 아래 명령어는 커밋 시 템플릿을 사용할 수 있게 해줍니다.
@@ -66,9 +85,6 @@
 		```
 		$ git commit --allow-empty
 		```
-
-- push to **dev** or **feature** branch, not main
-
 
 ## Deployment
 
@@ -81,4 +97,8 @@ main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디
 
 > 실패
 <img width="291" alt="image" src="https://github.com/GomGomDiary/GomGomBack/assets/75563378/fd9cfc75-b6cd-4c05-8b79-39697b203a0a">
+
+## TIL
+개발하며 배우고 정리한 지식들은 [여기에](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4) 정리했습니다.
+
 
