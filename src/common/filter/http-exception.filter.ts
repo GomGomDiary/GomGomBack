@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -15,17 +16,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const logger = new Logger();
+    const error = exception.getResponse();
+    const now = new Date();
+    const koreaTimeDiff = 9 * 60 * 60 * 1000;
 
     let user = request.cookies.diaryUser;
     if (process.env.NODE_ENV === 'production') {
       user = request.signedCookies.diaryUser;
     }
 
-    logger.error(`[${request.method}] ${request.url} ${user}`);
-    const now = new Date();
-    const koreaTimeDiff = 9 * 60 * 60 * 1000;
-    const error = exception.getResponse();
+    logger.warn(`[${request.method}] ${request.url} ${user}`);
 
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      logger.error(error);
+    }
     if (typeof error === 'string') {
       return response.status(status).json({
         statusCode: status,
@@ -37,6 +41,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         path: request.url,
       });
     }
+
     response.status(status).json({
       statusCode: status,
       ...error,
