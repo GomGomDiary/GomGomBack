@@ -28,7 +28,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.enableCors({
-    origin: ['https://gomgomdiary.site'],
+    origin: ['https://gomgomdiary.site', 'http://localhost:3000'],
     credentials: true,
   });
   app.useGlobalFilters(new HttpExceptionFilter());
