@@ -1,13 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
+import { Answer, Diary } from 'src/entity/diary.schema';
+
+export class AnswerShowDto extends PickType(Diary, [
+  '_id',
+  'question',
+  'answerList',
+]) {}
+
+class Question extends PickType(Diary, ['_id', 'question', 'questioner']) {}
+class AnswerSub extends PickType(Answer, [
+  '_id',
+  'answerer',
+  'answers',
+  'createdAt',
+  'updatedAt',
+]) {}
 
 export class AnswerGetDto {
-  @ApiProperty({
-    example: '644ba08d90664d0e9b7a82b7',
-    description: '_id',
-    required: true,
-  })
-  _id: string;
-
   @ApiProperty({
     example: {
       _id: '654ba08de9664d0e9b7a82f7',
@@ -17,7 +27,9 @@ export class AnswerGetDto {
     description: 'question',
     required: true,
   })
-  qustion: object;
+  @Expose()
+  @Type(() => Question)
+  question: Question;
 
   @ApiProperty({
     example: {
@@ -30,5 +42,7 @@ export class AnswerGetDto {
     description: 'answer',
     required: true,
   })
-  answer: object;
+  @Expose()
+  @Type(() => AnswerSub)
+  answer: AnswerSub;
 }

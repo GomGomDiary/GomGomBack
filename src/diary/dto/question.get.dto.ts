@@ -1,16 +1,14 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Diary } from '../diary.schema';
+import { Diary } from '../../entity/diary.schema';
+import { Expose } from 'class-transformer';
 
-export class QuestionGetDto extends PickType(Diary, ['question']) {
-  @ApiProperty({
-    example: '644ba08d90664d0e9b7a82b7',
-    description: 'questionList length',
-  })
-  _id: string;
-
+export class QuestionShowDto extends PickType(Diary, ['_id', 'question']) {
   @ApiProperty({
     example: '3',
     description: 'questionList length',
   })
-  questionLength: number;
+  @Expose()
+  get questionLength() {
+    return this.question.length;
+  }
 }
