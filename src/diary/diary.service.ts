@@ -79,6 +79,10 @@ export class DiaryService {
     });
   }
 
+  async checkDiaryOwnership(diaryId: string) {
+    return this.diaryRepository.checkOwnership(diaryId);
+  }
+
   async getQuestion(diaryId: string): Promise<QuestionShowDto> {
     return this.diaryRepository.findQuestion(diaryId);
   }

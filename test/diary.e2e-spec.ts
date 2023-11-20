@@ -37,7 +37,7 @@ describe('DiaryController (e2e)', () => {
     await app.close();
   });
 
-  describe('/diary (POST)', () => {
+  describe('/diary', () => {
     let diaryId, newBieResponse;
 
     beforeEach(async () => {
@@ -60,11 +60,19 @@ describe('DiaryController (e2e)', () => {
         .replace(/;/g, '');
     });
 
-    it('with no cookie', async () => {
+    it('ownership을 검증한다.', async () => {
+      const result = await request(app.getHttpServer())
+        .get('/diary')
+        .set('Cookie', [`diaryUser=${diaryId}`]);
+      expect(result.statusCode).toBe(200);
+      expect(result.text).toEqual('true');
+    });
+
+    it('cookie가 없는 경우 201을 반환한다.', async () => {
       expect(newBieResponse.statusCode).toBe(201);
     });
 
-    it('with cookie', async () => {
+    it('cookie가 있는 경우 204를 반환한다.', async () => {
       const oldBieResponse = await request(app.getHttpServer())
         .post('/diary/question')
         .set('Cookie', [`diaryUser=${diaryId}`])
@@ -79,7 +87,7 @@ describe('DiaryController (e2e)', () => {
     });
   });
 
-  describe('/diary/answer/:diaryId (POST)', () => {
+  describe('/diary/answer/:diaryId', () => {
     let diaryId, clientId1, answererResponse, token;
 
     beforeEach(async () => {
@@ -143,11 +151,11 @@ describe('DiaryController (e2e)', () => {
         .replace(/;/g, '');
     });
 
-    it('with no cookie', async () => {
+    it('cookie가 없는 경우 201을 반환한다.', async () => {
       expect(answererResponse.statusCode).toBe(201);
     });
 
-    it('with cookie when duplication answer', async () => {
+    it('중복 답변의 경우 409를 반환한다.', async () => {
       const makeDuplicationAnswer = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${clientId1}`])
@@ -156,7 +164,7 @@ describe('DiaryController (e2e)', () => {
       expect(makeDuplicationAnswer.statusCode).toBe(409);
     });
 
-    it('with cookie when answer yourself', async () => {
+    it('스스로에게 답변한 경우 400을 반환한다.', async () => {
       const selfResponse = await request(app.getHttpServer())
         .post(`/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${diaryId}`])
@@ -166,7 +174,7 @@ describe('DiaryController (e2e)', () => {
     });
   });
 
-  describe('/diary/answerers/:diaryId (GET)', () => {
+  describe('/diary/answerers/:diaryId', () => {
     let diaryId, clientId1, clientId2, token;
 
     beforeEach(async () => {
@@ -263,28 +271,26 @@ describe('DiaryController (e2e)', () => {
         resultJson = JSON.parse(result.text);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('questioner must be exist', () => {
+      it('response에 questioner가 존재해야한다.', () => {
         expect(resultJson.questioner).toBeDefined();
       });
 
-      it('answererList.length must be 2', () => {
+      it('answerList의 길이는 2여야한다.', () => {
         expect(resultJson.answererList.length).toBe(2);
+      });
+
+      it('answererList[i]._id는 clientId${i}여야 한다.', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
       });
 
-      it('answererList[i]._id must be clientId', () => {
-        expect(resultJson.answererList[0]._id).toEqual(clientId1);
-        expect(resultJson.answererList[1]._id).toEqual(clientId2);
-      });
-
-      it('anwererList[i].isPermission must be false', () => {
-        expect(resultJson.answererList[0].isPermission).toBeFalsy();
-        expect(resultJson.answererList[1].isPermission).toBeFalsy();
+      it('anwererList[i].isPermission은 false여야 한다.', () => {
+        expect(resultJson.answererList[0].isPermission).toBe(false);
+        expect(resultJson.answererList[1].isPermission).toBe(false);
       });
     });
 
@@ -298,26 +304,24 @@ describe('DiaryController (e2e)', () => {
         resultJson = JSON.parse(result.text);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('answererList.length must be 2', () => {
+      it('answererList의 길이는 2여야 한다.', () => {
         expect(resultJson.answererList.length).toBe(2);
+      });
+
+      it('answererList[i]._id는 clientId${i}여야 한다.', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
       });
 
-      it('answererList[i]._id must be clientId', () => {
-        expect(resultJson.answererList[0]._id).toEqual(clientId1);
-        expect(resultJson.answererList[1]._id).toEqual(clientId2);
-      });
-
-      it('anwererList[0].isPermission must be true', () => {
+      it('anwererList[0].isPermission은 true여야 한다.', () => {
         expect(resultJson.answererList[0].isPermission).toBeTruthy();
       });
 
-      it('anwererList[1].isPermission must be false', () => {
+      it('anwererList[1].isPermission은 false여야 한다', () => {
         expect(resultJson.answererList[1].isPermission).toBeFalsy();
       });
     });
@@ -332,26 +336,24 @@ describe('DiaryController (e2e)', () => {
         resultJson = JSON.parse(result.text);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('answererList.length must be 2', () => {
+      it('answererList의 길이는 2여야 한다.', () => {
         expect(resultJson.answererList.length).toBe(2);
+      });
+
+      it('answererList[i]._id는 clientId${i}여야 한다.', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
       });
 
-      it('answererList[i]._id must be clientId', () => {
-        expect(resultJson.answererList[0]._id).toEqual(clientId1);
-        expect(resultJson.answererList[1]._id).toEqual(clientId2);
-      });
-
-      it('anwererList[0].isPermission must be true', () => {
+      it('anwererList[0].isPermission은 true여야 한다.', () => {
         expect(resultJson.answererList[0].isPermission).toBeTruthy();
       });
 
-      it('anwererList[1].isPermission must be true', () => {
+      it('anwererList[1].isPermission은 true여야 한다.', () => {
         expect(resultJson.answererList[1].isPermission).toBeTruthy();
       });
     });
@@ -449,7 +451,7 @@ describe('DiaryController (e2e)', () => {
           `/diary/answer/${diaryId}/${clientId1}`,
         );
       });
-      it('statusCode must be 400', async () => {
+      it('400을 반환한다.', async () => {
         expect(result.statusCode).toBe(400);
       });
     });
@@ -464,11 +466,11 @@ describe('DiaryController (e2e)', () => {
         resultJson = JSON.parse(result.text);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('answerList _id must be clientId1', () => {
+      it('answerList _id는 clientId1과 같아야한다.', () => {
         expect(resultJson.answer._id).toEqual(clientId1);
       });
     });
@@ -482,7 +484,7 @@ describe('DiaryController (e2e)', () => {
           .set('Cookie', [`diaryUser=${clientId2}`]);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(401);
       });
     });
@@ -497,15 +499,15 @@ describe('DiaryController (e2e)', () => {
         resultJson = JSON.parse(result.text);
       });
 
-      it('statusCode must be 200', async () => {
+      it('200을 반환한다.', async () => {
         expect(result.statusCode).toBe(200);
       });
 
-      it('answer _id must be clientId1', () => {
+      it('answer _id는 clientId1이어야 한다.', () => {
         expect(resultJson.answer._id).toEqual(clientId1);
       });
 
-      it('answers must be answers of clientId1 answer', () => {
+      it('answers는 clientId1 answer과 같아야 한다.', () => {
         expect(resultJson.answer.answers).toStrictEqual(
           clientId1_Answer.answers,
         );

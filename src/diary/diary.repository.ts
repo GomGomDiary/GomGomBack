@@ -38,7 +38,7 @@ export class DiaryRepository {
     if (!id) {
       return false;
     }
-    return !!(await this.diaryModel.exists({ _id: id }).exec());
+    return !!(await this.diaryModel.exists({ _id: id }).lean().exec());
   }
 
   async create(diary: DiaryPostDto) {

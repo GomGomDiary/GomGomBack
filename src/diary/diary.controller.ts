@@ -50,6 +50,26 @@ export class DiaryController {
   ) {}
 
   @ApiOperation({
+    summary: '다이어리 존재 여부 확인',
+    description: '해당 Cookie를 가진 다이어리가 존재하는지 확인합니다.',
+  })
+  @ApiOkResponse({
+    description: '성공 시 200을 응답합니다.',
+    schema: {
+      example: true,
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'cookie의 diaryId가 적절하지 않을 경우 400을 응답합니다.',
+  })
+  @Get('')
+  async checkDiaryOwnership(
+    @Cookie('diaryUser', MongoDBIdPipe) diaryId: string,
+  ) {
+    return this.diaryService.checkDiaryOwnership(diaryId);
+  }
+
+  @ApiOperation({
     summary: '질문 보기',
     description: '정책상의 이유로 해당 API는 Bearer token이 필요합니다.',
   })
