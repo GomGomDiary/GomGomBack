@@ -13,7 +13,7 @@ export class AuthService {
       countersign: 1,
     });
     if (user.countersign !== countersignFromClient) {
-      throw new UnauthorizedException('Invalid countersign');
+      throw new UnauthorizedException('countersign이 올바르지 않습니다.');
     }
 
     const payload = { sub: user._id };

@@ -82,7 +82,7 @@ export class DiaryRepository {
         .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
@@ -106,7 +106,7 @@ export class DiaryRepository {
         .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
@@ -129,7 +129,7 @@ export class DiaryRepository {
         .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
@@ -141,7 +141,7 @@ export class DiaryRepository {
        */
       return this.diaryModel.findById(diaryId).orFail().exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
@@ -163,7 +163,7 @@ export class DiaryRepository {
         .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
