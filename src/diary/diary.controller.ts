@@ -29,23 +29,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { QuestionGetDto } from './dto/question.get.dto';
+import { QuestionShowDto } from './dto/question.get.dto';
 import { AnswererGetDto } from './dto/answerer.get.dto';
 import { AnswerGetDto } from './dto/answer.get.dto';
-
-// AS-IS
-// POST /question
-// GET /answer/:id
-// GET /answerer/:questionId
-// POST /answer/:questionId
-// GET /cookie
-
-// TO-BE
-// POST /diary/question
-// GET /diary/answer/:id
-// GET /diary/answerer/:questionId
-// POST /diary/answer/:questionId
-// GET /cookie
+import { ReturnValueToDto } from 'src/common/decorator/returnValueToDto';
+import { ChallengeShowDto } from './dto/challenge.res.dto';
+import { DiaryTokenShowDto } from './dto/countersign.res.dto';
 
 @ApiTags('Diary')
 @Controller({
@@ -65,7 +54,7 @@ export class DiaryController {
   @ApiBearerAuth('Token')
   @ApiOkResponse({
     description: '성공 시 200을 응답합니다.',
-    type: QuestionGetDto,
+    type: QuestionShowDto,
   })
   @ApiUnauthorizedResponse({
     description: 'token에 문제가 있을 경우 401을 응답합니다.',
@@ -75,6 +64,7 @@ export class DiaryController {
   })
   @UseGuards(AuthGuard)
   @Get('question/:diaryId')
+  @ReturnValueToDto(QuestionShowDto)
   async getQuestion(@Param('diaryId', MongoDBIdPipe) diaryId: string) {
     return this.diaryService.getQuestion(diaryId);
   }
@@ -117,6 +107,7 @@ export class DiaryController {
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
   @Get('answerers/:diaryId')
+  @ReturnValueToDto(AnswererGetDto)
   async getAnswerers(
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
@@ -138,6 +129,7 @@ export class DiaryController {
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
   @Get('answer/:diaryId/:answerId')
+  @ReturnValueToDto(AnswerGetDto)
   async getAnswer(
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
     @Param('answerId', MongoDBIdPipe) answerId: string,
@@ -186,19 +178,7 @@ export class DiaryController {
   @ApiResponse({
     status: 200,
     description: '성공 시 200을 응답합니다.',
-    schema: {
-      type: 'object',
-      properties: {
-        _id: {
-          type: 'string',
-          example: '644ba08d90664d0e9b7a82b7',
-        },
-        challenge: {
-          type: 'string',
-          example: '내 생일',
-        },
-      },
-    },
+    type: ChallengeShowDto,
   })
   @ApiBadRequestResponse({
     description:
@@ -208,7 +188,10 @@ export class DiaryController {
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
   @Get('challenge/:diaryId')
-  async getChallenge(@Param('diaryId', MongoDBIdPipe) diaryId: string) {
+  @ReturnValueToDto(ChallengeShowDto)
+  async getChallenge(
+    @Param('diaryId', MongoDBIdPipe) diaryId: string,
+  ): Promise<ChallengeShowDto> {
     return this.diaryService.getChallenge(diaryId);
   }
 
@@ -216,20 +199,11 @@ export class DiaryController {
   @ApiResponse({
     status: 201,
     description: '성공 시 201을 응답합니다.',
-    schema: {
-      type: 'object',
-      properties: {
-        diaryToken: {
-          type: 'string',
-          example:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTRiYTA4ZGU5NjY0ZDBlOWI3YTgyZjciLCJpYXQiOjE2OTk1MzY2ODIsImV4cCI6MTY5OTU0MDI4Mn0.NoNhAFSkSWc9FYduBApS_-X2ODDGlkGwR7FBZ4DZw',
-        },
-      },
-    },
+    type: DiaryTokenShowDto,
   })
   @ApiBadRequestResponse({
     description:
-      'request body field가 충분하지 않거나 cookie에 존재하는 diaryUser의 id가 적절하지 않을 경우 400을 응답합니다.',
+      'body field가 충분하지 않거나 cookie에 존재하는 diaryUser의 id가 적절하지 않을 경우 400을 응답합니다.',
   })
   @ApiUnauthorizedResponse({
     description: 'countersign이 올바르지 않을 경우 401을 응답합니다',
@@ -238,10 +212,11 @@ export class DiaryController {
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
   @Post('/countersign/:diaryId')
+  @ReturnValueToDto(DiaryTokenShowDto)
   async signIn(
     @Body() body: CountersignPostDto,
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
-  ) {
+  ): Promise<DiaryTokenShowDto> {
     return this.authService.signIn(diaryId, body.countersign);
   }
 }
