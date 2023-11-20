@@ -18,7 +18,25 @@ class AnswerWithPermission extends PickType(Answer, [
 }
 
 export class AnswererGetDto extends PickType(Diary, ['_id', 'questioner']) {
-  @Expose()
+  @ApiProperty({
+    example: [
+      {
+        _id: '654ba13be9664d0e9b7a82fa',
+        answerer: 'yoon',
+        createdAt: '2023-11-08T14:54:51.929Z',
+        updatedAt: '2023-11-08T14:54:51.929Z',
+        isPermission: true,
+      },
+      {
+        _id: '654e83cf8e4dec550733931c',
+        answerer: 'yoon',
+        createdAt: '2023-11-15T15:43:45.050Z',
+        updatedAt: '2023-11-15T15:43:45.050Z',
+        isPermission: false,
+      },
+    ],
+  })
   @Type(() => AnswerWithPermission)
+  @Expose()
   answererList: AnswerWithPermission[];
 }
