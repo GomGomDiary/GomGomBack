@@ -111,7 +111,15 @@ export class DiaryRepository {
   }
 
   async findOne(diaryId: string) {
-    return await this.diaryModel.findOne({ _id: diaryId }).lean<Diary>();
+    try {
+      return await this.diaryModel
+        .findOne({ _id: diaryId })
+        .lean<Diary>()
+        .orFail()
+        .exec();
+    } catch (err) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
   }
 
   async findQuestion(diaryId: string) {
@@ -182,6 +190,9 @@ export class DiaryRepository {
       },
       {
         $set: body,
+        $unset: {
+          answerList: 1,
+        },
       },
     );
   }

@@ -1,13 +1,11 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
   Post,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { DiaryPostDto } from './dto/diary.post.dto';
@@ -85,7 +83,6 @@ export class DiaryController {
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
   @UseGuards(AuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('question/:diaryId')
   @ReturnValueToDto(QuestionShowDto)
   async getQuestion(@Param('diaryId', MongoDBIdPipe) diaryId: string) {
@@ -107,12 +104,11 @@ export class DiaryController {
       'request body field가 충분하지 않거나 cookie에 존재하는 diaryUser의 id가 적절하지 않을 경우 400을 응답합니다. 자세한 내용은 error message를 참고해주세요.',
   })
   @ApiCookieAuth('diaryUser')
-  // @UseInterceptors(ClassSerializerInterceptor)
   @Post('question')
   async postQuestion(
     @Body() body: DiaryPostDto,
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
     return this.diaryService.postQuestion({ clientId, body, res });
   }
@@ -130,7 +126,6 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('answerers/:diaryId')
   @ReturnValueToDto(AnswererGetDto)
   async getAnswerers(
@@ -153,7 +148,6 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('answer/:diaryId/:answerId')
   @ReturnValueToDto(AnswerGetDto)
   async getAnswer(
@@ -185,7 +179,6 @@ export class DiaryController {
     description: '이미 답변한 경우 409를 응답합니다.',
   })
   @UseGuards(AuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post('answer/:diaryId')
   async postAnswer(
     @Param('diaryId') diaryId: string,
@@ -214,7 +207,6 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('challenge/:diaryId')
   @ReturnValueToDto(ChallengeShowDto)
   async getChallenge(
@@ -239,8 +231,7 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
-  @UseInterceptors(ClassSerializerInterceptor)
-  @Post('/countersign/:diaryId')
+  @Post('countersign/:diaryId')
   @ReturnValueToDto(DiaryTokenShowDto)
   async signIn(
     @Body() body: CountersignPostDto,
