@@ -23,6 +23,7 @@ async function bootstrap() {
   const env = configService.get<string>('NODE_ENV');
   const swaggerName = configService.get<string>('SWAGGER_USER');
   const swaggerPassword = configService.get<string>('SWAGGER_PASSWORD');
+  const domainUrl = configService.get<string>('DOMAIN_URL');
 
   if (env === 'development') mongoose.set('debug', true);
   if (env === 'production') app.enableShutdownHooks();
@@ -33,7 +34,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.enableCors({
-    origin: ['https://gomgomdiary.site', 'http://localhost:3000'],
+    origin: [domainUrl],
     credentials: true,
   });
   app.useGlobalFilters(new HttpExceptionFilter());
