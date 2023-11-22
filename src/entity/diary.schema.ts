@@ -1,14 +1,27 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { SchemaOptions, Document } from 'mongoose';
+import { SchemaOptions, Document, Types } from 'mongoose';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
 
 const options: SchemaOptions = {
   timestamps: true,
 };
 
 @Schema(options)
-export class Answer extends Document {
+export class Answer {
+  @ApiProperty({
+    example: '634ba08de9664d0e9b7a82f8',
+    description: 'id',
+    required: true,
+  })
+  @Type(() => Types.ObjectId)
+  @TransformObjectIdToString({ toPlainOnly: true })
+  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Expose()
+  _id: Types.ObjectId;
+
   @ApiProperty({
     example: 'yoyoo',
     description: 'nickname',
@@ -17,6 +30,7 @@ export class Answer extends Document {
   @IsNotEmpty()
   @IsString()
   @Prop()
+  @Expose()
   answerer: string;
 
   @ApiProperty({
@@ -27,13 +41,35 @@ export class Answer extends Document {
   @IsNotEmpty()
   @IsArray()
   @Prop()
+  @Expose()
   answers: string[];
+
+  @Prop()
+  @Expose()
+  createdAt: Date;
+
+  @Prop()
+  @Expose()
+  updatedAt: Date;
 }
 
 const AnswerSchema = SchemaFactory.createForClass(Answer);
 
+export type DiaryDocumentType = Omit<Diary, keyof Document>;
+
 @Schema(options)
-export class Diary extends Document {
+export class Diary {
+  @ApiProperty({
+    example: '654ba08de9664d0e9b7a82f7',
+    description: 'id',
+    required: true,
+  })
+  @Type(() => Types.ObjectId)
+  @TransformObjectIdToString({ toPlainOnly: true })
+  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Expose()
+  _id: Types.ObjectId;
+
   @ApiProperty({
     example: ['question1', 'question2', 'question3'],
     description: 'question list',
@@ -42,6 +78,7 @@ export class Diary extends Document {
   @IsNotEmpty()
   @IsArray()
   @Prop()
+  @Expose()
   question: string[];
 
   @ApiProperty({
@@ -54,6 +91,7 @@ export class Diary extends Document {
   @Prop({
     required: true,
   })
+  @Expose()
   questioner: string;
 
   @ApiProperty({
@@ -64,6 +102,7 @@ export class Diary extends Document {
   @IsNotEmpty()
   @IsString()
   @Prop()
+  @Expose()
   challenge: string;
 
   @ApiProperty({
@@ -74,6 +113,7 @@ export class Diary extends Document {
   @IsNotEmpty()
   @IsString()
   @Prop()
+  @Exclude({ toPlainOnly: true })
   countersign: string;
 
   @ApiProperty({
@@ -99,6 +139,8 @@ export class Diary extends Document {
   @Prop({
     type: [AnswerSchema],
   })
+  @Type(() => Answer)
+  @Expose()
   answerList: Answer[];
 }
 

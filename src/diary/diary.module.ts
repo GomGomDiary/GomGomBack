@@ -2,13 +2,12 @@ import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiarySchema } from './diary.schema';
-import { Diary } from './diary.schema';
 import { DiaryRepository } from './diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { Diary, DiarySchema } from 'src/entity/diary.schema';
 
 @Module({
   imports: [

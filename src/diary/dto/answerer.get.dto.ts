@@ -1,11 +1,42 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Diary } from '../diary.schema';
+import { Answer, Diary } from '../../entity/diary.schema';
+import { Expose, Type } from 'class-transformer';
 
-export class AnswererGetDto extends PickType(Diary, ['answerList']) {
+class AnswerWithPermission extends PickType(Answer, [
+  '_id',
+  'answerer',
+  'createdAt',
+  'updatedAt',
+]) {
   @ApiProperty({
-    example: '644ba08d90664d0e9b7a82b7',
-    description: '_id',
+    example: true,
+    description: 'permission',
     required: true,
   })
-  _id: string;
+  @Expose()
+  isPermission: boolean;
+}
+
+export class AnswererGetDto extends PickType(Diary, ['_id', 'questioner']) {
+  @ApiProperty({
+    example: [
+      {
+        _id: '654ba13be9664d0e9b7a82fa',
+        answerer: 'yoon',
+        createdAt: '2023-11-08T14:54:51.929Z',
+        updatedAt: '2023-11-08T14:54:51.929Z',
+        isPermission: true,
+      },
+      {
+        _id: '654e83cf8e4dec550733931c',
+        answerer: 'yoon',
+        createdAt: '2023-11-15T15:43:45.050Z',
+        updatedAt: '2023-11-15T15:43:45.050Z',
+        isPermission: false,
+      },
+    ],
+  })
+  @Type(() => AnswerWithPermission)
+  @Expose()
+  answererList: AnswerWithPermission[];
 }

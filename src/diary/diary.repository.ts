@@ -3,10 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Diary } from './diary.schema';
+import { Diary, DiaryDocumentType } from '../entity/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DiaryPostDto } from './dto/diary.post.dto';
+import { QuestionShowDto } from './dto/question.get.dto';
 
 @Injectable()
 export class DiaryRepository {
@@ -16,10 +17,18 @@ export class DiaryRepository {
 
   async checkDuplication(diaryId: string, clientId: string) {
     try {
-      return !!(await this.diaryModel.findOne({
-        _id: diaryId,
-        'answerList._id': clientId,
-      }));
+      /**
+       * 해당 코드는 Duplication을 체크하는 기능으로서
+       * 해당 유저가 없는 경우 에러를 뱉으면 안됩니다.
+       * 즉, orFail을 사용해서는 안됩니다.
+       */
+      return !!(await this.diaryModel
+        .findOne({
+          _id: diaryId,
+          'answerList._id': clientId,
+        })
+        .lean()
+        .exec());
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
@@ -29,7 +38,7 @@ export class DiaryRepository {
     if (!id) {
       return false;
     }
-    return !!(await this.diaryModel.exists({ _id: id }));
+    return !!(await this.diaryModel.exists({ _id: id }).lean().exec());
   }
 
   async create(diary: DiaryPostDto) {
@@ -41,18 +50,23 @@ export class DiaryRepository {
   }
 
   async existAsAnswerer(id: string) {
+    /**
+     * id 가 undefined일 경우 findOne이 첫 요소를 반환
+     */
     if (!id) {
       return false;
     }
-    return !!(await this.diaryModel.exists({ 'answerList._id': id }));
+    return !!(await this.diaryModel.exists({ 'answerList._id': id }).exec());
   }
 
   async existAsDiaryAnswerer(diaryId: string, cookieId: string) {
     // check diaryId, cookieId is undefined
-    return !!(await this.diaryModel.exists({
-      _id: diaryId,
-      'answerList._id': cookieId,
-    }));
+    return !!(await this.diaryModel
+      .exists({
+        _id: diaryId,
+        'answerList._id': cookieId,
+      })
+      .exec());
   }
 
   async findDiaryWithoutAnswers(diaryId: string) {
@@ -64,9 +78,11 @@ export class DiaryRepository {
             'answerList.answers': 0,
           },
         )
-        .orFail();
+        .lean()
+        .orFail()
+        .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
@@ -86,10 +102,16 @@ export class DiaryRepository {
             },
           },
         )
-        .orFail();
+        .lean()
+        .orFail()
+        .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
+  }
+
+  async findOne(diaryId: string) {
+    return await this.diaryModel.findOne({ _id: diaryId }).lean<Diary>();
   }
 
   async findQuestion(diaryId: string) {
@@ -103,24 +125,30 @@ export class DiaryRepository {
             question: 1,
           },
         )
-        .orFail();
+        .lean<QuestionShowDto>()
+        .orFail()
+        .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
   async findById(diaryId: string) {
     try {
-      return await this.diaryModel.findById(diaryId).orFail();
+      /**
+       * casue of using `save` in postAnswer
+       * do not use lean
+       */
+      return this.diaryModel.findById(diaryId).orFail().exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
   async findField(
     diaryId: string,
     field: {
-      [key in keyof Diary]?: number | string;
+      [T in keyof DiaryDocumentType]?: number | string;
     },
   ) {
     try {
@@ -131,9 +159,11 @@ export class DiaryRepository {
           },
           field,
         )
-        .orFail();
+        .lean()
+        .orFail()
+        .exec();
     } catch (err) {
-      throw new NotFoundException('Diary not found');
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }
 
