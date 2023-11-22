@@ -104,7 +104,8 @@ export class DiaryService {
      */
     if (isDiaryOwner) {
       await this.diaryRepository.updateOne(clientId, body);
-      return res.status(HttpStatus.NO_CONTENT).end();
+      res.status(HttpStatus.NO_CONTENT);
+      return;
     }
     /**
      * if Answerer o (Questioner x)
@@ -113,7 +114,7 @@ export class DiaryService {
     const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
     if (isAnswerer) {
       await this.diaryRepository.createWithId(clientId, body);
-      return res.status(HttpStatus.NO_CONTENT).end();
+      return;
     }
     /**
      * if Newbie (Questioner x, Answerer x)
@@ -122,8 +123,6 @@ export class DiaryService {
     const diary = await this.diaryRepository.create(body);
 
     this.setDiaryCookies(res, diary._id.toString());
-
-    res.end();
   }
 
   async getAnswer({

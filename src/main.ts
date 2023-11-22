@@ -46,7 +46,7 @@ async function bootstrap() {
       users: { [swaggerName]: swaggerPassword },
     }),
   );
-  // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   const config = new DocumentBuilder()
     .setTitle('Diary')
     .setDescription('Diary API description')
