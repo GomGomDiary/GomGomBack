@@ -182,6 +182,9 @@ export class DiaryRepository {
       },
       {
         $set: body,
+        $unset: {
+          answerList: 1,
+        },
       },
     );
   }

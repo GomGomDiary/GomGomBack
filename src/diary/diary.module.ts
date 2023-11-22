@@ -1,14 +1,17 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
-import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, getModelToken } from '@nestjs/mongoose';
 import { DiaryRepository } from './diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Diary, DiarySchema } from 'src/entity/diary.schema';
-
+import {
+  DiaryHistorySchema,
+  DiaryHistory,
+} from 'src/entity/diaryHistory.schema';
 @Module({
   imports: [
     JwtModule,
@@ -16,7 +19,30 @@ import { Diary, DiarySchema } from 'src/entity/diary.schema';
       load: [config],
       envFilePath: `./.env.${process.env.NODE_ENV}`,
     }),
-    MongooseModule.forFeature([{ name: Diary.name, schema: DiarySchema }]),
+    MongooseModule.forFeatureAsync([
+      {
+        name: Diary.name,
+        inject: [getModelToken(DiaryHistory.name)],
+        imports: [
+          MongooseModule.forFeature([
+            { name: DiaryHistory.name, schema: DiaryHistorySchema },
+          ]),
+        ],
+        useFactory: async (diaryHistoryModel) => {
+          const schema = DiarySchema;
+          schema.pre('updateOne', async function () {
+            const retentionDiary = await this.model
+              .findOne(this.getQuery())
+              .lean<Diary>()
+              .exec();
+            const diaryId = retentionDiary._id;
+            delete retentionDiary._id;
+            await diaryHistoryModel.create({ ...retentionDiary, diaryId });
+          });
+          return schema;
+        },
+      },
+    ]),
     forwardRef(() => AuthModule),
   ],
   controllers: [DiaryController],
