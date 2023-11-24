@@ -1,0 +1,33 @@
+name: 🐛 Bug report
+description: 버그 제보
+title: "🐛 BUG: "
+labels:
+  - bug
+assignees:
+  - Yoowatney
+  - summermong
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제목을 적어주세요.
+  - type: textarea
+    attributes:
+      label: describe-bug
+      description: 버그에 대한 설명을 적어주세요.
+      value: |
+        Steps to reproduce:
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: Expected behavior
+      description: 기대했던 정상 동작은 무엇인가요?
+      placeholder: 다이어리 생성 버튼을 연달아 눌렀을 때에도 201이 내려와야 함.
+    validations:
+      required: true
