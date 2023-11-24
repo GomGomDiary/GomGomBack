@@ -11,7 +11,7 @@ body:
   - type: textarea
     id: feature-description
     attributes:
-      label: feature-description
+      label: Feature description
       description: 어떤 기능 개선을 할까요?
       placeholder: "Describe your feature"
     validations:
