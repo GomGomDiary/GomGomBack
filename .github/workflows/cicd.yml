@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "src/**"
+      - ".aws/**"
 
 env:
   AWS_REGION : ap-northeast-2
