@@ -21,6 +21,7 @@
     "test:solo": "jest --config ./test/jest-solo.json"
   },
   "dependencies": {
+    "@nestjs/cache-manager": "^2.1.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^9.0.0",
@@ -28,6 +29,7 @@
     "@nestjs/mongoose": "^10.0.1",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^7.1.15",
+    "cache-manager": "^5.3.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",

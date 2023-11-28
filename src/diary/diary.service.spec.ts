@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiaryService } from './diary.service';
-import { DiaryRepository } from './diary.repository';
+import { DiaryRepository } from './repository/diary.repository';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import httpMocks from 'node-mocks-http';

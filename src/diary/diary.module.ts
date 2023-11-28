@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
 import { MongooseModule, getModelToken } from '@nestjs/mongoose';
-import { DiaryRepository } from './diary.repository';
+import { DiaryRepository } from './repository/diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
@@ -12,6 +12,8 @@ import {
   DiaryHistorySchema,
   DiaryHistory,
 } from 'src/entity/diaryHistory.schema';
+import { CacheModule } from '@nestjs/cache-manager';
+
 @Module({
   imports: [
     JwtModule,
@@ -19,6 +21,7 @@ import {
       load: [config],
       envFilePath: `./.env.${process.env.NODE_ENV}`,
     }),
+    CacheModule.register(),
     MongooseModule.forFeatureAsync([
       {
         name: Diary.name,
