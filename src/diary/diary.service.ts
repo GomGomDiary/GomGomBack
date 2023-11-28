@@ -2,10 +2,11 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DiaryRepository } from './diary.repository';
+import { DiaryRepository } from './repository/diary.repository';
 import { DiaryPostDto } from './dto/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
@@ -13,12 +14,15 @@ import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { Answer } from '../entity/diary.schema';
 import { QuestionShowDto } from './dto/question.get.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class DiaryService {
   constructor(
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   private setDiaryCookies(res: Response, value: string) {
@@ -246,5 +250,14 @@ export class DiaryService {
 
   async getChallenge(diaryId: string) {
     return await this.diaryRepository.findOne(diaryId);
+  }
+
+  async postUpdatingSignal(diaryId: string) {
+    await this.cacheManager.set(diaryId, true, 3000);
+    return;
+  }
+
+  async getUpdatingSignal(diaryId: string) {
+    return !!(await this.cacheManager.get(diaryId));
   }
 }
