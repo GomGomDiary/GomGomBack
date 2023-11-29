@@ -9,6 +9,7 @@ import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { MongooseInstrumentation } from '@opentelemetry/instrumentation-mongoose';
 
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
@@ -22,13 +23,14 @@ const spanProcessor =
 
 export const otelSDK = new NodeSDK({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: `nestjs-${process.env.NODE_ENV}`,
+    [SemanticResourceAttributes.SERVICE_NAME]: `gomgom-${process.env.NODE_ENV}`,
   }),
   spanProcessor,
   instrumentations: [
     new HttpInstrumentation(),
     new ExpressInstrumentation(),
     new NestInstrumentation(),
+    new MongooseInstrumentation(),
   ],
 });
 
