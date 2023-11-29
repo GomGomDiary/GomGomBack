@@ -1,3 +1,4 @@
+import { otelSDK } from './utils/tracing';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -12,7 +13,6 @@ import mongoose from 'mongoose';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import basicAuth from 'express-basic-auth';
-import { otelSDK } from './utils/tracing';
 
 async function bootstrap() {
   otelSDK.start();
