@@ -16,7 +16,7 @@ const jaegerExporter = new JaegerExporter({
 const traceExporter = jaegerExporter;
 
 const spanProcessor =
-  process.env.NODE_ENV === `production`
+  process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
     ? new BatchSpanProcessor(traceExporter)
     : new SimpleSpanProcessor(traceExporter);
 
