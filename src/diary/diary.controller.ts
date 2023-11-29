@@ -68,6 +68,28 @@ export class DiaryController {
   }
 
   @ApiOperation({
+    summary: '다이어리 업데이트 요청 시그널',
+    description: '다이어리 업데이트를 요청하는 시그널을 보냅니다.',
+  })
+  @Post('updating-signal')
+  async postUpdatingSignal(
+    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) diaryId: string,
+  ) {
+    return this.diaryService.postUpdatingSignal(diaryId);
+  }
+
+  @ApiOperation({
+    summary: '다이어리 업데이트 요청 시그널',
+    description: '다이어리 업데이트를 요청하는 시그널을 보냅니다.',
+  })
+  @Get('updating-signal')
+  async getUpdatingSignal(
+    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) diaryId: string,
+  ) {
+    return this.diaryService.getUpdatingSignal(diaryId);
+  }
+
+  @ApiOperation({
     summary: '질문 보기',
     description: '정책상의 이유로 해당 API는 Bearer token이 필요합니다.',
   })
