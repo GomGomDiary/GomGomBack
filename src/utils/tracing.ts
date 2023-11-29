@@ -9,7 +9,7 @@ import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { MongooseInstrumentation } from '@opentelemetry/instrumentation-mongoose';
+import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose';
 
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
