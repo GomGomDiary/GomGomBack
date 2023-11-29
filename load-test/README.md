@@ -30,7 +30,7 @@ user-data를 넣어주면 ec2가 부팅되면서 docker 및 compose를 설치합
 
 ## scp
 
-금전적인 관계로 부하를 주는 서버인 ec2는 1회성으로 사용됩니다.
+재정적인 관계로 부하를 주는 서버인 ec2는 1회성으로 사용됩니다.
 
 스크립트 및 각종 configuration을 원격 repository로부터 가져와야 하는데, 아직 gomgom repository를 public으로 바꾸는데엔 위험성이 따릅니다.
 
