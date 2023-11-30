@@ -11,13 +11,23 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose';
 
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
 });
-const traceExporter = jaegerExporter;
+
+const oltpExporter = new OTLPTraceExporter({
+  url: `https://api.honeycomb.io/v1/traces`,
+  headers: {
+    'x-honeycomb-team': process.env.HONEYCOMB_API_KEY,
+  },
+});
+
+// const traceExporter = jaegerExporter;
+const traceExporter = oltpExporter;
 
 // const spanProcessor =
 //   process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
