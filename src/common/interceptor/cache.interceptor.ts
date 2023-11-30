@@ -27,7 +27,6 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     if (this.CACHE_EVICT_METHODS.includes(req.method)) {
       return next.handle().pipe(tap(() => this.cacheManager.del(req.path)));
     }
-    console.log(`Cache hit: ${req.originalUrl}`);
 
     return super.intercept(context, next);
   }
