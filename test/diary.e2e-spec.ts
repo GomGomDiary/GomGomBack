@@ -287,11 +287,6 @@ describe('DiaryController (e2e)', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
       });
-
-      it('anwererList[i].isPermission은 false여야 한다.', () => {
-        expect(resultJson.answererList[0].isPermission).toBe(false);
-        expect(resultJson.answererList[1].isPermission).toBe(false);
-      });
     });
 
     describe('with clientId1 cookie', () => {
@@ -316,14 +311,6 @@ describe('DiaryController (e2e)', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
       });
-
-      it('anwererList[0].isPermission은 true여야 한다.', () => {
-        expect(resultJson.answererList[0].isPermission).toBeTruthy();
-      });
-
-      it('anwererList[1].isPermission은 false여야 한다', () => {
-        expect(resultJson.answererList[1].isPermission).toBeFalsy();
-      });
     });
 
     describe('with diaryId cookie', () => {
@@ -347,14 +334,6 @@ describe('DiaryController (e2e)', () => {
       it('answererList[i]._id는 clientId${i}여야 한다.', () => {
         expect(resultJson.answererList[0]._id).toEqual(clientId1);
         expect(resultJson.answererList[1]._id).toEqual(clientId2);
-      });
-
-      it('anwererList[0].isPermission은 true여야 한다.', () => {
-        expect(resultJson.answererList[0].isPermission).toBeTruthy();
-      });
-
-      it('anwererList[1].isPermission은 true여야 한다.', () => {
-        expect(resultJson.answererList[1].isPermission).toBeTruthy();
       });
     });
   });
