@@ -11,15 +11,20 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose';
 
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
 });
 const traceExporter = jaegerExporter;
 
-const spanProcessor =
-  process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
-    ? new BatchSpanProcessor(traceExporter)
-    : new SimpleSpanProcessor(traceExporter);
+// const spanProcessor =
+//   process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
+//     ? new BatchSpanProcessor(traceExporter)
+//     : new SimpleSpanProcessor(traceExporter);
+
+const spanProcessor = new SimpleSpanProcessor(traceExporter);
 
 export const otelSDK = new NodeSDK({
   resource: new Resource({
