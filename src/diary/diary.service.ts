@@ -14,15 +14,15 @@ import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { Answer } from '../entity/diary.schema';
 import { QuestionShowDto } from './dto/question.get.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { ANSWERERS } from 'src/utils/constants';
+import { CacheRepository } from './repository/cache.repository';
 
 @Injectable()
 export class DiaryService {
   constructor(
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly cacheService: CacheRepository,
   ) {}
 
   private setDiaryCookies(res: Response, value: string) {
@@ -100,33 +100,37 @@ export class DiaryService {
     clientId: string;
     res: Response;
   }) {
-    const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
-    /**
-     * if Questioner
-     * update Diary
-     * -> soft delete
-     */
-    if (isDiaryOwner) {
-      await this.diaryRepository.updateOne(clientId, body);
-      res.status(HttpStatus.NO_CONTENT);
-      return;
-    }
-    /**
-     * if Answerer o (Questioner x)
-     * create Diary
-     */
-    const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
-    if (isAnswerer) {
-      await this.diaryRepository.createWithId(clientId, body);
-      return;
-    }
-    /**
-     * if Newbie (Questioner x, Answerer x)
-     * create Diary && set cookie
-     */
-    const diary = await this.diaryRepository.create(body);
+    try {
+      const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
+      /**
+       * if Questioner
+       * update Diary
+       * -> soft delete
+       */
+      if (isDiaryOwner) {
+        await this.diaryRepository.updateOne(clientId, body);
+        res.status(HttpStatus.NO_CONTENT);
+        return;
+      }
+      /**
+       * if Answerer o (Questioner x)
+       * create Diary
+       */
+      const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
+      if (isAnswerer) {
+        await this.diaryRepository.createWithId(clientId, body);
+        return;
+      }
+      /**
+       * if Newbie (Questioner x, Answerer x)
+       * create Diary && set cookie
+       */
+      const diary = await this.diaryRepository.create(body);
 
-    this.setDiaryCookies(res, diary._id.toString());
+      this.setDiaryCookies(res, diary._id.toString());
+    } finally {
+      await this.cacheService.del(ANSWERERS, clientId);
+    }
   }
 
   async getAnswer({
@@ -142,6 +146,7 @@ export class DiaryService {
     if (clientId !== diaryId && clientId !== answerId) {
       throw new UnauthorizedException('해당 Answer를 읽는데 권한이 없습니다.');
     }
+
     const diary = await this.diaryRepository.findDiaryWithAnswerId(
       diaryId,
       answerId,
@@ -157,35 +162,13 @@ export class DiaryService {
     return response;
   }
 
-  async getAnswerers({ diaryId, clientId }) {
-    const isDiaryOwner = diaryId === clientId;
-
+  async getAnswerers({ diaryId }) {
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(diaryId);
-
-    const answererWithPermission = diary.answerList.map((answer) => {
-      let isPermission = false;
-      if (isDiaryOwner) {
-        /**
-         * if DiaryOwner, give permission all answer
-         */
-        isPermission = true;
-      } else if (answer._id.equals(clientId)) {
-        /**
-         * if answer._id === clientId
-         * give permission this answer
-         */
-        isPermission = true;
-      }
-      return {
-        ...answer,
-        isPermission,
-      };
-    });
 
     const response = {
       _id: diaryId,
       questioner: diary.questioner,
-      answererList: answererWithPermission,
+      answererList: diary.answerList,
     };
 
     return response;
@@ -238,20 +221,22 @@ export class DiaryService {
     }
 
     diary.answerList.push({ ...answer, _id: id } as Answer);
-
-    await this.diaryRepository.save([diary]);
+    Promise.all([
+      await this.diaryRepository.save([diary]),
+      await this.cacheService.del(ANSWERERS, diaryId),
+    ]);
   }
 
   async getChallenge(diaryId: string) {
     return await this.diaryRepository.findOne(diaryId);
   }
 
-  async postUpdatingSignal(diaryId: string) {
-    await this.cacheManager.set(diaryId, true, 3000);
-    return;
-  }
+  async postUpdatingSignal(diaryId) {
+    const keys = await this.cacheService.keys();
 
-  async getUpdatingSignal(diaryId: string) {
-    return !!(await this.cacheManager.get(diaryId));
+    return keys;
+  }
+  async getUpdatingSignal(diaryId) {
+    return '1234';
   }
 }

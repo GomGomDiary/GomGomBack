@@ -13,6 +13,7 @@ import {
   DiaryHistory,
 } from 'src/entity/diaryHistory.schema';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CacheRepository } from './repository/cache.repository';
 
 @Module({
   imports: [
@@ -49,7 +50,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     forwardRef(() => AuthModule),
   ],
   controllers: [DiaryController],
-  providers: [DiaryService, DiaryRepository],
+  providers: [DiaryService, DiaryRepository, CacheRepository],
   exports: [DiaryRepository],
 })
 export class DiaryModule {}

@@ -1,11 +1,13 @@
 import {
   Body,
+  CacheTTL,
   Controller,
   Get,
   Param,
   Post,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { DiaryPostDto } from './dto/diary.post.dto';
@@ -35,6 +37,9 @@ import { AnswerGetDto } from './dto/answer.get.dto';
 import { ReturnValueToDto } from 'src/common/decorator/returnValueToDto';
 import { ChallengeShowDto } from './dto/challenge.res.dto';
 import { DiaryTokenShowDto } from './dto/countersign.res.dto';
+import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
+import { ConfigService } from '@nestjs/config';
+import { CACHE_TTL } from 'src/utils/constants';
 
 @ApiTags('Diary')
 @Controller({
@@ -45,6 +50,7 @@ export class DiaryController {
   constructor(
     private readonly diaryService: DiaryService,
     private readonly authService: AuthService,
+    private readonly configService: ConfigService,
   ) {}
 
   @ApiOperation({
@@ -76,17 +82,6 @@ export class DiaryController {
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) diaryId: string,
   ) {
     return this.diaryService.postUpdatingSignal(diaryId);
-  }
-
-  @ApiOperation({
-    summary: '다이어리 업데이트 요청 시그널',
-    description: '다이어리 업데이트를 요청하는 시그널을 보냅니다.',
-  })
-  @Get('updating-signal')
-  async getUpdatingSignal(
-    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) diaryId: string,
-  ) {
-    return this.diaryService.getUpdatingSignal(diaryId);
   }
 
   @ApiOperation({
@@ -148,13 +143,12 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
+  @UseInterceptors(HttpCacheInterceptor)
+  @CacheTTL(CACHE_TTL)
   @Get('answerers/:diaryId')
   @ReturnValueToDto(AnswererGetDto)
-  async getAnswerers(
-    @Param('diaryId', MongoDBIdPipe) diaryId: string,
-    @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-  ) {
-    return this.diaryService.getAnswerers({ diaryId, clientId });
+  async getAnswerers(@Param('diaryId', MongoDBIdPipe) diaryId: string) {
+    return this.diaryService.getAnswerers({ diaryId });
   }
 
   @ApiOperation({ summary: '답변 보기' })

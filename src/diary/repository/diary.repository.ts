@@ -15,13 +15,13 @@ export class DiaryRepository {
     @InjectModel(Diary.name) private readonly diaryModel: Model<Diary>,
   ) {}
 
+  /**
+   * 해당 코드는 Duplication을 체크하는 기능으로서
+   * 해당 유저가 없는 경우 에러를 뱉으면 안됩니다.
+   * 즉, orFail을 사용해서는 안됩니다.
+   */
   async checkDuplication(diaryId: string, clientId: string) {
     try {
-      /**
-       * 해당 코드는 Duplication을 체크하는 기능으로서
-       * 해당 유저가 없는 경우 에러를 뱉으면 안됩니다.
-       * 즉, orFail을 사용해서는 안됩니다.
-       */
       return !!(await this.diaryModel
         .findOne({
           _id: diaryId,
@@ -191,10 +191,7 @@ export class DiaryRepository {
         _id: diaryId,
       },
       {
-        $set: body,
-        $unset: {
-          answerList: 1,
-        },
+        $set: { ...body, answerList: [] },
       },
     );
   }
