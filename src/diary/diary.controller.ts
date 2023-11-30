@@ -164,6 +164,8 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
+  @UseInterceptors(HttpCacheInterceptor)
+  @CacheTTL(CACHE_TTL)
   @Get('answer/:diaryId/:answerId')
   @ReturnValueToDto(AnswerGetDto)
   async getAnswer(

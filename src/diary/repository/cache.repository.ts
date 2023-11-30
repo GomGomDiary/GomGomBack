@@ -7,8 +7,8 @@ import { CacheInterfaceRepository } from './cache.interface';
 export class CacheRepository implements CacheInterfaceRepository {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheService: Cache) {}
 
-  async del(target: string, diaryId: string) {
-    await this.cacheService.del(`/v1/diary/${target}/${diaryId}`);
+  async del(target: string) {
+    await this.cacheService.del(`/v1/diary/${target}`);
   }
 
   async keys() {
