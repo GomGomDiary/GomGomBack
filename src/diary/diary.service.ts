@@ -142,16 +142,13 @@ export class DiaryService {
     if (clientId !== diaryId && clientId !== answerId) {
       throw new UnauthorizedException('해당 Answer를 읽는데 권한이 없습니다.');
     }
-    const answerListWithId = await this.diaryRepository.findAnswerByAnswerId(
+    const diary = await this.diaryRepository.findDiaryWithAnswerId(
       diaryId,
       answerId,
     );
+    const { answerList, ...question } = diary;
+    const answer = diary.answerList[0];
 
-    const question = await this.diaryRepository.findField(diaryId, {
-      question: 1,
-      questioner: 1,
-    });
-    const answer = answerListWithId.answerList[0];
     const response = {
       question: { ...question },
       answer: { ...answer },
@@ -164,9 +161,6 @@ export class DiaryService {
     const isDiaryOwner = diaryId === clientId;
 
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(diaryId);
-    // check clientId is in diary answer
-    // const isAnswererAboutDiaryId =
-    // await this.diaryRepository.existAsDiaryAnswerer(diaryId, clientId);
 
     const answererWithPermission = diary.answerList.map((answer) => {
       let isPermission = false;

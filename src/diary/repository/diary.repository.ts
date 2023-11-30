@@ -86,7 +86,7 @@ export class DiaryRepository {
     }
   }
 
-  async findAnswerByAnswerId(diaryId: string, answerId: string) {
+  async findDiaryWithAnswerId(diaryId: string, answerId: string) {
     try {
       return await this.diaryModel
         .findOne(
@@ -95,6 +95,8 @@ export class DiaryRepository {
             'answerList._id': answerId,
           },
           {
+            questioner: 1,
+            question: 1,
             answerList: {
               $elemMatch: {
                 _id: answerId,
