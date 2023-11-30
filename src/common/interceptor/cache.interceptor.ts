@@ -7,13 +7,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Observable, tap } from 'rxjs';
-import { ANSWERERS, QUESTION } from 'src/utils/constants';
+// import { ANSWERERS, QUESTION } from 'src/utils/constants';
 
 @Injectable()
 export class HttpCacheInterceptor extends CacheInterceptor {
   protected trackBy(context: ExecutionContext): string {
     const req = context.switchToHttp().getRequest<Request>();
-    if (req.path.includes(ANSWERERS)) return req.path;
+    return req.path;
   }
 
   private readonly CACHE_EVICT_METHODS = ['POST', 'PATCH', 'PUT', 'DELETE'];

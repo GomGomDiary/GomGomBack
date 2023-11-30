@@ -1,4 +1,4 @@
 export interface CacheInterfaceRepository {
-  del(target: string, diaryId: string): Promise<void>;
+  del(target: string): Promise<void>;
   keys(): Promise<string[]>;
 }

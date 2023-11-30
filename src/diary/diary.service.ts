@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { Answer } from '../entity/diary.schema';
 import { QuestionShowDto } from './dto/question.get.dto';
-import { ANSWERERS } from 'src/utils/constants';
+import { ANSWER, ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from './repository/cache.repository';
 
 @Injectable()
@@ -129,7 +129,23 @@ export class DiaryService {
 
       this.setDiaryCookies(res, diary._id.toString());
     } finally {
-      await this.cacheService.del(ANSWERERS, clientId);
+      /**
+       * Delete cache
+       * /${ANSWERERS}/${clientId}
+       * /${ANSWER}/${clientId}/*
+       */
+      const keys = await this.cacheService.keys();
+
+      const promises = [];
+      for (const key of keys) {
+        if (key.includes(`/v1/diary/${ANSWER}/${clientId}`)) {
+          promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+        }
+      }
+      await Promise.all([
+        ...promises,
+        this.cacheService.del(`${ANSWERERS}${clientId}`),
+      ]);
     }
   }
 
@@ -223,7 +239,7 @@ export class DiaryService {
     diary.answerList.push({ ...answer, _id: id } as Answer);
     Promise.all([
       await this.diaryRepository.save([diary]),
-      await this.cacheService.del(ANSWERERS, diaryId),
+      await this.cacheService.del(`${ANSWERERS}${diaryId}`),
     ]);
   }
 
@@ -233,6 +249,12 @@ export class DiaryService {
 
   async postUpdatingSignal(diaryId) {
     const keys = await this.cacheService.keys();
+    // delete /v1/diary/:diaryId/*
+    // for (const key of keys) {
+    // 	if (key.includes(`/v1/diary/${diaryId}`)) {
+    // 		await this.cacheService.del(key);
+    // 	}
+    // }
 
     return keys;
   }
