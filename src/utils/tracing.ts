@@ -27,14 +27,15 @@ const oltpExporter = new OTLPTraceExporter({
 });
 
 // const traceExporter = jaegerExporter;
-const traceExporter = oltpExporter;
+const traceExporter =
+  process.env.NODE_ENV === 'production' ? jaegerExporter : oltpExporter;
 
-// const spanProcessor =
-//   process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
-//     ? new BatchSpanProcessor(traceExporter)
-//     : new SimpleSpanProcessor(traceExporter);
+const spanProcessor =
+  process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
+    ? new BatchSpanProcessor(traceExporter)
+    : new SimpleSpanProcessor(traceExporter);
 
-const spanProcessor = new SimpleSpanProcessor(traceExporter);
+// const spanProcessor = new SimpleSpanProcessor(traceExporter);
 
 export const otelSDK = new NodeSDK({
   resource: new Resource({
