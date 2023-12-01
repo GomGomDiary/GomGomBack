@@ -2,7 +2,7 @@
 
 부하 테스트 결과를 시각화하기 위해 grafana와 influxdb를 사용합니다.
 
-tracing으로는 jaeger 및 opentelemetry를 사용합니다.
+tracing으로는 opentelemetry 및 jaeger, Honeycomb를 사용합니다.
 
 `init.sh`를 이용해서 띄워주시면 됩니다.
 ```bash
