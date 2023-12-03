@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Res,
   UseGuards,
   UseInterceptors,
@@ -27,12 +28,14 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { QuestionShowDto } from './dto/question.get.dto';
-import { AnswererGetDto } from './dto/answerer.get.dto';
+import { AnswererGetDto, PaginateAnswererDto } from './dto/answerer.get.dto';
 import { AnswerGetDto } from './dto/answer.get.dto';
 import { ReturnValueToDto } from 'src/common/decorator/returnValueToDto';
 import { ChallengeShowDto } from './dto/challenge.res.dto';
@@ -40,7 +43,9 @@ import { DiaryTokenShowDto } from './dto/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_TTL } from 'src/utils/constants';
+import mongoose from 'mongoose';
 
+console.log(CACHE_TTL);
 @ApiTags('Diary')
 @Controller({
   version: '1',
@@ -143,12 +148,29 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
+  @ApiQuery({
+    name: 'start',
+    type: Number,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'take',
+    type: Number,
+    required: true,
+  })
+  @ApiParam({
+    name: 'diaryId',
+    required: true,
+  })
   @UseInterceptors(HttpCacheInterceptor)
   @CacheTTL(CACHE_TTL)
   @Get('answerers/:diaryId')
   @ReturnValueToDto(AnswererGetDto)
-  async getAnswerers(@Param('diaryId', MongoDBIdPipe) diaryId: string) {
-    return this.diaryService.getAnswerers({ diaryId });
+  async getAnswerers(
+    @Param('diaryId', MongoDBIdPipe) diaryId: string,
+    @Query('') query: PaginateAnswererDto,
+  ) {
+    return this.diaryService.getAnswerers({ diaryId, query });
   }
 
   @ApiOperation({ summary: '답변 보기' })
@@ -163,6 +185,10 @@ export class DiaryController {
   })
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
+  })
+  @ApiParam({
+    name: 'diaryId',
+    required: true,
   })
   @UseInterceptors(HttpCacheInterceptor)
   @CacheTTL(CACHE_TTL)
@@ -196,6 +222,10 @@ export class DiaryController {
     status: 409,
     description: '이미 답변한 경우 409를 응답합니다.',
   })
+  @ApiParam({
+    name: 'diaryId',
+    required: true,
+  })
   @UseGuards(AuthGuard)
   @Post('answer/:diaryId')
   async postAnswer(
@@ -225,6 +255,10 @@ export class DiaryController {
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
   })
+  @ApiParam({
+    name: 'diaryId',
+    required: true,
+  })
   @Get('challenge/:diaryId')
   @ReturnValueToDto(ChallengeShowDto)
   async getChallenge(
@@ -248,6 +282,10 @@ export class DiaryController {
   })
   @ApiNotFoundResponse({
     description: 'diaryId가 존재하지 않을 경우 404를 응답합니다.',
+  })
+  @ApiParam({
+    name: 'diaryId',
+    required: true,
   })
   @Post('countersign/:diaryId')
   @ReturnValueToDto(DiaryTokenShowDto)

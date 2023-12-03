@@ -13,6 +13,9 @@ import { Observable, tap } from 'rxjs';
 export class HttpCacheInterceptor extends CacheInterceptor {
   protected trackBy(context: ExecutionContext): string {
     const req = context.switchToHttp().getRequest<Request>();
+    if (req.path.includes('answerers')) {
+      return req.originalUrl;
+    }
     return req.path;
   }
 
@@ -22,11 +25,11 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Promise<Observable<any>> {
-    const req = context.switchToHttp().getRequest<Request>();
-
-    if (this.CACHE_EVICT_METHODS.includes(req.method)) {
-      return next.handle().pipe(tap(() => this.cacheManager.del(req.path)));
-    }
+    // const req = context.switchToHttp().getRequest<Request>();
+    //
+    // if (this.CACHE_EVICT_METHODS.includes(req.method)) {
+    //   return next.handle().pipe(tap(() => this.cacheManager.del(req.path)));
+    // }
 
     return super.intercept(context, next);
   }

@@ -31,7 +31,14 @@ async function bootstrap() {
   if (env === 'production') app.enableShutdownHooks();
 
   app.use(cookieParser(cookieSecret));
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
   app.enableVersioning({
     type: VersioningType.URI,
   });
