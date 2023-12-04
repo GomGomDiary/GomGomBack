@@ -40,6 +40,10 @@
   - [ExpressJS + Typescript](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
   - MongoDB ( [Atlas](https://www.mongodb.com/cloud/atlas/)로 사용 중 입니다. )
 
+
+## TIL
+개발 기록은 [노션](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4)에 정리했습니다.
+
 ## Prerequisites
 - Docker (20.10.14 or higher)
 - docker-compose (1.29.2 or higher)
@@ -67,9 +71,14 @@
 	```
 	$ chmod 744 docker-development.sh; ./docker-development.sh
 	```
+
+## Load testing
+
+부하 테스트에 대한 설명은 [load-test](https://github.com/GomGomDiary/GomGomBack/tree/main/load-test)에 쓰여있습니다.
+
 ## 주의 사항
 ### 환경 변수
-개발 시 환경변수가 업데이트 될 수 있습니다. 만약 프로덕션 환경까지 영향을 미치는 변수라면 아래 룰을 따라주세요.
+개발 시 환경변수가 업데이트 될 수 있습니다. 아래 룰을 따라주세요.
 1. `.env.development`, `.env.test`, `.env.example`에 field를 추가시켜주세요.
 2. `docker-compose.test.yaml`에 environment를 추가시켜주세요.
 > `.env.development`는 개발 시, `.env.test`는 로컬에서 e2e, 부하 테스트를 돌릴 시, `docker-compose.test.yaml`은 CI에서 필요합니다.
@@ -80,11 +89,6 @@
 
 3-2. `PORT`와 같은 secret 중요도가 낮은 변수라면...
 - [task-definition.json](https://github.com/GomGomDiary/GomGomBack/blob/main/.aws/task-definition.json)에서 [environment](https://github.com/GomGomDiary/GomGomBack/blob/e72f14805213b38930ba510eac62da3268355cbd/.aws/task-definition.json#L16)를 업데이트 해주세요.
-
-
-## Load testing
-
-부하 테스트에 대한 설명은 [load-test](https://github.com/GomGomDiary/GomGomBack/tree/main/load-test)에 쓰여있습니다.
 
 ## Contribution rule
 
@@ -116,6 +120,3 @@ main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디
 > 실패
 <img width="291" alt="image" src="https://github.com/GomGomDiary/GomGomBack/assets/75563378/71432e71-6914-4113-a485-475be92dc5a1">
 
-
-## TIL
-개발 기록은 [노션에](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4) 정리했습니다.
