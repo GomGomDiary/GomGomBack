@@ -5,7 +5,8 @@
 > 바쁜 일상 속 사랑하는 누군가에 대해 곰곰이 고민하는 시간을 주는 GomGomDiary입니다.
 
 ## Project Architecuture
-![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/e8a33057-3164-42de-b328-cd08497a2a91)
+![image](https://github.com/GomGomDiary/GomGomBack/assets/75563378/4a18cdd8-32b1-421c-ac4b-adb56f6823f2)
+
 
 ## 기술 스택
 ### Backend
@@ -33,12 +34,6 @@
 ### Load Testing
 
 <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white"><img src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white">
-
-
-
-- 참고
-  - [ExpressJS + Typescript](https://github.com/GomGomDiary/GomGomBack/tree/feature/express) ( 프로토타입 구축 시 사용했었습니다. )
-  - MongoDB ( [Atlas](https://www.mongodb.com/cloud/atlas/)로 사용 중 입니다. )
 
 
 ## TIL
@@ -119,4 +114,3 @@ main branch에 push가 일어나고, 해당 커밋의 변경 사항이 `src` 디
 
 > 실패
 <img width="291" alt="image" src="https://github.com/GomGomDiary/GomGomBack/assets/75563378/71432e71-6914-4113-a485-475be92dc5a1">
-
