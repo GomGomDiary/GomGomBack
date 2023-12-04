@@ -1,21 +1,22 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Answer, Diary } from '../../entity/diary.schema';
 import { Expose, Type } from 'class-transformer';
+import {
+  IsIn,
+  IsNumber,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { DEFAULT_PAGINATE } from 'src/utils/constants';
 
 class AnswerWithPermission extends PickType(Answer, [
   '_id',
   'answerer',
   'createdAt',
   'updatedAt',
-]) {
-  @ApiProperty({
-    example: true,
-    description: 'permission',
-    required: true,
-  })
-  @Expose()
-  isPermission: boolean;
-}
+]) {}
 
 export class AnswererGetDto extends PickType(Diary, ['_id', 'questioner']) {
   @ApiProperty({
@@ -25,18 +26,43 @@ export class AnswererGetDto extends PickType(Diary, ['_id', 'questioner']) {
         answerer: 'yoon',
         createdAt: '2023-11-08T14:54:51.929Z',
         updatedAt: '2023-11-08T14:54:51.929Z',
-        isPermission: true,
       },
       {
         _id: '654e83cf8e4dec550733931c',
         answerer: 'yoon',
         createdAt: '2023-11-15T15:43:45.050Z',
         updatedAt: '2023-11-15T15:43:45.050Z',
-        isPermission: false,
       },
     ],
   })
   @Type(() => AnswerWithPermission)
   @Expose()
   answererList: AnswerWithPermission[];
+
+  @ApiProperty({
+    example: 46,
+  })
+  @Expose()
+  answerCount: number;
+}
+
+@ValidatorConstraint({ name: 'IsStartMultipleOfFive', async: false })
+export class IsStartMultipleofFive implements ValidatorConstraintInterface {
+  validate(start: number, args: ValidationArguments) {
+    return start % 5 === 0;
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return 'start must be a multiple of 5.';
+  }
+}
+
+export class PaginateAnswererDto {
+  @IsNumber()
+  @Validate(IsStartMultipleofFive)
+  start: number;
+
+  @IsNumber()
+  @IsIn(DEFAULT_PAGINATE)
+  take: number;
 }

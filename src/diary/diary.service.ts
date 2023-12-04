@@ -2,8 +2,8 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { DiaryRepository } from './repository/diary.repository';
@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { Answer } from '../entity/diary.schema';
 import { QuestionShowDto } from './dto/question.get.dto';
-import { ANSWER, ANSWERERS } from 'src/utils/constants';
+import { ANSWER, ANSWERERS, DEFAULT_PAGINATE } from 'src/utils/constants';
 import { CacheRepository } from './repository/cache.repository';
 
 @Injectable()
@@ -138,14 +138,11 @@ export class DiaryService {
 
       const promises = [];
       for (const key of keys) {
-        if (key.includes(`/v1/diary/${ANSWER}/${clientId}`)) {
+        if (key.includes(`${clientId}`)) {
           promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
         }
       }
-      await Promise.all([
-        ...promises,
-        this.cacheService.del(`${ANSWERERS}${clientId}`),
-      ]);
+      await Promise.all(promises);
     }
   }
 
@@ -178,13 +175,22 @@ export class DiaryService {
     return response;
   }
 
-  async getAnswerers({ diaryId }) {
-    const diary = await this.diaryRepository.findDiaryWithoutAnswers(diaryId);
+  async getAnswerers({ diaryId, query }) {
+    const end = query.take + query.start;
+    const diary = await this.diaryRepository.findDiaryWithoutAnswers(
+      diaryId,
+      query.start,
+      end,
+    );
+    if (!diary) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
 
     const response = {
       _id: diaryId,
       questioner: diary.questioner,
       answererList: diary.answerList,
+      answerCount: diary.answerCount,
     };
 
     return response;
@@ -237,10 +243,29 @@ export class DiaryService {
     }
 
     diary.answerList.push({ ...answer, _id: id } as Answer);
-    Promise.all([
-      await this.diaryRepository.save([diary]),
-      await this.cacheService.del(`${ANSWERERS}${diaryId}`),
-    ]);
+
+    /**
+     * NOW : 정교하게 캐싱을 적용하려니 가독성이 심히 떨어져 잠시 pending
+     * TODO : 마지막 start 부분 caching만 삭제
+     */
+
+    // const answerCount = await this.diaryRepository.getAnswererCount(diaryId);
+
+    // const cacheKeyListToDelete = [];
+    // for (const page of DEFAULT_PAGINATE) {
+    //   const cacheKeyToDelete = answerCount - (answerCount % page);
+    //   cacheKeyListToDelete.push(cacheKeyToDelete);
+    // }
+
+    const keys = await this.cacheService.keys();
+    const promises = [];
+    for (const key of keys) {
+      console.log(key);
+      if (key.includes(`${ANSWERERS}/${diaryId}`)) {
+        promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+      }
+    }
+    await Promise.all([this.diaryRepository.save([diary]), ...promises]);
   }
 
   async getChallenge(diaryId: string) {

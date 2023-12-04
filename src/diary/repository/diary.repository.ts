@@ -5,9 +5,13 @@ import {
 } from '@nestjs/common';
 import { Diary, DiaryDocumentType } from '../../entity/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { DiaryPostDto } from '../dto/diary.post.dto';
 import { QuestionShowDto } from '../dto/question.get.dto';
+
+interface DiaryWithAnswerCount extends Diary {
+  answerCount: number;
+}
 
 @Injectable()
 export class DiaryRepository {
@@ -69,18 +73,36 @@ export class DiaryRepository {
       .exec());
   }
 
-  async findDiaryWithoutAnswers(diaryId: string) {
+  async findDiaryWithoutAnswers(
+    diaryId: string,
+    start: number,
+    end: number,
+  ): Promise<DiaryWithAnswerCount> {
     try {
-      return await this.diaryModel
-        .findOne(
-          { _id: diaryId },
+      return (
+        await this.diaryModel.aggregate([
+          { $match: { _id: new mongoose.Types.ObjectId(diaryId) } },
           {
-            'answerList.answers': 0,
+            $project: {
+              _id: 1,
+              questioner: 1,
+              answerList: {
+                $map: {
+                  input: { $slice: ['$answerList', start, end] },
+                  as: 'answer',
+                  in: {
+                    _id: '$$answer._id',
+                    answerer: '$$answer.answerer',
+                    createdAt: '$$answer.createdAt',
+                    updatedAt: '$$answer.updatedAt',
+                  },
+                },
+              },
+              answerCount: { $size: '$answerList' },
+            },
           },
-        )
-        .lean()
-        .orFail()
-        .exec();
+        ])
+      )[0];
     } catch (err) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
@@ -194,5 +216,23 @@ export class DiaryRepository {
         $set: { ...body, answerList: [] },
       },
     );
+  }
+
+  async getAnswererCount(diaryId: string) {
+    return (
+      await this.diaryModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(diaryId),
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            answerCount: { $size: '$answerList' },
+          },
+        },
+      ])
+    )[0];
   }
 }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -30,6 +30,14 @@ describe('DiaryController (e2e)', () => {
     }).compile();
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    );
     await app.init();
   });
 
@@ -266,7 +274,7 @@ describe('DiaryController (e2e)', () => {
          * answerer 정보 요청
          */
         result = await request(app.getHttpServer()).get(
-          `/diary/answerers/${diaryId}`,
+          `/diary/answerers/${diaryId}?start=0&take=5`,
         );
         resultJson = JSON.parse(result.text);
       });
@@ -294,7 +302,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answerers/${diaryId}`)
+          .get(`/diary/answerers/${diaryId}?start=0&take=5`)
           .set('Cookie', [`diaryUser=${clientId1}`]);
         resultJson = JSON.parse(result.text);
       });
@@ -318,7 +326,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answerers/${diaryId}`)
+          .get(`/diary/answerers/${diaryId}?start=0&take=5`)
           .set('Cookie', [`diaryUser=${diaryId}`]);
         resultJson = JSON.parse(result.text);
       });
