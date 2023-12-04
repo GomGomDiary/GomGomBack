@@ -53,33 +53,7 @@ export class IsStartMultipleofFive implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'must be a multiple of 5.';
-  }
-}
-
-@ValidatorConstraint({ name: 'IsEndMultipleOfFive', async: false })
-export class IsEndMultipleofFive implements ValidatorConstraintInterface {
-  validate(end: number, args: ValidationArguments) {
-    console.log(end, typeof end);
-    return end % 5 === 0 && end !== 0;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return 'must be a multiple of 5 and not 0.';
-  }
-}
-
-@ValidatorConstraint({ async: false })
-export class IsGraterThanStart implements ValidatorConstraintInterface {
-  validate(end: number, args: ValidationArguments) {
-    const object = args.object as PaginateAnswererDto;
-    console.log(object);
-    console.log(end);
-    return end % 5 === 0 && end !== 0;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return 'must be a multiple of 5 and not 0.';
+    return 'start must be a multiple of 5.';
   }
 }
 
@@ -90,7 +64,5 @@ export class PaginateAnswererDto {
 
   @IsNumber()
   @IsIn(DEFAULT_PAGINATE)
-  // @Validate(IsEndMultipleofFive)
-  // @Validate(IsGraterThanStart)
   take: number;
 }

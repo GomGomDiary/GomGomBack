@@ -104,7 +104,6 @@ export class DiaryRepository {
         ])
       )[0];
     } catch (err) {
-      console.log(err);
       throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
   }

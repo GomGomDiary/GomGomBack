@@ -43,9 +43,7 @@ import { DiaryTokenShowDto } from './dto/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_TTL } from 'src/utils/constants';
-import mongoose from 'mongoose';
 
-console.log(CACHE_TTL);
 @ApiTags('Diary')
 @Controller({
   version: '1',
