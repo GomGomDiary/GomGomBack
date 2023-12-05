@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CanActivate } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 

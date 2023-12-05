@@ -15,11 +15,10 @@ import { DiaryPostDto } from './dto/diary.post.dto';
 import { Cookie } from 'src/common/decorator/cookie.decorator';
 import { Response } from 'express';
 import { MongoDBIdPipe } from 'src/common/pipe/cookieObjectId.pipe';
-import { EmptyPipe } from 'src/common/pipe/empty.pipe';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { CountersignPostDto } from './dto/counstersign.post.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -41,8 +40,8 @@ import { ReturnValueToDto } from 'src/common/decorator/returnValueToDto';
 import { ChallengeShowDto } from './dto/challenge.res.dto';
 import { DiaryTokenShowDto } from './dto/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
-import { ConfigService } from '@nestjs/config';
 import { CACHE_TTL } from 'src/utils/constants';
+import { AnswerGuard } from 'src/auth/guards/cookie.guard';
 
 @ApiTags('Diary')
 @Controller({
@@ -53,7 +52,6 @@ export class DiaryController {
   constructor(
     private readonly diaryService: DiaryService,
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
   ) {}
 
   @ApiOperation({
@@ -81,10 +79,8 @@ export class DiaryController {
     description: '다이어리 업데이트를 요청하는 시그널을 보냅니다.',
   })
   @Post('updating-signal')
-  async postUpdatingSignal(
-    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) diaryId: string,
-  ) {
-    return this.diaryService.postUpdatingSignal(diaryId);
+  async postUpdatingSignal() {
+    return this.diaryService.postUpdatingSignal();
   }
 
   @ApiOperation({
@@ -188,6 +184,7 @@ export class DiaryController {
     name: 'diaryId',
     required: true,
   })
+  @UseGuards(AnswerGuard)
   @UseInterceptors(HttpCacheInterceptor)
   @CacheTTL(CACHE_TTL)
   @Get('answer/:diaryId/:answerId')
@@ -195,9 +192,8 @@ export class DiaryController {
   async getAnswer(
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
     @Param('answerId', MongoDBIdPipe) answerId: string,
-    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe) clientId: string,
   ) {
-    return this.diaryService.getAnswer({ diaryId, answerId, clientId });
+    return this.diaryService.getAnswer({ diaryId, answerId });
   }
 
   @ApiOperation({ summary: '답변 쓰기' })
