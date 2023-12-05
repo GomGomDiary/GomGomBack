@@ -438,8 +438,8 @@ describe('DiaryController (e2e)', () => {
           `/diary/answer/${diaryId}/${clientId1}`,
         );
       });
-      it('400을 반환한다.', async () => {
-        expect(result.statusCode).toBe(400);
+      it('401을 반환한다.', async () => {
+        expect(result.statusCode).toBe(401);
       });
     });
 

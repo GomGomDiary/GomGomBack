@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { DiaryRepository } from './repository/diary.repository';
 import { DiaryPostDto } from './dto/diary.post.dto';
@@ -149,17 +148,10 @@ export class DiaryService {
   async getAnswer({
     diaryId,
     answerId,
-    clientId,
   }: {
     diaryId: string;
     answerId: string;
-    clientId: string;
   }) {
-    // clientId !== diaryId && clientId !== answerId
-    if (clientId !== diaryId && clientId !== answerId) {
-      throw new UnauthorizedException('해당 Answer를 읽는데 권한이 없습니다.');
-    }
-
     const diary = await this.diaryRepository.findDiaryWithAnswerId(
       diaryId,
       answerId,
@@ -272,7 +264,7 @@ export class DiaryService {
     return await this.diaryRepository.findOne(diaryId);
   }
 
-  async postUpdatingSignal(diaryId) {
+  async postUpdatingSignal() {
     const keys = await this.cacheService.keys();
     // delete /v1/diary/:diaryId/*
     // for (const key of keys) {

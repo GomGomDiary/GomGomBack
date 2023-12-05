@@ -2,9 +2,10 @@ import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { DiaryModule } from 'src/diary/diary.module';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from 'src/config';
+import { AnswerGuard } from './guards/cookie.guard';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import config from 'src/config';
     }),
     forwardRef(() => DiaryModule),
   ],
-  providers: [AuthService, AuthGuard],
-  exports: [AuthService, AuthGuard],
+  providers: [AuthService, AuthGuard, AnswerGuard],
+  exports: [AuthService, AuthGuard, AnswerGuard],
 })
 export class AuthModule {}
