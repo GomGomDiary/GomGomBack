@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
@@ -6,6 +6,8 @@ import { MongoIdTransfrom } from 'src/common/decorator/mongoIdTransform.decorato
 import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
 import { PaginateAnswererDto } from 'src/diary/dto/answerer.get.dto';
 import { DiaryHistory } from 'src/entity/diaryHistory.schema';
+
+export class HistoryItemGetDto extends OmitType(DiaryHistory, ['updatedAt']) {}
 
 export class HistoryGetDto extends PickType(DiaryHistory, [
   '_id',
@@ -49,7 +51,6 @@ export class PaginateHistoryDto extends PickType(PaginateAnswererDto, [
   })
   @IsOptional()
   @MongoIdTransfrom({ toClassOnly: true })
-  // @MongoIdValidationTransfrom({ toClassOnly: true })
   next: Types.ObjectId | undefined;
 }
 

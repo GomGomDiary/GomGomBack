@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { HistoryRepository } from './repository/history.repository';
-import { DiaryIdDto } from './dto/diaryId.dto';
 import { ObjectId } from 'mongoose';
 import { PaginateHistoryDto } from './dto/history.get.dto';
 import { generatePaginationQuery } from 'src/utils/pagination';
+import { DiaryIdDto } from './dto/diaryId.dto';
 
 @Injectable()
 export class HistoryService {
@@ -27,5 +27,19 @@ export class HistoryService {
     };
 
     return result;
+  }
+
+  async findOne(diaryIdDto: DiaryIdDto, clientId: ObjectId) {
+    const diaryHistoryItem = await this.historyRepository.findOne(
+      diaryIdDto,
+      clientId,
+    );
+    if (!diaryHistoryItem) {
+      throw new NotFoundException(
+        `${clientId} 유저의 ${diaryIdDto.diaryId} history가 존재하지 않습니다`,
+      );
+    }
+
+    return diaryHistoryItem;
   }
 }
