@@ -3,7 +3,6 @@ import { Expose, Transform, Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { MongoIdTransfrom } from 'src/common/decorator/mongoIdTransform.decorator';
-import { MongoIdValidationTransfrom } from 'src/common/decorator/mongoIdValidationTransform.decorator';
 import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
 import { PaginateAnswererDto } from 'src/diary/dto/answerer.get.dto';
 import { DiaryHistory } from 'src/entity/diaryHistory.schema';
