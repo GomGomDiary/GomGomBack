@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import cookieParser from 'cookie-parser';
+import { setUp } from 'src/utils/setUp';
 
 const clientId1_Answer = {
   answers: ['name', 12, 'food', 'hobby'],
@@ -29,15 +29,7 @@ describe('DiaryController (e2e)', () => {
       ],
     }).compile();
     app = moduleFixture.createNestApplication();
-    app.use(cookieParser());
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    );
+    setUp(app);
     await app.init();
   });
 
@@ -54,7 +46,7 @@ describe('DiaryController (e2e)', () => {
        * question 1개를 만들게 됩됩니다.
        */
       newBieResponse = await request(app.getHttpServer())
-        .post('/diary/question')
+        .post('/v1/diary/question')
         .send({
           question: ['name', 'age', 'food', 'hobby'],
           questioner: 'first',
@@ -70,7 +62,7 @@ describe('DiaryController (e2e)', () => {
 
     it('ownership을 검증한다.', async () => {
       const result = await request(app.getHttpServer())
-        .get('/diary')
+        .get('/v1/diary')
         .set('Cookie', [`diaryUser=${diaryId}`]);
       expect(result.statusCode).toBe(200);
       expect(result.text).toEqual('true');
@@ -82,7 +74,7 @@ describe('DiaryController (e2e)', () => {
 
     it('cookie가 있는 경우 204를 반환한다.', async () => {
       const oldBieResponse = await request(app.getHttpServer())
-        .post('/diary/question')
+        .post('/v1/diary/question')
         .set('Cookie', [`diaryUser=${diaryId}`])
         .send({
           question: ['New name', 'New age', 'New food', 'Nwe hobby'],
@@ -109,7 +101,7 @@ describe('DiaryController (e2e)', () => {
        * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
-        .post('/diary/question')
+        .post('/v1/diary/question')
         .send({
           question: ['name', 'age', 'food', 'hobby'],
           questioner: 'first',
@@ -130,7 +122,7 @@ describe('DiaryController (e2e)', () => {
        * answerer 인증
        */
       const tokenResponse = await request(app.getHttpServer())
-        .post(`/diary/countersign/${diaryId}`)
+        .post(`/v1/diary/countersign/${diaryId}`)
         .send({
           countersign: 'first',
         });
@@ -144,7 +136,7 @@ describe('DiaryController (e2e)', () => {
        * answer 생성 with token
        */
       answererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send(clientId1_Answer);
 
@@ -165,7 +157,7 @@ describe('DiaryController (e2e)', () => {
 
     it('중복 답변의 경우 409를 반환한다.', async () => {
       const makeDuplicationAnswer = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${clientId1}`])
         .set('Authorization', `Bearer ${token}`)
         .send(clientId1_Answer);
@@ -174,7 +166,7 @@ describe('DiaryController (e2e)', () => {
 
     it('스스로에게 답변한 경우 400을 반환한다.', async () => {
       const selfResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Cookie', [`diaryUser=${diaryId}`])
         .set('Authorization', `Bearer ${token}`)
         .send(clientId1_Answer);
@@ -196,7 +188,7 @@ describe('DiaryController (e2e)', () => {
        * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
-        .post('/diary/question')
+        .post('/v1/diary/question')
         .send({
           question: ['name', 'age', 'food', 'hobby'],
           questioner: 'first',
@@ -217,7 +209,7 @@ describe('DiaryController (e2e)', () => {
        * answerer 인증
        */
       const tokenResponse = await request(app.getHttpServer())
-        .post(`/diary/countersign/${diaryId}`)
+        .post(`/v1/diary/countersign/${diaryId}`)
         .send({
           countersign: 'first',
         });
@@ -231,7 +223,7 @@ describe('DiaryController (e2e)', () => {
        * answer1 생성
        */
       const firstAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send(clientId1_Answer);
 
@@ -249,7 +241,7 @@ describe('DiaryController (e2e)', () => {
        * answer2 생성
        */
       const secondAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
           answers: ['name', 12, 'food', 'hobby'],
@@ -274,7 +266,7 @@ describe('DiaryController (e2e)', () => {
          * answerer 정보 요청
          */
         result = await request(app.getHttpServer()).get(
-          `/diary/answerers/${diaryId}?start=0&take=5`,
+          `/v1/diary/answerers/${diaryId}?start=0&take=5`,
         );
         resultJson = JSON.parse(result.text);
       });
@@ -302,7 +294,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answerers/${diaryId}?start=0&take=5`)
+          .get(`/v1/diary/answerers/${diaryId}?start=0&take=5`)
           .set('Cookie', [`diaryUser=${clientId1}`]);
         resultJson = JSON.parse(result.text);
       });
@@ -326,7 +318,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answerers/${diaryId}?start=0&take=5`)
+          .get(`/v1/diary/answerers/${diaryId}?start=0&take=5`)
           .set('Cookie', [`diaryUser=${diaryId}`]);
         resultJson = JSON.parse(result.text);
       });
@@ -360,7 +352,7 @@ describe('DiaryController (e2e)', () => {
        * question 생성
        */
       const newBieResponse = await request(app.getHttpServer())
-        .post('/diary/question')
+        .post('/v1/diary/question')
         .send({
           question: ['name', 'age', 'food', 'hobby'],
           questioner: 'first',
@@ -381,7 +373,7 @@ describe('DiaryController (e2e)', () => {
        * answerer 인증
        */
       const tokenResponse = await request(app.getHttpServer())
-        .post(`/diary/countersign/${diaryId}`)
+        .post(`/v1/diary/countersign/${diaryId}`)
         .send({
           countersign: 'first',
         });
@@ -395,7 +387,7 @@ describe('DiaryController (e2e)', () => {
        * answer1 생성
        */
       const firstAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send(clientId1_Answer);
 
@@ -413,7 +405,7 @@ describe('DiaryController (e2e)', () => {
        * answer2 생성
        */
       const secondAnswererResponse = await request(app.getHttpServer())
-        .post(`/diary/answer/${diaryId}`)
+        .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
           answers: ['name', 12, 'food', 'hobby'],
@@ -435,7 +427,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer()).get(
-          `/diary/answer/${diaryId}/${clientId1}`,
+          `/v1/diary/answer/${diaryId}/${clientId1}`,
         );
       });
       it('401을 반환한다.', async () => {
@@ -448,7 +440,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answer/${diaryId}/${clientId1}`)
+          .get(`/v1/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${diaryId}`]);
         resultJson = JSON.parse(result.text);
       });
@@ -467,7 +459,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answer/${diaryId}/${clientId1}`)
+          .get(`/v1/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${clientId2}`]);
       });
 
@@ -481,7 +473,7 @@ describe('DiaryController (e2e)', () => {
 
       beforeEach(async () => {
         result = await request(app.getHttpServer())
-          .get(`/diary/answer/${diaryId}/${clientId1}`)
+          .get(`/v1/diary/answer/${diaryId}/${clientId1}`)
           .set('Cookie', [`diaryUser=${clientId1}`]);
         resultJson = JSON.parse(result.text);
       });
