@@ -4,6 +4,8 @@ import { SchemaOptions, Document, Types } from 'mongoose';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
+import { KOREAN_TIME_DIFF } from 'src/utils/constants';
+import { toKoreaTime } from 'src/utils/toKoreaTime';
 
 const options: SchemaOptions = {
   timestamps: true,
@@ -17,7 +19,7 @@ export class Answer {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString({ toPlainOnly: true })
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
   @Transform((value) => value.obj._id, { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
@@ -44,12 +46,18 @@ export class Answer {
   @Expose()
   answers: string[];
 
+  @ApiProperty({
+    example: '2022-01-01T00:00:00.000',
+    description: 'createdAt',
+  })
   @Prop()
   @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   createdAt: Date;
 
   @Prop()
   @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   updatedAt: Date;
 }
 
@@ -65,7 +73,7 @@ export class Diary {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString({ toPlainOnly: true })
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
   @Transform((value) => value.obj._id, { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
@@ -142,6 +150,16 @@ export class Diary {
   @Type(() => Answer)
   @Expose()
   answerList: Answer[];
+
+  @Prop()
+  @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  createdAt: Date;
+
+  @Prop()
+  @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  updatedAt: Date;
 }
 
 export const DiarySchema = SchemaFactory.createForClass(Diary);

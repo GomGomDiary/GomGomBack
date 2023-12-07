@@ -37,10 +37,12 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      // whitelist: true,
     }),
   );
   app.enableVersioning({
     type: VersioningType.URI,
+    defaultVersion: '1',
   });
   app.enableCors({
     origin: [domainUrl],

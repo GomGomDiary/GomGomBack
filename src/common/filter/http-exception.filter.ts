@@ -7,6 +7,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { toKoreaTime } from 'src/utils/toKoreaTime';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,7 +19,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const logger = new Logger();
     const error = exception.getResponse();
     const now = new Date();
-    const koreaTimeDiff = 9 * 60 * 60 * 1000;
 
     let user = request.cookies.diaryUser;
     if (process.env.NODE_ENV === 'production') {
@@ -35,9 +35,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: status,
         error,
         timestampUtc: now.toISOString().replace('Z', ''),
-        timestampKst: new Date(now.getTime() + koreaTimeDiff)
-          .toISOString()
-          .replace('Z', ''),
+        timestampKst: toKoreaTime(now),
         path: request.url,
       });
     }
@@ -46,9 +44,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       ...error,
       timestampUtc: now.toISOString().replace('Z', ''),
-      timestampKst: new Date(now.getTime() + koreaTimeDiff)
-        .toISOString()
-        .replace('Z', ''),
+      timestampKst: toKoreaTime(now),
       path: request.url,
     });
   }

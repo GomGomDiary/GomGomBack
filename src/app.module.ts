@@ -8,6 +8,7 @@ import config from './config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     DiaryModule,
     AuthModule,
     CacheModule.register({}),
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

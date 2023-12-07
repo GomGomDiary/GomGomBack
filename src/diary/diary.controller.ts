@@ -45,7 +45,6 @@ import { AnswerGuard } from 'src/auth/guards/cookie.guard';
 
 @ApiTags('Diary')
 @Controller({
-  version: '1',
   path: 'diary',
 })
 export class DiaryController {

@@ -40,8 +40,17 @@ import { CacheRepository } from './repository/cache.repository';
               .lean<Diary>()
               .exec();
             const diaryId = retentionDiary._id;
+
+            retentionDiary.createdAt = retentionDiary.updatedAt;
+            const numberOfAnswerers = retentionDiary.answerList.length;
+            delete retentionDiary.updatedAt;
             delete retentionDiary._id;
-            await diaryHistoryModel.create({ ...retentionDiary, diaryId });
+
+            await diaryHistoryModel.create({
+              ...retentionDiary,
+              diaryId,
+              numberOfAnswerers,
+            });
           });
           return schema;
         },
