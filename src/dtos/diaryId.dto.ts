@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { MongoIdTransfrom } from 'src/common/decorator/mongoIdTransform.decorator';
+import { MongoIdTransfrom } from 'src/common/decorators/mongoIdTransform.decorator';
 
 export class DiaryIdDto {
   constructor(diaryId: string | Types.ObjectId) {

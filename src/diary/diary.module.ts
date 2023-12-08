@@ -7,11 +7,11 @@ import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { Diary, DiarySchema } from 'src/entity/diary.schema';
+import { Diary, DiarySchema } from 'src/entities/diary.schema';
 import {
   DiaryHistorySchema,
   DiaryHistory,
-} from 'src/entity/diaryHistory.schema';
+} from 'src/entities/diaryHistory.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from './repository/cache.repository';
 

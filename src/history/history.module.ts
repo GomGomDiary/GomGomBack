@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { HistoryController } from './history.controller';
 import { HistoryService } from './history.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiaryHistory } from 'src/entity/diaryHistory.schema';
+import { DiaryHistory } from 'src/entities/diaryHistory.schema';
 import { HistoryRepository } from './repository/history.repository';
 
 @Module({

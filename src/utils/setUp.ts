@@ -8,7 +8,7 @@ import { INestApplication } from '@nestjs/common/interfaces/nest-application.int
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
+import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import basicAuth from 'express-basic-auth';
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

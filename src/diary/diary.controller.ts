@@ -11,13 +11,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
-import { DiaryPostDto } from '../dto/diary.post.dto';
-import { Cookie } from 'src/common/decorator/cookie.decorator';
+import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { Response } from 'express';
-import { MongoDBIdPipe } from 'src/common/pipe/cookieObjectId.pipe';
-import { AnswerPostDto } from '../dto/answer.post.dto';
+import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
+import { AnswerPostDto } from '../dtos/answer.post.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { CountersignPostDto } from '../dto/counstersign.post.dto';
+import { CountersignPostDto } from '../dtos/counstersign.post.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import {
   ApiBadRequestResponse,
@@ -33,16 +33,16 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { QuestionShowDto } from '../dto/question.get.dto';
-import { AnswererGetDto, PaginateAnswererDto } from '../dto/answerer.get.dto';
-import { AnswerGetDto } from '../dto/answer.get.dto';
-import { ReturnValueToDto } from 'src/common/decorator/returnValueToDto';
-import { ChallengeShowDto } from '../dto/challenge.res.dto';
-import { DiaryTokenShowDto } from '../dto/countersign.res.dto';
-import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
+import { QuestionShowDto } from '../dtos/question.get.dto';
+import { AnswererGetDto, PaginateAnswererDto } from '../dtos/answerer.get.dto';
+import { AnswerGetDto } from '../dtos/answer.get.dto';
+import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
+import { ChallengeShowDto } from '../dtos/challenge.res.dto';
+import { DiaryTokenShowDto } from '../dtos/countersign.res.dto';
+import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { DiaryIdDto } from 'src/dto/diaryId.dto';
+import { DiaryIdDto } from 'src/dtos/diaryId.dto';
 
 @ApiTags('Diary')
 @Controller({

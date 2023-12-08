@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { SchemaOptions, Document, Types } from 'mongoose';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { KOREAN_TIME_DIFF } from 'src/utils/constants';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
 

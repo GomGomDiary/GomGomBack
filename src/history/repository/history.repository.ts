@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { DiaryHistory } from 'src/entity/diaryHistory.schema';
-import { HistoryGetDto } from '../../dto/history.get.dto';
-import { DiaryIdDto } from '../../dto/diaryId.dto';
+import { DiaryHistory } from 'src/entities/diaryHistory.schema';
+import { HistoryGetDto } from '../../dtos/history.get.dto';
+import { DiaryIdDto } from '../../dtos/diaryId.dto';
 
 @Injectable()
 export class HistoryRepository {

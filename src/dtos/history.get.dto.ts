@@ -2,10 +2,10 @@ import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
-import { MongoIdTransfrom } from 'src/common/decorator/mongoIdTransform.decorator';
-import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
-import { PaginateAnswererDto } from 'src/dto/answerer.get.dto';
-import { DiaryHistory } from 'src/entity/diaryHistory.schema';
+import { MongoIdTransfrom } from 'src/common/decorators/mongoIdTransform.decorator';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
+import { PaginateAnswererDto } from 'src/dtos/answerer.get.dto';
+import { DiaryHistory } from 'src/entities/diaryHistory.schema';
 
 export class HistoryItemGetDto extends OmitType(DiaryHistory, ['updatedAt']) {}
 

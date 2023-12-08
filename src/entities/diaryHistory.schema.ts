@@ -3,7 +3,7 @@ import { Diary } from './diary.schema';
 import { Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
-import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 
 @Schema()
 export class DiaryHistory extends Diary {
