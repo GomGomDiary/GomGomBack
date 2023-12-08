@@ -38,11 +38,15 @@ export class DiaryRepository {
     }
   }
 
-  async checkOwnership(id: string) {
-    if (!id) {
-      return false;
-    }
-    return !!(await this.diaryModel.exists({ _id: id }).lean().exec());
+  async checkOwnership(clientId: string) {
+    return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
+  }
+
+  async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
+    return !!(await this.diaryModel
+      .exists({ _id: diaryId, 'answerList._id': clientId })
+      .lean()
+      .exec());
   }
 
   async create(diary: DiaryPostDto) {

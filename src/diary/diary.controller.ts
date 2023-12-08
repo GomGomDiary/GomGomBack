@@ -42,6 +42,7 @@ import { DiaryTokenShowDto } from './dto/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptor/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
+import { DiaryIdDto } from 'src/history/dto/diaryId.dto';
 
 @ApiTags('Diary')
 @Controller({
@@ -67,10 +68,30 @@ export class DiaryController {
     description: 'cookie의 diaryId가 적절하지 않을 경우 400을 응답합니다.',
   })
   @Get('')
-  async checkDiaryOwnership(
-    @Cookie('diaryUser', MongoDBIdPipe) diaryId: string,
+  async isQuestioner(@Cookie('diaryUser', MongoDBIdPipe) clientId: string) {
+    return this.diaryService.checkDiaryOwnership(clientId);
+  }
+
+  @ApiOperation({
+    summary: '답변 존재 여부 확인',
+    description: '해당 Cookie를 가진 답변이 존재하는지 확인합니다.',
+  })
+  @ApiOkResponse({
+    description: '성공 시 200을 응답합니다.',
+    schema: {
+      example: true,
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'cookie의 diaryId가 적절하지 않을 경우 400을 응답합니다.',
+  })
+  @ApiParam({ name: 'diaryId', type: String })
+  @Get(':diaryId')
+  async isAnswerer(
+    @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
+    @Param() diaryIdDto: DiaryIdDto,
   ) {
-    return this.diaryService.checkDiaryOwnership(diaryId);
+    return this.diaryService.checkAnswerer(clientId, diaryIdDto);
   }
 
   @ApiOperation({

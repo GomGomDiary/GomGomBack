@@ -13,8 +13,9 @@ import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from './dto/answer.post.dto';
 import { Answer } from '../entity/diary.schema';
 import { QuestionShowDto } from './dto/question.get.dto';
-import { ANSWER, ANSWERERS, DEFAULT_PAGINATE } from 'src/utils/constants';
+import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from './repository/cache.repository';
+import { DiaryIdDto } from 'src/history/dto/diaryId.dto';
 
 @Injectable()
 export class DiaryService {
@@ -82,8 +83,18 @@ export class DiaryService {
     });
   }
 
-  async checkDiaryOwnership(diaryId: string) {
-    return this.diaryRepository.checkOwnership(diaryId);
+  async checkDiaryOwnership(clientId: string) {
+    if (!clientId) {
+      return false;
+    }
+    return this.diaryRepository.checkOwnership(clientId);
+  }
+
+  async checkAnswerer(clientId: string, diaryIdDto: DiaryIdDto) {
+    if (!clientId) {
+      return false;
+    }
+    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
   }
 
   async getQuestion(diaryId: string): Promise<QuestionShowDto> {
