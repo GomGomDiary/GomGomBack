@@ -6,8 +6,8 @@ import {
 import { Diary, DiaryDocumentType } from '../../entity/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { DiaryPostDto } from '../dto/diary.post.dto';
-import { QuestionShowDto } from '../dto/question.get.dto';
+import { DiaryPostDto } from '../../dto/diary.post.dto';
+import { QuestionShowDto } from '../../dto/question.get.dto';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;

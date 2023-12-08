@@ -4,7 +4,7 @@ import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { MongoIdTransfrom } from 'src/common/decorator/mongoIdTransform.decorator';
 import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
-import { PaginateAnswererDto } from 'src/diary/dto/answerer.get.dto';
+import { PaginateAnswererDto } from 'src/dto/answerer.get.dto';
 import { DiaryHistory } from 'src/entity/diaryHistory.schema';
 
 export class HistoryItemGetDto extends OmitType(DiaryHistory, ['updatedAt']) {}
