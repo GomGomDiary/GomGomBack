@@ -27,7 +27,10 @@ export class HistoryRepository {
   async findOne(diaryIdDto: DiaryIdDto, clientId: ObjectId) {
     try {
       return await this.histoyModel
-        .findOne({ _id: diaryIdDto.diaryId, diaryId: clientId })
+        .findOne(
+          { _id: diaryIdDto.diaryId, diaryId: clientId },
+          { answerList: { $slice: [0, 5] } },
+        )
         .lean<DiaryHistory>()
         .exec();
     } catch (err) {
