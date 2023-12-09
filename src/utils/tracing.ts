@@ -14,8 +14,8 @@ import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import dotenv from 'dotenv';
 
-// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 dotenv.config({
   path: `.env.${process.env.NODE_ENV}`,
@@ -24,8 +24,6 @@ dotenv.config({
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
 });
-
-console.log(process.env.HONEYCOMB_API_KEY);
 
 const oltpExporter = new OTLPTraceExporter({
   url: `https://api.honeycomb.io/v1/traces`,
