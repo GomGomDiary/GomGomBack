@@ -25,6 +25,8 @@ const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
 });
 
+console.log(process.env.HONEYCOMB_API_KEY);
+
 const oltpExporter = new OTLPTraceExporter({
   url: `https://api.honeycomb.io/v1/traces`,
   headers: {
