@@ -5,13 +5,10 @@ import { AppModule } from '../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { setUp } from 'src/utils/setUp';
+import { clientId1_Answer, diaryData } from './utils/constants';
+import { createDiary } from './utils/createDiary';
 
-const clientId1_Answer = {
-  answers: ['name', 12, 'food', 'hobby'],
-  answerer: 'client1',
-};
-
-describe('DiaryController (e2e)', () => {
+describe('Diary Controller (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -37,23 +34,18 @@ describe('DiaryController (e2e)', () => {
     await app.close();
   });
 
-  describe('/diary', () => {
-    let diaryId, newBieResponse;
+  describe('(GET) /diary - 다이어리 존재 여부 확인', () => {
+    let diaryId: string, newBieResponse: request.Response;
 
     beforeEach(async () => {
       /**
        * 해당 beforeEach 실행 시
        * question 1개를 만들게 됩됩니다.
        */
-      newBieResponse = await request(app.getHttpServer())
-        .post('/v1/diary/question')
-        .send({
-          question: ['name', 'age', 'food', 'hobby'],
-          questioner: 'first',
-          challenge: 'first',
-          countersign: 'first',
-        });
+      newBieResponse = await createDiary(app, diaryData);
+
       const cookie = newBieResponse.header['set-cookie'][0];
+
       diaryId = cookie
         .match(/diaryUser=.+?;/)[0]
         .slice('diaryUser='.length)
@@ -87,7 +79,7 @@ describe('DiaryController (e2e)', () => {
     });
   });
 
-  describe('/diary/answer/:diaryId', () => {
+  describe('(POST) /diary/answer/:diaryId - 답변 쓰기', () => {
     let diaryId, clientId1, answererResponse, token;
 
     beforeEach(async () => {
@@ -100,15 +92,7 @@ describe('DiaryController (e2e)', () => {
       /**
        * question 생성
        */
-      const newBieResponse = await request(app.getHttpServer())
-        .post('/v1/diary/question')
-        .send({
-          question: ['name', 'age', 'food', 'hobby'],
-          questioner: 'first',
-          challenge: 'first',
-          countersign: 'first',
-        });
-
+      const newBieResponse = await createDiary(app, diaryData);
       /**
        * diaryId cookie 파싱
        */
@@ -174,7 +158,7 @@ describe('DiaryController (e2e)', () => {
     });
   });
 
-  describe('/diary/answerers/:diaryId', () => {
+  describe('(GET) /diary/answerers/:diaryId - 답변자 보기', () => {
     let diaryId, clientId1, clientId2, token;
 
     beforeEach(async () => {
@@ -187,14 +171,7 @@ describe('DiaryController (e2e)', () => {
       /**
        * question 생성
        */
-      const newBieResponse = await request(app.getHttpServer())
-        .post('/v1/diary/question')
-        .send({
-          question: ['name', 'age', 'food', 'hobby'],
-          questioner: 'first',
-          challenge: 'first',
-          countersign: 'first',
-        });
+      const newBieResponse = await createDiary(app, diaryData);
 
       /**
        * diaryId 파싱
@@ -338,7 +315,7 @@ describe('DiaryController (e2e)', () => {
     });
   });
 
-  describe('/diary/answer/:diaryId/:answerId (GET)', () => {
+  describe('(GET) /diary/answer/:diaryId/:answerId - 질문 보기', () => {
     let diaryId, clientId1, clientId2, token;
 
     beforeEach(async () => {
@@ -353,12 +330,7 @@ describe('DiaryController (e2e)', () => {
        */
       const newBieResponse = await request(app.getHttpServer())
         .post('/v1/diary/question')
-        .send({
-          question: ['name', 'age', 'food', 'hobby'],
-          questioner: 'first',
-          challenge: 'first',
-          countersign: 'first',
-        });
+        .send(diaryData);
 
       /**
        * diaryId 파싱
@@ -491,6 +463,29 @@ describe('DiaryController (e2e)', () => {
           clientId1_Answer.answers,
         );
       });
+    });
+  });
+
+  describe('(POST) /diary/countersign/:diaryId - counstersign 검증', () => {
+    let result: request.Response;
+    let diaryId: string;
+    beforeEach(async () => {
+      result = await createDiary(app, diaryData);
+
+      const diaryIdCookie = result.header['set-cookie'][0];
+      diaryId = diaryIdCookie
+        .match(/diaryUser=.+?;/)[0]
+        .slice('diaryUser='.length)
+        .replace(/;/g, '');
+    });
+
+    it('201을 반환한다.', async () => {
+      const result = await request(app.getHttpServer())
+        .post(`/v1/diary/countersign/${diaryId}`)
+        .send({ countersign: 'first' });
+
+      expect(result.statusCode).toBe(201);
+      expect(result.body.diaryToken).toBeDefined();
     });
   });
 });
