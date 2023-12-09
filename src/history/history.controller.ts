@@ -11,7 +11,7 @@ import {
 } from '../common/dtos/history.get.dto';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
 import { ObjectId } from 'mongoose';
-import { DiaryIdDto } from '../common/dtos/diaryId.dto';
+import { HistoryIdDto } from '../common/dtos/historyId.dto';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
@@ -79,16 +79,16 @@ export class HistoryController {
     description: 'history가 존재하지 않을 때 404를 응답합니다.',
   })
   @ApiParam({
-    name: 'diaryId',
+    name: 'historyId',
     required: true,
   })
-  @Get(':diaryId')
+  @Get(':historyId')
   @ReturnValueToDto(HistoryItemGetDto)
   async findOne(
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
     clientId: ObjectId,
-    @Param() diaryIdDto: DiaryIdDto,
+    @Param() historyIdDto: HistoryIdDto,
   ) {
-    return this.historyService.findOne(diaryIdDto, clientId);
+    return this.historyService.findOne(historyIdDto, clientId);
   }
 }

@@ -45,7 +45,7 @@ import { DiaryTokenShowDto } from '../common/dtos/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
+import { HistoryIdDto } from 'src/common/dtos/historyId.dto';
 
 @ApiTags('Diary')
 @Controller({
@@ -93,7 +93,7 @@ export class DiaryController {
   @Get(':diaryId')
   async isAnswerer(
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-    @Param() diaryIdDto: DiaryIdDto,
+    @Param() diaryIdDto: HistoryIdDto,
   ) {
     return this.diaryService.checkAnswerer(clientId, diaryIdDto);
   }

@@ -3,7 +3,7 @@ import { HistoryRepository } from '../common/repositories/history.repository';
 import { ObjectId } from 'mongoose';
 import { PaginateHistoryDto } from '../common/dtos/history.get.dto';
 import { generatePaginationQuery } from 'src/utils/pagination';
-import { DiaryIdDto } from '../common/dtos/diaryId.dto';
+import { HistoryIdDto } from '../common/dtos/historyId.dto';
 
 @Injectable()
 export class HistoryService {
@@ -29,14 +29,14 @@ export class HistoryService {
     return result;
   }
 
-  async findOne(diaryIdDto: DiaryIdDto, clientId: ObjectId) {
+  async findOne(historyIdDto: HistoryIdDto, clientId: ObjectId) {
     const diaryHistoryItem = await this.historyRepository.findOne(
-      diaryIdDto,
+      historyIdDto,
       clientId,
     );
     if (!diaryHistoryItem) {
       throw new NotFoundException(
-        `${clientId} 유저의 ${diaryIdDto.diaryId} history가 존재하지 않습니다`,
+        `${clientId} 유저의 ${historyIdDto.historyId} history가 존재하지 않습니다`,
       );
     }
 
