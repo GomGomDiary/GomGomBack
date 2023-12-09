@@ -16,7 +16,7 @@ import { Answer } from '../models/diary.schema';
 import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
+import { HistoryIdDto } from 'src/common/dtos/historyId.dto';
 
 @Injectable()
 export class DiaryService {
@@ -91,11 +91,11 @@ export class DiaryService {
     return this.diaryRepository.checkOwnership(clientId);
   }
 
-  async checkAnswerer(clientId: string, diaryIdDto: DiaryIdDto) {
+  async checkAnswerer(clientId: string, diaryIdDto: HistoryIdDto) {
     if (!clientId) {
       return false;
     }
-    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
+    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.historyId);
   }
 
   async getQuestion(diaryId: string): Promise<QuestionShowDto> {
