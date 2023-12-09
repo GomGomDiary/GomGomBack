@@ -1,6 +1,5 @@
 import {
   ClassSerializerInterceptor,
-  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -15,15 +14,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setUp(app: INestApplication) {
   const configService = app.get(ConfigService);
-
-  const port = configService.get<number>('PORT');
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   const env = configService.get<string>('NODE_ENV');
   const swaggerName = configService.get<string>('SWAGGER_USER');
   const swaggerPassword = configService.get<string>('SWAGGER_PASSWORD');
   const domainUrl = configService.get<string>('DOMAIN_URL');
-
-  const logger = new Logger();
 
   if (env === 'development') mongoose.set('debug', true);
   if (env === 'production') app.enableShutdownHooks();
@@ -78,6 +73,4 @@ export function setUp(app: INestApplication) {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-
-  logger.log(`Listening on PORT: ${port}`);
 }
