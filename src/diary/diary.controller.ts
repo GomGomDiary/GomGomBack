@@ -50,6 +50,7 @@ import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 @ApiTags('Diary')
 @Controller({
   path: 'diary',
+  version: '1',
 })
 export class DiaryController {
   constructor(
