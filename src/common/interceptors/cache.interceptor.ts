@@ -1,13 +1,12 @@
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
-  CacheInterceptor,
+  // CacheInterceptor,
   CallHandler,
   ExecutionContext,
   Injectable,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { Observable, tap } from 'rxjs';
-// import { ANSWERERS, QUESTION } from 'src/utils/constants';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class HttpCacheInterceptor extends CacheInterceptor {
@@ -25,12 +24,6 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Promise<Observable<any>> {
-    // const req = context.switchToHttp().getRequest<Request>();
-    //
-    // if (this.CACHE_EVICT_METHODS.includes(req.method)) {
-    //   return next.handle().pipe(tap(() => this.cacheManager.del(req.path)));
-    // }
-
     return super.intercept(context, next);
   }
 }

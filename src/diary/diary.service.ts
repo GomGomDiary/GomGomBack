@@ -1,20 +1,22 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DiaryRepository } from './repository/diary.repository';
-import { DiaryPostDto } from './dto/diary.post.dto';
+import { DiaryRepository } from '../common/repositories/diary.repository';
+import { DiaryPostDto } from '../common/dtos/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { AnswerPostDto } from './dto/answer.post.dto';
-import { Answer } from '../entity/diary.schema';
-import { QuestionShowDto } from './dto/question.get.dto';
-import { ANSWER, ANSWERERS, DEFAULT_PAGINATE } from 'src/utils/constants';
-import { CacheRepository } from './repository/cache.repository';
+import { AnswerPostDto } from '../common/dtos/answer.post.dto';
+import { Answer } from '../models/diary.schema';
+import { QuestionShowDto } from '../common/dtos/question.get.dto';
+import { ANSWERERS } from 'src/utils/constants';
+import { CacheRepository } from '../common/repositories/cache.repository';
+import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 
 @Injectable()
 export class DiaryService {
@@ -82,8 +84,18 @@ export class DiaryService {
     });
   }
 
-  async checkDiaryOwnership(diaryId: string) {
-    return this.diaryRepository.checkOwnership(diaryId);
+  async checkDiaryOwnership(clientId: string) {
+    if (!clientId) {
+      return false;
+    }
+    return this.diaryRepository.checkOwnership(clientId);
+  }
+
+  async checkAnswerer(clientId: string, diaryIdDto: DiaryIdDto) {
+    if (!clientId) {
+      return false;
+    }
+    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
   }
 
   async getQuestion(diaryId: string): Promise<QuestionShowDto> {
@@ -208,7 +220,7 @@ export class DiaryService {
       clientId,
     );
     if (isDuplication) {
-      throw new HttpException('답변을 이미 작성했습니다.', 409);
+      throw new ConflictException('답변을 이미 작성했습니다.');
     }
 
     let id: mongoose.Types.ObjectId;
@@ -252,7 +264,6 @@ export class DiaryService {
     const keys = await this.cacheService.keys();
     const promises = [];
     for (const key of keys) {
-      console.log(key);
       if (key.includes(`${ANSWERERS}/${diaryId}`)) {
         promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
       }
@@ -266,16 +277,6 @@ export class DiaryService {
 
   async postUpdatingSignal() {
     const keys = await this.cacheService.keys();
-    // delete /v1/diary/:diaryId/*
-    // for (const key of keys) {
-    // 	if (key.includes(`/v1/diary/${diaryId}`)) {
-    // 		await this.cacheService.del(key);
-    // 	}
-    // }
-
     return keys;
-  }
-  async getUpdatingSignal(diaryId) {
-    return '1234';
   }
 }

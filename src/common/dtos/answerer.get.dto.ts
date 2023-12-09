@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Answer, Diary } from '../../entity/diary.schema';
+import { Answer, Diary } from '../../models/diary.schema';
 import { Expose, Type } from 'class-transformer';
 import {
   IsIn,

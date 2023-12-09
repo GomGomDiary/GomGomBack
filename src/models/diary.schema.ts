@@ -1,9 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { SchemaOptions, Document, Types } from 'mongoose';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  Length,
+} from 'class-validator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { TransformObjectIdToString } from 'src/common/decorator/transformObjectIdToString.decorator';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
+import { toKoreaTime } from 'src/utils/toKoreaTime';
 
 const options: SchemaOptions = {
   timestamps: true,
@@ -17,7 +25,7 @@ export class Answer {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString({ toPlainOnly: true })
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
   @Transform((value) => value.obj._id, { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
@@ -29,6 +37,7 @@ export class Answer {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 10)
   @Prop()
   @Expose()
   answerer: string;
@@ -40,16 +49,26 @@ export class Answer {
   })
   @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(5)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
   @Prop()
   @Expose()
   answers: string[];
 
+  @ApiProperty({
+    example: '2022-01-01T00:00:00.000',
+    description: 'createdAt',
+  })
   @Prop()
   @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   createdAt: Date;
 
   @Prop()
   @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   updatedAt: Date;
 }
 
@@ -65,7 +84,7 @@ export class Diary {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString({ toPlainOnly: true })
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
   @Transform((value) => value.obj._id, { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
@@ -77,6 +96,10 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(5)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
   @Prop()
   @Expose()
   question: string[];
@@ -88,6 +111,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 10)
   @Prop({
     required: true,
   })
@@ -101,6 +125,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 50)
   @Prop()
   @Expose()
   challenge: string;
@@ -112,6 +137,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 50)
   @Prop()
   @Exclude({ toPlainOnly: true })
   countersign: string;
@@ -123,14 +149,12 @@ export class Diary {
         _id: '654ba13be9664d0e9b7a82fa',
         createdAt: '2023-11-08T14:54:51.929Z',
         updatedAt: '2023-11-08T14:54:51.929Z',
-        isPermission: false,
       },
       {
         answerer: 'metamong',
         _id: '654ba1a2e9664d0e9b7a8304',
         createdAt: '2023-11-08T14:56:34.596Z',
         updatedAt: '2023-11-08T14:56:34.596Z',
-        isPermission: false,
       },
     ],
     description: 'answerList',
@@ -142,6 +166,16 @@ export class Diary {
   @Type(() => Answer)
   @Expose()
   answerList: Answer[];
+
+  @Prop()
+  @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  createdAt: Date;
+
+  @Prop()
+  @Expose()
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  updatedAt: Date;
 }
 
 export const DiarySchema = SchemaFactory.createForClass(Diary);

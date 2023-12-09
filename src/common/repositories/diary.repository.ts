@@ -3,11 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Diary, DiaryDocumentType } from '../../entity/diary.schema';
+import { Diary, DiaryDocumentType } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { DiaryPostDto } from '../dto/diary.post.dto';
-import { QuestionShowDto } from '../dto/question.get.dto';
+import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { QuestionShowDto } from '../dtos/question.get.dto';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
@@ -38,11 +38,15 @@ export class DiaryRepository {
     }
   }
 
-  async checkOwnership(id: string) {
-    if (!id) {
-      return false;
-    }
-    return !!(await this.diaryModel.exists({ _id: id }).lean().exec());
+  async checkOwnership(clientId: string) {
+    return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
+  }
+
+  async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
+    return !!(await this.diaryModel
+      .exists({ _id: diaryId, 'answerList._id': clientId })
+      .lean()
+      .exec());
   }
 
   async create(diary: DiaryPostDto) {
@@ -191,7 +195,7 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean()
+        .lean<typeof field & { _id: mongoose.Types.ObjectId }>()
         .orFail()
         .exec();
     } catch (err) {

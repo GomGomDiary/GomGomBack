@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { DiaryRepository } from 'src/diary/repository/diary.repository';
+import { DiaryRepository } from 'src/common/repositories/diary.repository';
 
 @Injectable()
 export class AuthService {
