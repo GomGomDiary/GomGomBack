@@ -14,8 +14,8 @@ import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import dotenv from 'dotenv';
 
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 dotenv.config({
   path: `.env.${process.env.NODE_ENV}`,
@@ -34,7 +34,9 @@ const oltpExporter = new OTLPTraceExporter({
 
 // const traceExporter = jaegerExporter;
 const traceExporter =
-  process.env.NODE_ENV === 'production' ? jaegerExporter : oltpExporter;
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
+    ? oltpExporter
+    : jaegerExporter;
 
 const spanProcessor =
   process.env.NODE_ENV === `production` || process.env.NODE_ENV === `test`
