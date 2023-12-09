@@ -11,9 +11,15 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { MongooseInstrumentation } from 'opentelemetry-instrumentation-mongoose';
 
-// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import dotenv from 'dotenv';
+
+// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
+dotenv.config({
+  path: `.env.${process.env.NODE_ENV}`,
+});
 
 const jaegerExporter = new JaegerExporter({
   endpoint: process.env.JAEGER_ENDPOINT,
