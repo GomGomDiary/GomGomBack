@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { HistoryRepository } from './repository/history.repository';
+import { HistoryRepository } from '../common/repositories/history.repository';
 import { ObjectId } from 'mongoose';
-import { PaginateHistoryDto } from '../dtos/history.get.dto';
+import { PaginateHistoryDto } from '../common/dtos/history.get.dto';
 import { generatePaginationQuery } from 'src/utils/pagination';
-import { DiaryIdDto } from '../dtos/diaryId.dto';
+import { DiaryIdDto } from '../common/dtos/diaryId.dto';
 
 @Injectable()
 export class HistoryService {

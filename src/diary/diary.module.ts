@@ -2,18 +2,18 @@ import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
 import { MongooseModule, getModelToken } from '@nestjs/mongoose';
-import { DiaryRepository } from './repository/diary.repository';
+import { DiaryRepository } from '../common/repositories/diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { Diary, DiarySchema } from 'src/entities/diary.schema';
+import { Diary, DiarySchema } from 'src/models/diary.schema';
 import {
   DiaryHistorySchema,
   DiaryHistory,
-} from 'src/entities/diaryHistory.schema';
+} from 'src/models/diaryHistory.schema';
 import { CacheModule } from '@nestjs/cache-manager';
-import { CacheRepository } from './repository/cache.repository';
+import { CacheRepository } from '../common/repositories/cache.repository';
 
 @Module({
   imports: [

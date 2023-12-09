@@ -1,4 +1,4 @@
-import { Diary } from '../../entities/diary.schema';
+import { Diary } from '../../../models/diary.schema';
 import { DiaryPostDto } from '../../dtos/diary.post.dto';
 
 export interface DiaryInterfaceRepository {

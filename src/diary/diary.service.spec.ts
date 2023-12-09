@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiaryService } from './diary.service';
-import { DiaryRepository } from './repository/diary.repository';
+import { DiaryRepository } from '../common/repositories/diary.repository';
 import httpMocks from 'node-mocks-http';
-import { CacheRepository } from './repository/cache.repository';
+import { CacheRepository } from '../common/repositories/cache.repository';
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { AnswerPostDto } from 'src/dtos/answer.post.dto';
+import { AnswerPostDto } from 'src/common/dtos/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('DiaryService', () => {

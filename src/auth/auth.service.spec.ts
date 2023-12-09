@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { DiaryRepository } from 'src/diary/repository/diary.repository';
+import { DiaryRepository } from 'src/common/repositories/diary.repository';
 import { UnauthorizedException } from '@nestjs/common';
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
 import mongoose from 'mongoose';

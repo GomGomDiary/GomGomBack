@@ -11,13 +11,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
-import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { DiaryPostDto } from '../common/dtos/diary.post.dto';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { Response } from 'express';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
-import { AnswerPostDto } from '../dtos/answer.post.dto';
+import { AnswerPostDto } from '../common/dtos/answer.post.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { CountersignPostDto } from '../dtos/counstersign.post.dto';
+import { CountersignPostDto } from '../common/dtos/counstersign.post.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import {
   ApiBadRequestResponse,
@@ -33,16 +33,19 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { QuestionShowDto } from '../dtos/question.get.dto';
-import { AnswererGetDto, PaginateAnswererDto } from '../dtos/answerer.get.dto';
-import { AnswerGetDto } from '../dtos/answer.get.dto';
+import { QuestionShowDto } from '../common/dtos/question.get.dto';
+import {
+  AnswererGetDto,
+  PaginateAnswererDto,
+} from '../common/dtos/answerer.get.dto';
+import { AnswerGetDto } from '../common/dtos/answer.get.dto';
 import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
-import { ChallengeShowDto } from '../dtos/challenge.res.dto';
-import { DiaryTokenShowDto } from '../dtos/countersign.res.dto';
+import { ChallengeShowDto } from '../common/dtos/challenge.res.dto';
+import { DiaryTokenShowDto } from '../common/dtos/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { DiaryIdDto } from 'src/dtos/diaryId.dto';
+import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 
 @ApiTags('Diary')
 @Controller({

@@ -6,17 +6,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DiaryRepository } from './repository/diary.repository';
-import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { DiaryRepository } from '../common/repositories/diary.repository';
+import { DiaryPostDto } from '../common/dtos/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { AnswerPostDto } from '../dtos/answer.post.dto';
-import { Answer } from '../entities/diary.schema';
-import { QuestionShowDto } from '../dtos/question.get.dto';
+import { AnswerPostDto } from '../common/dtos/answer.post.dto';
+import { Answer } from '../models/diary.schema';
+import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
-import { CacheRepository } from './repository/cache.repository';
-import { DiaryIdDto } from 'src/dtos/diaryId.dto';
+import { CacheRepository } from '../common/repositories/cache.repository';
+import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 
 @Injectable()
 export class DiaryService {

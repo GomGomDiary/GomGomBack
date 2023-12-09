@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { Answer, Diary } from 'src/entities/diary.schema';
+import { Answer, Diary } from 'src/models/diary.schema';
 
 export class AnswerShowDto extends PickType(Diary, [
   '_id',

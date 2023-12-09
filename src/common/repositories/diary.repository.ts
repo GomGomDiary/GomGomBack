@@ -3,11 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Diary, DiaryDocumentType } from '../../entities/diary.schema';
+import { Diary, DiaryDocumentType } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { DiaryPostDto } from '../../dtos/diary.post.dto';
-import { QuestionShowDto } from '../../dtos/question.get.dto';
+import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { QuestionShowDto } from '../dtos/question.get.dto';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
