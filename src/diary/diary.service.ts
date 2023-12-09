@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -219,7 +220,7 @@ export class DiaryService {
       clientId,
     );
     if (isDuplication) {
-      throw new HttpException('답변을 이미 작성했습니다.', 409);
+      throw new ConflictException('답변을 이미 작성했습니다.');
     }
 
     let id: mongoose.Types.ObjectId;
@@ -263,7 +264,6 @@ export class DiaryService {
     const keys = await this.cacheService.keys();
     const promises = [];
     for (const key of keys) {
-      console.log(key);
       if (key.includes(`${ANSWERERS}/${diaryId}`)) {
         promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
       }
@@ -277,16 +277,6 @@ export class DiaryService {
 
   async postUpdatingSignal() {
     const keys = await this.cacheService.keys();
-    // delete /v1/diary/:diaryId/*
-    // for (const key of keys) {
-    // 	if (key.includes(`/v1/diary/${diaryId}`)) {
-    // 		await this.cacheService.del(key);
-    // 	}
-    // }
-
     return keys;
-  }
-  async getUpdatingSignal(diaryId) {
-    return '1234';
   }
 }

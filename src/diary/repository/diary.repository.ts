@@ -195,7 +195,7 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean()
+        .lean<typeof field & { _id: mongoose.Types.ObjectId }>()
         .orFail()
         .exec();
     } catch (err) {
