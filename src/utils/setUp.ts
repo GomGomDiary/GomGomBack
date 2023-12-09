@@ -36,7 +36,6 @@ export function setUp(app: INestApplication) {
 
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '1',
   });
 
   app.enableCors({

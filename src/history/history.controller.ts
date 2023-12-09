@@ -23,7 +23,10 @@ import {
 } from '@nestjs/swagger';
 
 @ApiTags('History')
-@Controller('history')
+@Controller({
+  path: 'history',
+  version: '1',
+})
 export class HistoryController {
   constructor(private readonly historyService: HistoryService) {}
 

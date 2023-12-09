@@ -44,7 +44,7 @@ describe('Diary Controller (e2e)', () => {
     beforeEach(async () => {
       /**
        * 해당 beforeEach 실행 시
-       * question 1개를 만들게 됩됩니다.
+       * question 1개를 만들게 됩니다.
        */
       newBieResponse = await createDiary(app, diaryData);
 
