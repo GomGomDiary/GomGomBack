@@ -7,7 +7,18 @@ import { TransformObjectIdToString } from 'src/common/decorators/transformObject
 import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
 import { DiaryHistory } from 'src/models/diaryHistory.schema';
 
-export class HistoryItemGetDto extends OmitType(DiaryHistory, ['updatedAt']) {}
+export class HistoryItemGetDto extends OmitType(DiaryHistory, [
+  'updatedAt',
+  'countersign',
+]) {
+  @ApiProperty({
+    example: '0120',
+    description: '암호에 대한 답',
+    required: true,
+  })
+  @Expose()
+  countersign: string;
+}
 
 export class HistoryGetDto extends PickType(DiaryHistory, [
   '_id',
