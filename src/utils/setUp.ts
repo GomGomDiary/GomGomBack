@@ -30,7 +30,7 @@ export function setUp(app: INestApplication) {
       transformOptions: {
         enableImplicitConversion: true,
       },
-      // whitelist: true,
+      whitelist: true,
     }),
   );
 

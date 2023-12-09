@@ -1,10 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { SchemaOptions, Document, Types } from 'mongoose';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  Length,
+} from 'class-validator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
-import { KOREAN_TIME_DIFF } from 'src/utils/constants';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
 
 const options: SchemaOptions = {
@@ -31,6 +37,7 @@ export class Answer {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 10)
   @Prop()
   @Expose()
   answerer: string;
@@ -42,6 +49,10 @@ export class Answer {
   })
   @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(5)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
   @Prop()
   @Expose()
   answers: string[];
@@ -85,6 +96,10 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(5)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
   @Prop()
   @Expose()
   question: string[];
@@ -96,6 +111,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 10)
   @Prop({
     required: true,
   })
@@ -109,6 +125,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 50)
   @Prop()
   @Expose()
   challenge: string;
@@ -120,6 +137,7 @@ export class Diary {
   })
   @IsNotEmpty()
   @IsString()
+  @Length(1, 50)
   @Prop()
   @Exclude({ toPlainOnly: true })
   countersign: string;

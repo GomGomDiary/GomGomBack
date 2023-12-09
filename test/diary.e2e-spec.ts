@@ -5,7 +5,11 @@ import { AppModule } from '../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { setUp } from 'src/utils/setUp';
-import { clientId1_Answer, diaryData } from './utils/constants';
+import {
+  clientId1_Answer,
+  clientId2_Answer,
+  diaryData,
+} from './utils/constants';
 import { createDiary } from './utils/createDiary';
 
 describe('Diary Controller (e2e)', () => {
@@ -69,7 +73,13 @@ describe('Diary Controller (e2e)', () => {
         .post('/v1/diary/question')
         .set('Cookie', [`diaryUser=${diaryId}`])
         .send({
-          question: ['New name', 'New age', 'New food', 'Nwe hobby'],
+          question: [
+            'New name',
+            'New age',
+            'New food',
+            'New hobby',
+            'New Language',
+          ],
           questioner: 'New',
           challenge: 'New',
           countersign: 'New',
@@ -220,10 +230,7 @@ describe('Diary Controller (e2e)', () => {
       const secondAnswererResponse = await request(app.getHttpServer())
         .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client2',
-        });
+        .send(clientId2_Answer);
 
       /**
        * cookie 파싱
@@ -379,10 +386,7 @@ describe('Diary Controller (e2e)', () => {
       const secondAnswererResponse = await request(app.getHttpServer())
         .post(`/v1/diary/answer/${diaryId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({
-          answers: ['name', 12, 'food', 'hobby'],
-          answerer: 'client2',
-        });
+        .send(clientId2_Answer);
 
       /**
        * cookie 파싱
