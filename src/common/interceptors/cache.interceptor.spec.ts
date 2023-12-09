@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpCacheInterceptor } from './cache.interceptor';
-import { CacheInterceptor, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
-import { of } from 'rxjs';
 import { Cache } from 'cache-manager';
 import { Reflector } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
