@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DiaryRepository } from 'src/common/repositories/diary.repository';
 
@@ -12,6 +16,9 @@ export class AuthService {
     const user = await this.diaryRepository.findField(diaryId, {
       countersign: 1,
     });
+    if (!user) {
+      throw new NotFoundException('diaryId가 올바르지 않습니다.');
+    }
     if (user.countersign !== countersignFromClient) {
       throw new UnauthorizedException('countersign이 올바르지 않습니다.');
     }

@@ -62,8 +62,8 @@ process.on('SIGTERM', () => {
   otelSDK
     .shutdown()
     .then(
-      () => console.log('SDK shut down successfully'),
-      (err) => console.log('Error shutting down SDK', err),
+      () => console.log('otel has been shutdown'),
+      (err) => console.log('failed to shutdown otel', err),
     )
     .finally(() => process.exit(0));
 });

@@ -8,10 +8,11 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
+import { sendWebhook } from 'src/utils/webhook';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  async catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -25,15 +26,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       user = request.signedCookies.diaryUser;
     }
 
-    logger.warn(`[${request.method}] ${request.url} ${user}`);
+    const userInform = `[${request.method}] ${request.url} ${user}`;
+    logger.warn(`[${request.method}] ${request.url}   ${user}`);
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      await sendWebhook(error, userInform);
       logger.error(error);
     }
     if (typeof error === 'string') {
       return response.status(status).json({
         statusCode: status,
-        error,
         timestampUtc: now.toISOString().replace('Z', ''),
         timestampKst: toKoreaTime(now),
         path: request.url,
@@ -42,7 +44,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     response.status(status).json({
       statusCode: status,
-      ...error,
       timestampUtc: now.toISOString().replace('Z', ''),
       timestampKst: toKoreaTime(now),
       path: request.url,

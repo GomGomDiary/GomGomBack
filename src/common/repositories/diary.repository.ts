@@ -1,13 +1,13 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Diary, DiaryDocumentType } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
 import { QuestionShowDto } from '../dtos/question.get.dto';
+import {
+  CustomInternalServerError,
+  CustomErrorOptions,
+} from '../errors/customError';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
@@ -34,27 +34,81 @@ export class DiaryRepository {
         .lean()
         .exec());
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          clientId,
+        },
+        where: 'checkDuplication',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
   async checkOwnership(clientId: string) {
-    return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
+    try {
+      return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          clientId,
+        },
+        where: 'checkOwnership',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
-    return !!(await this.diaryModel
-      .exists({ _id: diaryId, 'answerList._id': clientId })
-      .lean()
-      .exec());
+    try {
+      return !!(await this.diaryModel
+        .exists({ _id: diaryId, 'answerList._id': clientId })
+        .lean()
+        .exec());
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          clientId,
+          diaryId,
+        },
+        where: 'checkAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async create(diary: DiaryPostDto) {
-    return await this.diaryModel.create(diary);
+    try {
+      return await this.diaryModel.create(diary);
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          diary,
+        },
+        where: 'create',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async createWithId(id: string, body: DiaryPostDto) {
-    return await this.diaryModel.create({ _id: id, ...body });
+    try {
+      return await this.diaryModel.create({ _id: id, ...body });
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          id,
+          body,
+        },
+        where: 'createWithId',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async existAsAnswerer(id: string) {
@@ -64,17 +118,40 @@ export class DiaryRepository {
     if (!id) {
       return false;
     }
-    return !!(await this.diaryModel.exists({ 'answerList._id': id }).exec());
+    try {
+      return !!(await this.diaryModel.exists({ 'answerList._id': id }).exec());
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          id,
+        },
+        where: 'existAsAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async existAsDiaryAnswerer(diaryId: string, cookieId: string) {
     // check diaryId, cookieId is undefined
-    return !!(await this.diaryModel
-      .exists({
-        _id: diaryId,
-        'answerList._id': cookieId,
-      })
-      .exec());
+    try {
+      return !!(await this.diaryModel
+        .exists({
+          _id: diaryId,
+          'answerList._id': cookieId,
+        })
+        .exec());
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          cookieId,
+        },
+        where: 'existAsDiaryAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async findDiaryWithoutAnswers(
@@ -108,7 +185,16 @@ export class DiaryRepository {
         ])
       )[0];
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          start,
+          end,
+        },
+        where: 'findDiaryWithoutAnswers',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -131,10 +217,17 @@ export class DiaryRepository {
           },
         )
         .lean()
-        .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          answerId,
+        },
+        where: 'findDiaryWithAnswerId',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -143,10 +236,16 @@ export class DiaryRepository {
       return await this.diaryModel
         .findOne({ _id: diaryId })
         .lean<Diary>()
-        .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findOne',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -162,10 +261,16 @@ export class DiaryRepository {
           },
         )
         .lean<QuestionShowDto>()
-        .orFail()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findQuestion',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -175,9 +280,16 @@ export class DiaryRepository {
        * casue of using `save` in postAnswer
        * do not use lean
        */
-      return this.diaryModel.findById(diaryId).orFail().exec();
+      return this.diaryModel.findById(diaryId).exec();
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findById',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -195,11 +307,17 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean<typeof field & { _id: mongoose.Types.ObjectId }>()
-        .orFail()
+        .lean<Diary>()
         .exec();
     } catch (err) {
-      throw new NotFoundException('Diary가 존재하지 않습니다.');
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findField',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -207,36 +325,66 @@ export class DiaryRepository {
     try {
       return this.diaryModel.bulkSave(documents);
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          documents,
+        },
+        where: 'save',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
   async updateOne(diaryId: string, body: DiaryPostDto) {
-    return await this.diaryModel.updateOne(
-      {
-        _id: diaryId,
-      },
-      {
-        $set: { ...body, answerList: [] },
-      },
-    );
+    try {
+      return await this.diaryModel.updateOne(
+        {
+          _id: diaryId,
+        },
+        {
+          $set: { ...body, answerList: [] },
+        },
+      );
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          body,
+        },
+        where: 'updateOne',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 
   async getAnswererCount(diaryId: string) {
-    return (
-      await this.diaryModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(diaryId),
+    try {
+      return (
+        await this.diaryModel.aggregate([
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(diaryId),
+            },
           },
-        },
-        {
-          $project: {
-            _id: 1,
-            answerCount: { $size: '$answerList' },
+          {
+            $project: {
+              _id: 1,
+              answerCount: { $size: '$answerList' },
+            },
           },
+        ])
+      )[0];
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
         },
-      ])
-    )[0];
+        where: 'getAnswererCount',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 }
