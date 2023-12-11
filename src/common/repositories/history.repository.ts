@@ -4,6 +4,10 @@ import { Model, ObjectId } from 'mongoose';
 import { DiaryHistory } from 'src/models/diaryHistory.schema';
 import { HistoryGetDto } from '../dtos/history.get.dto';
 import { HistoryIdDto } from '../dtos/historyId.dto';
+import {
+  CustomErrorOptions,
+  CustomInternalServerError,
+} from '../errors/customError';
 
 @Injectable()
 export class HistoryRepository {
@@ -20,7 +24,15 @@ export class HistoryRepository {
         .limit(take)
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          query,
+          take,
+        },
+        where: 'findHistoryList',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -34,7 +46,15 @@ export class HistoryRepository {
         .lean<DiaryHistory>()
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          historyIdDto,
+          clientId,
+        },
+        where: 'findOne',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 }

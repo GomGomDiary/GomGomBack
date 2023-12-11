@@ -4,6 +4,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
 import { QuestionShowDto } from '../dtos/question.get.dto';
+import {
+  CustomInternalServerError,
+  CustomErrorOptions,
+} from '../errors/customError';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
@@ -30,10 +34,15 @@ export class DiaryRepository {
         .lean()
         .exec());
     } catch (err) {
-      // const customError = {
-      //
-      // }
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          clientId,
+        },
+        where: 'checkDuplication',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -41,18 +50,33 @@ export class DiaryRepository {
     try {
       return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          clientId,
+        },
+        where: 'checkOwnership',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
   async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
     try {
       return !!(await this.diaryModel
-        .exists({ _id: diaryId, 'answerList._id': clientId })
+        .exists({ _id: diaryId, 'answerList._id': true })
         .lean()
         .exec());
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          clientId,
+          diaryId,
+        },
+        where: 'checkAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -60,7 +84,14 @@ export class DiaryRepository {
     try {
       return await this.diaryModel.create(diary);
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diary,
+        },
+        where: 'create',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -68,7 +99,15 @@ export class DiaryRepository {
     try {
       return await this.diaryModel.create({ _id: id, ...body });
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          id,
+          body,
+        },
+        where: 'createWithId',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -82,7 +121,14 @@ export class DiaryRepository {
     try {
       return !!(await this.diaryModel.exists({ 'answerList._id': id }).exec());
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          id,
+        },
+        where: 'existAsAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -96,7 +142,15 @@ export class DiaryRepository {
         })
         .exec());
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          cookieId,
+        },
+        where: 'existAsDiaryAnswerer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -131,11 +185,16 @@ export class DiaryRepository {
         ])
       )[0];
     } catch (err) {
-      // err custom화 필요
-      // const customError = {
-      // query : ...
-      //  err,}
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          start,
+          end,
+        },
+        where: 'findDiaryWithoutAnswers',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -160,7 +219,15 @@ export class DiaryRepository {
         .lean()
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          answerId,
+        },
+        where: 'findDiaryWithAnswerId',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -171,7 +238,14 @@ export class DiaryRepository {
         .lean<Diary>()
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findOne',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -189,7 +263,14 @@ export class DiaryRepository {
         .lean<QuestionShowDto>()
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findQuestion',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -201,7 +282,14 @@ export class DiaryRepository {
        */
       return this.diaryModel.findById(diaryId).exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findById',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -222,7 +310,14 @@ export class DiaryRepository {
         .lean<Diary>()
         .exec();
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'findField',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -230,7 +325,14 @@ export class DiaryRepository {
     try {
       return this.diaryModel.bulkSave(documents);
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          documents,
+        },
+        where: 'save',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -245,7 +347,15 @@ export class DiaryRepository {
         },
       );
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          body,
+        },
+        where: 'updateOne',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
@@ -267,7 +377,14 @@ export class DiaryRepository {
         ])
       )[0];
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+        },
+        where: 'getAnswererCount',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 }

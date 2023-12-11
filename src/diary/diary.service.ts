@@ -17,6 +17,10 @@ import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
+import {
+  CustomErrorOptions,
+  CustomInternalServerError,
+} from 'src/common/errors/customError';
 
 @Injectable()
 export class DiaryService {
@@ -280,7 +284,15 @@ export class DiaryService {
       }
       await Promise.all([this.diaryRepository.save([diary]), ...promises]);
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      const customError: CustomErrorOptions = {
+        information: {
+          diaryId,
+          diary,
+        },
+        where: 'Service - postAnswer',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
     }
   }
 
