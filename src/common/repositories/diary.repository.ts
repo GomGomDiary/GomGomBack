@@ -64,7 +64,7 @@ export class DiaryRepository {
   async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
     try {
       return !!(await this.diaryModel
-        .exists({ _id: diaryId, 'answerList._id': true })
+        .exists({ _id: diaryId, 'answerList._id': clientId })
         .lean()
         .exec());
     } catch (err) {
