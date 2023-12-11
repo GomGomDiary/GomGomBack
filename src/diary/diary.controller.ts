@@ -40,12 +40,11 @@ import {
 } from '../common/dtos/answerer.get.dto';
 import { AnswerGetDto } from '../common/dtos/answer.get.dto';
 import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
-import { ChallengeShowDto } from '../common/dtos/challenge.res.dto';
+import { ChallengeGetDto } from '../common/dtos/challenge.res.dto';
 import { DiaryTokenShowDto } from '../common/dtos/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { HistoryIdDto } from 'src/common/dtos/historyId.dto';
 import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 
 @ApiTags('Diary')
@@ -265,7 +264,7 @@ export class DiaryController {
   @ApiResponse({
     status: 200,
     description: '성공 시 200을 응답합니다.',
-    type: ChallengeShowDto,
+    type: ChallengeGetDto,
   })
   @ApiBadRequestResponse({
     description:
@@ -279,10 +278,10 @@ export class DiaryController {
     required: true,
   })
   @Get('challenge/:diaryId')
-  @ReturnValueToDto(ChallengeShowDto)
+  @ReturnValueToDto(ChallengeGetDto)
   async getChallenge(
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
-  ): Promise<ChallengeShowDto> {
+  ): Promise<ChallengeGetDto> {
     return this.diaryService.getChallenge(diaryId);
   }
 

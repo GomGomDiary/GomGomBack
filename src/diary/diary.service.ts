@@ -1,9 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
@@ -16,7 +16,6 @@ import { Answer } from '../models/diary.schema';
 import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { HistoryIdDto } from 'src/common/dtos/historyId.dto';
 import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 
 @Injectable()
@@ -100,7 +99,11 @@ export class DiaryService {
   }
 
   async getQuestion(diaryId: string): Promise<QuestionShowDto> {
-    return this.diaryRepository.findQuestion(diaryId);
+    const question = await this.diaryRepository.findQuestion(diaryId);
+    if (!question) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
+    return question;
   }
 
   async postQuestion({
@@ -169,6 +172,9 @@ export class DiaryService {
       diaryId,
       answerId,
     );
+    if (!diary) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
     const { answerList, ...question } = diary;
     const answer = diary.answerList[0];
 
@@ -240,6 +246,9 @@ export class DiaryService {
     }
 
     const diary = await this.diaryRepository.findById(diaryId);
+    if (!diary) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
 
     if (diary.question.length !== answer.answers.length) {
       throw new BadRequestException(
@@ -255,25 +264,35 @@ export class DiaryService {
      */
 
     // const answerCount = await this.diaryRepository.getAnswererCount(diaryId);
-
     // const cacheKeyListToDelete = [];
     // for (const page of DEFAULT_PAGINATE) {
     //   const cacheKeyToDelete = answerCount - (answerCount % page);
     //   cacheKeyListToDelete.push(cacheKeyToDelete);
     // }
 
-    const keys = await this.cacheService.keys();
-    const promises = [];
-    for (const key of keys) {
-      if (key.includes(`${ANSWERERS}/${diaryId}`)) {
-        promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+    try {
+      const keys = await this.cacheService.keys();
+      const promises = [];
+      for (const key of keys) {
+        if (key.includes(`${ANSWERERS}/${diaryId}`)) {
+          promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+        }
       }
+      await Promise.all([this.diaryRepository.save([diary]), ...promises]);
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
-    await Promise.all([this.diaryRepository.save([diary]), ...promises]);
   }
 
   async getChallenge(diaryId: string) {
-    return await this.diaryRepository.findOne(diaryId);
+    const result = await this.diaryRepository.findField(diaryId, {
+      challenge: 1,
+      questioner: 1,
+    });
+    if (!result) {
+      throw new NotFoundException('Diary가 존재하지 않습니다.');
+    }
+    return result;
   }
 
   async postUpdatingSignal() {

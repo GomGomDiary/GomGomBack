@@ -8,12 +8,22 @@ import mongoose from 'mongoose';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let diaryRepository: DeepMocked<DiaryRepository>;
+  let diaryRepository;
   let jwtService: DeepMocked<JwtService>;
+  // let diaryRepository: DeepMocked<DiaryRepository>;
+  const mockDiaryRepository = {
+    findField: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
+      providers: [
+        AuthService,
+        {
+          provide: DiaryRepository,
+          useValue: mockDiaryRepository,
+        },
+      ],
     })
       .useMocker(createMock)
       .compile();

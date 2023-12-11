@@ -5,8 +5,14 @@ import { AppModule } from '../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { setUp } from 'src/utils/setUp';
-import { createDiary } from './utils/createDiary';
 import { diaryData } from './utils/constants';
+import { createDiaryWithAnswer } from './utils/createDiaryWithAnswer';
+import { plainToClass } from 'class-transformer';
+import {
+  HistoryGetListDto,
+  HistoryItemGetDto,
+} from 'src/common/dtos/history.get.dto';
+import { validate } from 'class-validator';
 
 describe('History Controller (e2e)', () => {
   let app: INestApplication;
@@ -34,18 +40,12 @@ describe('History Controller (e2e)', () => {
     await app.close();
   });
 
-  describe('(GET) /history - 히스토리 리스트', () => {
-    let diaryId: string, newbieResponse: request.Response;
+  describe('(GET) /history - 히스토리 리스트 보기', () => {
+    let diaryId: string;
 
     beforeEach(async () => {
-      newbieResponse = await createDiary(app, diaryData);
-      const cookie = newbieResponse.header['set-cookie'][0];
-
-      diaryId = cookie
-        .match(/diaryUser=.+?;/)[0]
-        .slice('diaryUser='.length)
-        .replace(/;/g, '');
-      createDiary(app, diaryData, diaryId);
+      ({ diaryId } = await createDiaryWithAnswer(app, diaryData));
+      ({ diaryId } = await createDiaryWithAnswer(app, diaryData, diaryId));
     });
 
     it('cookie가 없을 경우 400을 반환한다.', async () => {
@@ -55,33 +55,49 @@ describe('History Controller (e2e)', () => {
       expect(result.statusCode).toBe(400);
     });
 
-    it('cookie가 존재할 경우 200을 반환한다.', async () => {
+    it('response는 HistoryGetListDto와 검증시 에러가 없어야 한다.', async () => {
       const result = await request(app.getHttpServer())
         .get('/v1/history?take=5')
         .set('Cookie', [`diaryUser=${diaryId}`]);
+      const resultJson = JSON.parse(result.text);
+      const dtoObject = plainToClass(HistoryGetListDto, resultJson);
+      const errors = await validate(dtoObject);
+
+      expect(errors.length).toBe(0);
       expect(result.statusCode).toBe(200);
     });
   });
 
-  describe('(GET) /history', () => {
-    let diaryId: string, newbieResponse: request.Response;
+  describe('(GET) /history/:historyId - 히스토리 아이템 보기', () => {
+    let diaryId: string, historyItemId: string;
 
     beforeEach(async () => {
-      newbieResponse = await createDiary(app, diaryData);
-      const cookie = newbieResponse.header['set-cookie'][0];
-
-      diaryId = cookie
-        .match(/diaryUser=.+?;/)[0]
-        .slice('diaryUser='.length)
-        .replace(/;/g, '');
-      createDiary(app, diaryData, diaryId);
+      ({ diaryId } = await createDiaryWithAnswer(app, diaryData));
+      ({ diaryId } = await createDiaryWithAnswer(app, diaryData, diaryId));
+      const historyResult = await request(app.getHttpServer())
+        .get('/v1/history?take=5')
+        .set('Cookie', [`diaryUser=${diaryId}`]);
+      historyItemId = historyResult.body.historyList[0]._id;
     });
 
     it('cookie가 없을 경우 400을 반환한다.', async () => {
-      const result = await request(app.getHttpServer())
-        .get('/v1/history?take=5')
-        .set('Cookie', []);
+      const result = await request(app.getHttpServer()).get(
+        `/v1/history/${historyItemId}?take=5`,
+      );
+
       expect(result.statusCode).toBe(400);
+    });
+
+    it('response는 HistoryItemGetDto와 검증시 에러가 없어야 한다.', async () => {
+      const result = await request(app.getHttpServer())
+        .get(`/v1/history/${historyItemId}?take=5`)
+        .set('Cookie', [`diaryUser=${diaryId}`]);
+      const resultJson = JSON.parse(result.text);
+      const dtoObject = plainToClass(HistoryItemGetDto, resultJson);
+      const errors = await validate(dtoObject);
+
+      expect(errors.length).toBe(0);
+      expect(result.statusCode).toBe(200);
     });
 
     it('cookie가 존재할 경우 200을 반환한다.', async () => {
