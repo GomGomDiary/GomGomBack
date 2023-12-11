@@ -84,7 +84,7 @@ describe('Diary Controller (e2e)', () => {
       ({ diaryId, clientId1 } = await createDiaryWithAnswer(app, diaryData));
     });
 
-    it('diaryId가 없는 경우 false를 반환한다', async () => {
+    it('diaryId가 없는 경우 false를 반환한다.', async () => {
       const nonExistentDiaryId = '1'.repeat(24);
       const result = await request(app.getHttpServer()).get(
         `/v1/diary/${nonExistentDiaryId}`,
@@ -94,7 +94,7 @@ describe('Diary Controller (e2e)', () => {
       expect(result.text).toEqual('false');
     });
 
-    it('diaryId가 잘못 된 경우 400을 반환한다', async () => {
+    it('diaryId가 잘못 된 경우 400을 반환한다.', async () => {
       const wrongDiaryId = '1'.repeat(23);
       const result = await request(app.getHttpServer()).get(
         `/v1/diary/${wrongDiaryId}`,
@@ -183,7 +183,7 @@ describe('Diary Controller (e2e)', () => {
       expect(result.statusCode).toBe(401);
     });
 
-    it('diaryId가 존재하지 않을 경우 404를 반환한다', async () => {
+    it('diaryId가 존재하지 않을 경우 404를 반환한다.', async () => {
       const nonExistentDiaryId = '1'.repeat(24);
       const result = await request(app.getHttpServer())
         .get(`/v1/diary/question/${nonExistentDiaryId}`)
@@ -222,7 +222,7 @@ describe('Diary Controller (e2e)', () => {
       expect(result.statusCode).toBe(401);
     });
 
-    it('남의 Diary를 접근할 경우 401를 반환한다', async () => {
+    it('남의 Diary를 접근할 경우 401를 반환한다.', async () => {
       const nonExistentDiaryId = '1'.repeat(24);
       const result = await request(app.getHttpServer())
         .get(`/v1/diary/answer/${nonExistentDiaryId}/${clientId1}`)
