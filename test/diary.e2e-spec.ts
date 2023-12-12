@@ -286,27 +286,33 @@ describe('Diary Controller (e2e)', () => {
       expect(result.statusCode).toBe(400);
     });
 
-    it('start = 10, take = 5일 때 answerList의 길이는 5여야 한다.', async () => {
-      const promises = [];
-      for (let i = 0; i < 20; i++) {
-        promises.push(
-          request(app.getHttpServer())
-            .post(`/v1/diary/answer/${diaryId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({
-              answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
-              answerer: `client${i + 1}`,
-            }),
+    it.each([
+      { start: 10, take: 5, expected: 5 },
+      { start: 0, take: 10, expected: 10 },
+    ])(
+      'start = $start, take = $take일 때 answerList의 길이는 $expected여야 한다.',
+      async ({ start, take, expected }) => {
+        const promises = [];
+        for (let i = 0; i < 20; i++) {
+          promises.push(
+            request(app.getHttpServer())
+              .post(`/v1/diary/answer/${diaryId}`)
+              .set('Authorization', `Bearer ${token}`)
+              .send({
+                answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
+                answerer: `client${i + 1}`,
+              }),
+          );
+        }
+        await Promise.all(promises);
+        const result = await request(app.getHttpServer()).get(
+          `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}`,
         );
-      }
-      await Promise.all(promises);
-      const result = await request(app.getHttpServer()).get(
-        `/v1/diary/answerers/${diaryId}?start=10&take=5`,
-      );
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.answererList.length).toBe(5);
-    });
+        expect(result.statusCode).toBe(200);
+        expect(result.body.answererList.length).toBe(expected);
+      },
+    );
 
     it('response는 AnswererGetDto와 validation시 에러가 없어야 한다.', async () => {
       const result = await request(app.getHttpServer()).get(
