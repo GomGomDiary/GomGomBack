@@ -292,18 +292,15 @@ describe('Diary Controller (e2e)', () => {
     ])(
       'start = $start, take = $take일 때 answerList의 길이는 $expected여야 한다.',
       async ({ start, take, expected }) => {
-        const promises = [];
-        for (let i = 0; i < 20; i++) {
-          promises.push(
-            request(app.getHttpServer())
-              .post(`/v1/diary/answer/${diaryId}`)
-              .set('Authorization', `Bearer ${token}`)
-              .send({
-                answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
-                answerer: `client${i + 1}`,
-              }),
-          );
-        }
+        const promises = Array.from({ length: 20 }, (_, i) => {
+          return request(app.getHttpServer())
+            .post(`/v1/diary/answer/${diaryId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+              answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
+              answerer: `client${i + 1}`,
+            });
+        });
         await Promise.all(promises);
         const result = await request(app.getHttpServer()).get(
           `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}`,
