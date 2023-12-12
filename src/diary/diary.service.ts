@@ -191,11 +191,10 @@ export class DiaryService {
   }
 
   async getAnswerers({ diaryId, query }) {
-    const end = query.take + query.start;
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(
       diaryId,
       query.start,
-      end,
+      query.take,
     );
     if (!diary) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
