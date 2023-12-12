@@ -262,10 +262,10 @@ describe('Diary Controller (e2e)', () => {
   });
 
   describe('(GET) /diary/answerers/:diaryId - 답변자 보기', () => {
-    let diaryId: string;
+    let diaryId: string, token: string;
 
     beforeEach(async () => {
-      ({ diaryId } = await createDiaryWithAnswer(app, diaryData));
+      ({ diaryId, token } = await createDiaryWithAnswer(app, diaryData));
     });
 
     it('diaryId param이 존재하지 않을 경우 404를 반환한다.', async () => {
@@ -284,6 +284,28 @@ describe('Diary Controller (e2e)', () => {
       );
 
       expect(result.statusCode).toBe(400);
+    });
+
+    it('start = 10, take = 5일 때 answerList의 길이는 5여야 한다.', async () => {
+      const promises = [];
+      for (let i = 0; i < 20; i++) {
+        promises.push(
+          request(app.getHttpServer())
+            .post(`/v1/diary/answer/${diaryId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+              answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
+              answerer: `client${i + 1}`,
+            }),
+        );
+      }
+      await Promise.all(promises);
+      const result = await request(app.getHttpServer()).get(
+        `/v1/diary/answerers/${diaryId}?start=10&take=5`,
+      );
+
+      expect(result.statusCode).toBe(200);
+      expect(result.body.answererList.length).toBe(5);
     });
 
     it('response는 AnswererGetDto와 validation시 에러가 없어야 한다.', async () => {
