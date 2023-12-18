@@ -15,6 +15,7 @@ import { QuestionShowDto } from 'src/common/dtos/question.get.dto';
 import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
 import { DiaryTokenShowDto } from 'src/common/dtos/countersign.res.dto';
 import { ChallengeGetDto } from 'src/common/dtos/challenge.res.dto';
+import { HistoryGetListDto } from 'src/common/dtos/history.get.dto';
 
 describe('Diary Controller (e2e)', () => {
   let app: INestApplication;
@@ -125,6 +126,23 @@ describe('Diary Controller (e2e)', () => {
       const result = await createDiary(app, diaryData, diaryId);
 
       expect(result.statusCode).toBe(204);
+    });
+
+    it('질문을 재작성할 경우 history가 쌓여야 한다.', async () => {
+      // 다이어리 작성
+      const { diaryId } = await createDiaryWithAnswer(app, diaryData);
+
+      // 다이어리 재작성
+      await createDiary(app, diaryData, diaryId);
+
+      // 작성된 다이어리 히스토리 리스트 가져오기
+      const historyResponse = await request(app.getHttpServer())
+        .get(`/v1/history?take=5`)
+        .set('Cookie', [`diaryUser=${diaryId}`]);
+      const history: HistoryGetListDto = JSON.parse(historyResponse.text);
+
+      // history의 길이가 1 이상인지 검증
+      expect(history.historyList.length).toBe(1);
     });
   });
 
