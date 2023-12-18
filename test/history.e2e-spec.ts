@@ -69,10 +69,10 @@ describe('History Controller (e2e)', () => {
   });
 
   describe('(GET) /history/:historyId - 히스토리 아이템 보기', () => {
-    let diaryId: string, historyItemId: string;
+    let diaryId: string, historyItemId: string, token: string;
 
     beforeEach(async () => {
-      ({ diaryId } = await createDiaryWithAnswer(app, diaryData));
+      ({ diaryId, token } = await createDiaryWithAnswer(app, diaryData));
       ({ diaryId } = await createDiaryWithAnswer(app, diaryData, diaryId));
       const historyResult = await request(app.getHttpServer())
         .get('/v1/history?take=5')
@@ -87,6 +87,31 @@ describe('History Controller (e2e)', () => {
 
       expect(result.statusCode).toBe(400);
     });
+
+    // it.each([
+    //   { start: 10, take: 5, expected: 5 },
+    //   { start: 0, take: 10, expected: 10 },
+    // ])(
+    //   'start = $start, take = $take일 때 answerList의 길이는 $expected여야 한다.',
+    //   async ({ start, take, expected }) => {
+    //     const promises = Array.from({ length: 20 }, (_, i) => {
+    //       return request(app.getHttpServer())
+    //         .post(`/v1/diary/answer/${diaryId}`)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .send({
+    //           answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
+    //           answerer: `client${i + 1}`,
+    //         });
+    //     });
+    //     await Promise.all(promises);
+    //     const result = await request(app.getHttpServer()).get(
+    //       `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}`,
+    //     );
+    //
+    //     expect(result.statusCode).toBe(200);
+    //     expect(result.body.answererList.length).toBe(expected);
+    //   },
+    // );
 
     it('response는 HistoryItemGetDto와 검증시 에러가 없어야 한다.', async () => {
       const result = await request(app.getHttpServer())
