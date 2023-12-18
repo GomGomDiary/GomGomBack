@@ -14,6 +14,8 @@ import {
 } from 'src/models/diaryHistory.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
+import { CustomInternalServerError } from 'src/common/errors/customError';
+import { OmitType } from '@nestjs/swagger';
 
 @Module({
   imports: [
@@ -39,12 +41,25 @@ import { CacheRepository } from '../common/repositories/cache.repository';
               .findOne(this.getQuery())
               .lean<Diary>()
               .exec();
+            if (!retentionDiary) {
+              throw new CustomInternalServerError({
+                where: 'preUpdateOne',
+                information: {
+                  query: 'findOne',
+                },
+                err: 'retentionDiary is undefined',
+              });
+            }
             const diaryId = retentionDiary._id;
 
             retentionDiary.createdAt = retentionDiary.updatedAt;
             const numberOfAnswerers = retentionDiary.answerList.length;
-            delete retentionDiary.updatedAt;
-            delete retentionDiary._id;
+
+            const refinedRetentionDiary = {
+              ...retentionDiary,
+            } as Partial<Diary>;
+            delete refinedRetentionDiary._id;
+            delete refinedRetentionDiary.updatedAt;
 
             await diaryHistoryModel.create({
               ...retentionDiary,

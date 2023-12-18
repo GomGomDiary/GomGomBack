@@ -16,9 +16,11 @@ export function setUp(app: INestApplication) {
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   const env = configService.get<string>('NODE_ENV');
-  const swaggerName = configService.get<string>('SWAGGER_USER');
-  const swaggerPassword = configService.get<string>('SWAGGER_PASSWORD');
-  const domainUrl = configService.get<string>('DOMAIN_URL');
+  const swaggerName = configService.get<string>('SWAGGER_USER') || 'admin';
+  const swaggerPassword =
+    configService.get<string>('SWAGGER_PASSWORD') || 'admin';
+  const domainUrl =
+    configService.get<string>('DOMAIN_URL') || 'https://gomgomdiary.site';
 
   if (env === 'development') mongoose.set('debug', true);
   if (env === 'production') app.enableShutdownHooks();

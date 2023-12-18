@@ -188,7 +188,7 @@ export class DiaryController {
     @Param('diaryId', MongoDBIdPipe) diaryId: string,
     @Query('') query: PaginateAnswererDto,
   ) {
-    return this.diaryService.getAnswerers({ diaryId, query });
+    return this.diaryService.getAnswerers(diaryId, query);
   }
 
   @ApiOperation({ summary: '답변 보기' })

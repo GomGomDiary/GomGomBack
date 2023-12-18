@@ -10,7 +10,7 @@ import {
   PaginateHistoryDto,
 } from '../common/dtos/history.get.dto';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
-import { ObjectId } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { HistoryIdDto } from '../common/dtos/historyId.dto';
 import {
   ApiBadRequestResponse,
@@ -57,7 +57,7 @@ export class HistoryController {
   @ReturnValueToDto(HistoryGetListDto)
   async findList(
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
-    clientId: ObjectId,
+    clientId: Types.ObjectId,
     @Query() query: PaginateHistoryDto,
   ) {
     return this.historyService.findAll(clientId, query);
@@ -86,7 +86,7 @@ export class HistoryController {
   @ReturnValueToDto(HistoryItemGetDto)
   async findOne(
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
-    clientId: ObjectId,
+    clientId: Types.ObjectId,
     @Param() historyIdDto: HistoryIdDto,
   ) {
     return this.historyService.findOne(historyIdDto, clientId);

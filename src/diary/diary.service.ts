@@ -21,6 +21,7 @@ import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from 'src/common/errors/customError';
+import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
 
 @Injectable()
 export class DiaryService {
@@ -155,7 +156,7 @@ export class DiaryService {
        */
       const keys = await this.cacheService.keys();
 
-      const promises = [];
+      const promises: Promise<void>[] = [];
       for (const key of keys) {
         if (key.includes(`${clientId}`)) {
           promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
@@ -190,7 +191,7 @@ export class DiaryService {
     return response;
   }
 
-  async getAnswerers({ diaryId, query }) {
+  async getAnswerers(diaryId: string, query: PaginateAnswererDto) {
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(
       diaryId,
       query.start,
@@ -275,7 +276,7 @@ export class DiaryService {
 
     try {
       const keys = await this.cacheService.keys();
-      const promises = [];
+      const promises: Promise<void>[] = [];
       for (const key of keys) {
         if (key.includes(`${ANSWERERS}/${diaryId}`)) {
           promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));

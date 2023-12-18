@@ -1,7 +1,7 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Diary, DiaryDocumentType } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
 import { QuestionShowDto } from '../dtos/question.get.dto';
 import {
@@ -321,9 +321,9 @@ export class DiaryRepository {
     }
   }
 
-  async save(documents: any[]) {
+  async save(documents: unknown[]) {
     try {
-      return this.diaryModel.bulkSave(documents);
+      return this.diaryModel.bulkSave(documents as Document[]);
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {

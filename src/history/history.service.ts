@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { HistoryRepository } from '../common/repositories/history.repository';
-import { ObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 import { PaginateHistoryDto } from '../common/dtos/history.get.dto';
 import { generatePaginationQuery } from 'src/utils/pagination';
 import { HistoryIdDto } from '../common/dtos/historyId.dto';
@@ -9,7 +9,10 @@ import { HistoryIdDto } from '../common/dtos/historyId.dto';
 export class HistoryService {
   constructor(private readonly historyRepository: HistoryRepository) {}
 
-  async findAll(clientId: ObjectId, paginateHistoryDto: PaginateHistoryDto) {
+  async findAll(
+    clientId: Types.ObjectId,
+    paginateHistoryDto: PaginateHistoryDto,
+  ) {
     const query = generatePaginationQuery(
       { diaryId: clientId },
       null,
@@ -29,7 +32,7 @@ export class HistoryService {
     return result;
   }
 
-  async findOne(historyIdDto: HistoryIdDto, clientId: ObjectId) {
+  async findOne(historyIdDto: HistoryIdDto, clientId: Types.ObjectId) {
     const diaryHistoryItem = await this.historyRepository.findOne(
       historyIdDto,
       clientId,
