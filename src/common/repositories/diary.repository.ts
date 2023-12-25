@@ -321,9 +321,9 @@ export class DiaryRepository {
     }
   }
 
-  async save(documents: unknown[]) {
+  async save(documents: Document[]) {
     try {
-      return this.diaryModel.bulkSave(documents as Document[]);
+      return this.diaryModel.bulkSave(documents);
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
