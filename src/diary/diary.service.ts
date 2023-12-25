@@ -3,7 +3,6 @@ import {
   ConflictException,
   HttpStatus,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
@@ -297,14 +296,18 @@ export class DiaryService {
   }
 
   async getChallenge(diaryId: string) {
-    const result = await this.diaryRepository.findField(diaryId, {
-      challenge: 1,
-      questioner: 1,
-    });
-    if (!result) {
+    const challengeWithQuestioner = await this.diaryRepository.findField(
+      diaryId,
+      {
+        challenge: 1,
+        questioner: 1,
+      },
+    );
+
+    if (!challengeWithQuestioner) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
-    return result;
+    return challengeWithQuestioner;
   }
 
   async postUpdatingSignal() {

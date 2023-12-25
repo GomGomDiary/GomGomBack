@@ -10,7 +10,7 @@ import {
   PaginateHistoryDto,
 } from '../common/dtos/history.get.dto';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { HistoryIdDto } from '../common/dtos/historyId.dto';
 import {
   ApiBadRequestResponse,

@@ -15,7 +15,6 @@ import {
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { CustomInternalServerError } from 'src/common/errors/customError';
-import { OmitType } from '@nestjs/swagger';
 
 @Module({
   imports: [

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Diary, DiaryDocumentType } from '../../models/diary.schema';
+import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
@@ -12,6 +12,8 @@ import {
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
 }
+
+type FieldType = keyof Diary;
 
 @Injectable()
 export class DiaryRepository {
@@ -293,11 +295,9 @@ export class DiaryRepository {
     }
   }
 
-  async findField(
+  async findField<T extends FieldType>(
     diaryId: string,
-    field: {
-      [T in keyof DiaryDocumentType]?: number | string;
-    },
+    field: { [K in T]: 1 },
   ) {
     try {
       return await this.diaryModel
@@ -307,7 +307,7 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean<Diary>()
+        .lean<Pick<Diary, T | '_id'>>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
