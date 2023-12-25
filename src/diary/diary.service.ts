@@ -11,7 +11,7 @@ import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from '../common/dtos/answer.post.dto';
-import { Answer } from '../models/diary.schema';
+import { Answer, Diary } from '../models/diary.schema';
 import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
@@ -102,7 +102,7 @@ export class DiaryService {
     return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
   }
 
-  async getQuestion(diaryId: string): Promise<QuestionShowDto> {
+  async getQuestion(diaryId: string): Promise<Pick<Diary, '_id' | 'question'>> {
     const question = await this.diaryRepository.findQuestion(diaryId);
     if (!question) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
