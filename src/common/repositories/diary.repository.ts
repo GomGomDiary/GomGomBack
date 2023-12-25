@@ -3,7 +3,6 @@ import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
-import { QuestionShowDto } from '../dtos/question.get.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,
@@ -13,7 +12,9 @@ interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
 }
 
-type FieldType = keyof Diary;
+type FieldType = {
+  [U in keyof Diary]?: 1;
+};
 
 @Injectable()
 export class DiaryRepository {
@@ -262,7 +263,7 @@ export class DiaryRepository {
             question: 1,
           },
         )
-        .lean<QuestionShowDto>()
+        .lean<Pick<Diary, '_id' | 'question'>>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
@@ -295,10 +296,7 @@ export class DiaryRepository {
     }
   }
 
-  async findField<T extends FieldType>(
-    diaryId: string,
-    field: { [K in T]: 1 },
-  ) {
+  async findField<T extends FieldType>(diaryId: string, field: T) {
     try {
       return await this.diaryModel
         .findOne(
@@ -307,7 +305,7 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean<Pick<Diary, T | '_id'>>()
+        .lean<Pick<Diary, '_id' | Extract<keyof T, keyof Diary>>>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
