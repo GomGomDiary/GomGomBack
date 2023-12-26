@@ -12,7 +12,7 @@ async function bootstrap() {
   setUp(app);
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT');
+  const port = configService.get<number>('PORT') || 80;
   const logger = new Logger();
 
   logger.log(`🚀 PORT: ${port}`);

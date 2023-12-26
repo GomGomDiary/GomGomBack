@@ -3,7 +3,6 @@ import {
   ConflictException,
   HttpStatus,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
@@ -12,7 +11,7 @@ import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { AnswerPostDto } from '../common/dtos/answer.post.dto';
-import { Answer } from '../models/diary.schema';
+import { Answer, Diary } from '../models/diary.schema';
 import { QuestionShowDto } from '../common/dtos/question.get.dto';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
@@ -21,6 +20,7 @@ import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from 'src/common/errors/customError';
+import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
 
 @Injectable()
 export class DiaryService {
@@ -102,7 +102,7 @@ export class DiaryService {
     return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
   }
 
-  async getQuestion(diaryId: string): Promise<QuestionShowDto> {
+  async getQuestion(diaryId: string): Promise<Pick<Diary, '_id' | 'question'>> {
     const question = await this.diaryRepository.findQuestion(diaryId);
     if (!question) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
@@ -155,7 +155,7 @@ export class DiaryService {
        */
       const keys = await this.cacheService.keys();
 
-      const promises = [];
+      const promises: Promise<void>[] = [];
       for (const key of keys) {
         if (key.includes(`${clientId}`)) {
           promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
@@ -190,7 +190,7 @@ export class DiaryService {
     return response;
   }
 
-  async getAnswerers({ diaryId, query }) {
+  async getAnswerers(diaryId: string, query: PaginateAnswererDto) {
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(
       diaryId,
       query.start,
@@ -275,7 +275,7 @@ export class DiaryService {
 
     try {
       const keys = await this.cacheService.keys();
-      const promises = [];
+      const promises: Promise<void>[] = [];
       for (const key of keys) {
         if (key.includes(`${ANSWERERS}/${diaryId}`)) {
           promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
@@ -296,14 +296,18 @@ export class DiaryService {
   }
 
   async getChallenge(diaryId: string) {
-    const result = await this.diaryRepository.findField(diaryId, {
-      challenge: 1,
-      questioner: 1,
-    });
-    if (!result) {
+    const challengeWithQuestioner = await this.diaryRepository.findField(
+      diaryId,
+      {
+        challenge: 1,
+        questioner: 1,
+      },
+    );
+
+    if (!challengeWithQuestioner) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
     }
-    return result;
+    return challengeWithQuestioner;
   }
 
   async postUpdatingSignal() {

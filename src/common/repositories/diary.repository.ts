@@ -1,9 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Diary, DiaryDocumentType } from '../../models/diary.schema';
+import { Injectable } from '@nestjs/common';
+import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 import { DiaryPostDto } from '../dtos/diary.post.dto';
-import { QuestionShowDto } from '../dtos/question.get.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,
@@ -12,6 +11,10 @@ import {
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;
 }
+
+type FieldType = {
+  [U in keyof Diary]?: 1;
+};
 
 @Injectable()
 export class DiaryRepository {
@@ -260,7 +263,7 @@ export class DiaryRepository {
             question: 1,
           },
         )
-        .lean<QuestionShowDto>()
+        .lean<Pick<Diary, '_id' | 'question'>>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
@@ -293,12 +296,7 @@ export class DiaryRepository {
     }
   }
 
-  async findField(
-    diaryId: string,
-    field: {
-      [T in keyof DiaryDocumentType]?: number | string;
-    },
-  ) {
+  async findField<T extends FieldType>(diaryId: string, field: T) {
     try {
       return await this.diaryModel
         .findOne(
@@ -307,7 +305,7 @@ export class DiaryRepository {
           },
           field,
         )
-        .lean<Diary>()
+        .lean<Pick<Diary, '_id' | Extract<keyof T, keyof Diary>>>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
@@ -321,7 +319,7 @@ export class DiaryRepository {
     }
   }
 
-  async save(documents: any[]) {
+  async save(documents: Document[]) {
     try {
       return this.diaryModel.bulkSave(documents);
     } catch (err) {

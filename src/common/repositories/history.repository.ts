@@ -1,6 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { DiaryHistory } from 'src/models/diaryHistory.schema';
 import { HistoryGetDto } from '../dtos/history.get.dto';
 import { HistoryIdDto } from '../dtos/historyId.dto';
@@ -8,6 +8,7 @@ import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from '../errors/customError';
+import { PaginateQueryType } from 'src/utils/pagination';
 
 @Injectable()
 export class HistoryRepository {
@@ -16,7 +17,7 @@ export class HistoryRepository {
     private readonly histoyModel: Model<DiaryHistory>,
   ) {}
 
-  async findHistoryList(query, take = 5) {
+  async findHistoryList(query: PaginateQueryType, take = 5) {
     try {
       return await this.histoyModel
         .find(query, { _id: 1, createdAt: 1, numberOfAnswerers: 1 })
@@ -36,7 +37,7 @@ export class HistoryRepository {
     }
   }
 
-  async findOne(historyIdDto: HistoryIdDto, clientId: ObjectId) {
+  async findOne(historyIdDto: HistoryIdDto, clientId: Types.ObjectId) {
     try {
       return await this.histoyModel
         .findOne(

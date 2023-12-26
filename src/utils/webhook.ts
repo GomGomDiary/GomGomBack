@@ -17,7 +17,7 @@ export const sendWebhook = async (err: any, hint: string) => {
     .setTimestamp()
     .setColor(15548997);
 
-  const hook = new Webhook(process.env.WEBHOOK_URL);
+  const hook = new Webhook(process.env.WEBHOOK_URL as string);
 
   await hook.send(embed);
 };
