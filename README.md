@@ -37,7 +37,7 @@
 
 
 ## TIL
-개발 기록은 [노션](https://scarce-oregano-95f.notion.site/GomGomDiary-TIL-eed52cb0941646ae8e75971716017dcc?pvs=4)에 정리했습니다.
+개발 기록은 [노션](https://iamyoyoo.notion.site/eed52cb0941646ae8e75971716017dcc?pvs=4)에 정리했습니다.
 
 ## Prerequisites
 - Docker (20.10.14 or higher)
