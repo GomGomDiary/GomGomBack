@@ -1,5 +1,4 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Answer, Diary } from '../../models/diary.schema';
 import { Expose, Type } from 'class-transformer';
 import {
   IsIn,
@@ -10,15 +9,16 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { DEFAULT_PAGINATE } from 'src/utils/constants';
+import { AnswerDto, DiaryDto } from './diary.dto';
 
-class AnswerWithPermission extends PickType(Answer, [
+class AnswerWithPermission extends PickType(AnswerDto, [
   '_id',
   'answerer',
   'createdAt',
   'updatedAt',
 ]) {}
 
-export class AnswererGetDto extends PickType(Diary, ['_id', 'questioner']) {
+export class AnswererGetDto extends PickType(DiaryDto, ['_id', 'questioner']) {
   @ApiProperty({
     example: [
       {

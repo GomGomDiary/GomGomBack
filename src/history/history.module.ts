@@ -2,13 +2,11 @@ import { Module } from '@nestjs/common';
 import { HistoryController } from './history.controller';
 import { HistoryService } from './history.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiaryHistory } from 'src/models/diaryHistory.schema';
+import { History } from 'src/models/history.schema';
 import { HistoryRepository } from '../common/repositories/history.repository';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: 'DiaryHistory', schema: DiaryHistory }]),
-  ],
+  imports: [MongooseModule.forFeature([{ name: 'History', schema: History }])],
   controllers: [HistoryController],
   providers: [HistoryService, HistoryRepository],
 })

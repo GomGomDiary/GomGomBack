@@ -36,6 +36,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (typeof error === 'string') {
       return response.status(status).json({
         statusCode: status,
+        error,
         timestampUtc: now.toISOString().replace('Z', ''),
         timestampKst: toKoreaTime(now),
         path: request.url,
@@ -44,6 +45,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     response.status(status).json({
       statusCode: status,
+      ...error,
       timestampUtc: now.toISOString().replace('Z', ''),
       timestampKst: toKoreaTime(now),
       path: request.url,

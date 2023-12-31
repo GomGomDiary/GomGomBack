@@ -1,8 +1,8 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Diary } from '../../models/diary.schema';
 import { Expose } from 'class-transformer';
+import { DiaryDto } from './diary.dto';
 
-export class QuestionShowDto extends PickType(Diary, ['_id', 'question']) {
+export class QuestionShowDto extends PickType(DiaryDto, ['_id', 'question']) {
   @ApiProperty({
     example: '3',
     description: 'questionList length',

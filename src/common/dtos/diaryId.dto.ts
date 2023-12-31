@@ -14,7 +14,7 @@ export class DiaryIdDto {
 
   @ApiProperty({
     example: '634ba08de9664d0e9b7a82f8',
-    description: 'historyId',
+    description: 'diaryId',
     required: true,
   })
   @IsNotEmpty()

@@ -11,11 +11,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
-import { DiaryPostDto } from '../common/dtos/diary.post.dto';
+import { CreateDiaryDto as CreateDiaryDto } from '../common/dtos/diary.post.dto';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { Response } from 'express';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
-import { AnswerPostDto } from '../common/dtos/answer.post.dto';
+import { CreateAnswerDto } from '../common/dtos/answer.post.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { CountersignPostDto } from '../common/dtos/counstersign.post.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -146,7 +146,7 @@ export class DiaryController {
   @ApiCookieAuth('diaryUser')
   @Post('question')
   async postQuestion(
-    @Body() body: DiaryPostDto,
+    @Body() body: CreateDiaryDto,
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -248,7 +248,7 @@ export class DiaryController {
   @Post('answer/:diaryId')
   async postAnswer(
     @Param('diaryId') diaryId: string,
-    @Body() body: AnswerPostDto,
+    @Body() body: CreateAnswerDto,
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
     @Res({ passthrough: true }) res: Response,
   ) {

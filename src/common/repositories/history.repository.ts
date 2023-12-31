@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DiaryHistory } from 'src/models/diaryHistory.schema';
+import { History } from 'src/models/history.schema';
 import { HistoryGetDto } from '../dtos/history.get.dto';
 import { HistoryIdDto } from '../dtos/historyId.dto';
 import {
@@ -13,13 +13,13 @@ import { PaginateQueryType } from 'src/utils/pagination';
 @Injectable()
 export class HistoryRepository {
   constructor(
-    @InjectModel(DiaryHistory.name)
-    private readonly histoyModel: Model<DiaryHistory>,
+    @InjectModel(History.name)
+    private readonly historyModel: Model<History>,
   ) {}
 
   async findHistoryList(query: PaginateQueryType, take = 5) {
     try {
-      return await this.histoyModel
+      return await this.historyModel
         .find(query, { _id: 1, createdAt: 1, numberOfAnswerers: 1 })
         .lean<[HistoryGetDto]>()
         .limit(take)
@@ -39,12 +39,12 @@ export class HistoryRepository {
 
   async findOne(historyIdDto: HistoryIdDto, clientId: Types.ObjectId) {
     try {
-      return await this.histoyModel
+      return await this.historyModel
         .findOne(
           { _id: historyIdDto.historyId, diaryId: clientId },
           { answerList: { $slice: [0, 5] } },
         )
-        .lean<DiaryHistory>()
+        .lean<History>()
         .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
-import { DiaryPostDto } from '../dtos/diary.post.dto';
+import { CreateDiaryDto } from '../dtos/diary.post.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,
@@ -27,7 +27,7 @@ export class DiaryRepository {
    * 해당 유저가 없는 경우 에러를 뱉으면 안됩니다.
    * 즉, orFail을 사용해서는 안됩니다.
    */
-  async checkDuplication(diaryId: string, clientId: string) {
+  async checkDuplication(diaryId: string, clientId: string | undefined) {
     try {
       return !!(await this.diaryModel
         .findOne({
@@ -83,7 +83,7 @@ export class DiaryRepository {
     }
   }
 
-  async create(diary: DiaryPostDto) {
+  async create(diary: CreateDiaryDto) {
     try {
       return await this.diaryModel.create(diary);
     } catch (err) {
@@ -98,7 +98,7 @@ export class DiaryRepository {
     }
   }
 
-  async createWithId(id: string, body: DiaryPostDto) {
+  async createWithId(id: string, body: CreateDiaryDto) {
     try {
       return await this.diaryModel.create({ _id: id, ...body });
     } catch (err) {
@@ -334,7 +334,7 @@ export class DiaryRepository {
     }
   }
 
-  async updateOne(diaryId: string, body: DiaryPostDto) {
+  async updateOne(diaryId: string, body: CreateDiaryDto) {
     try {
       return await this.diaryModel.updateOne(
         {

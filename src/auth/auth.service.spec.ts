@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let diaryRepository;
+  let diaryRepository: any;
   let jwtService: DeepMocked<JwtService>;
   // let diaryRepository: DeepMocked<DiaryRepository>;
   const mockDiaryRepository = {

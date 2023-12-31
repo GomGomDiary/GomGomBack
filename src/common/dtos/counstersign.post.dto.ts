@@ -1,4 +1,4 @@
 import { PickType } from '@nestjs/swagger';
-import { Diary } from '../../models/diary.schema';
+import { DiaryDto } from './diary.dto';
 
-export class CountersignPostDto extends PickType(Diary, ['countersign']) {}
+export class CountersignPostDto extends PickType(DiaryDto, ['countersign']) {}

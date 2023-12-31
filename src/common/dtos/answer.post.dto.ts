@@ -1,4 +1,7 @@
 import { PickType } from '@nestjs/swagger';
-import { Answer } from '../../models/diary.schema';
+import { AnswerDto } from './diary.dto';
 
-export class AnswerPostDto extends PickType(Answer, ['answerer', 'answers']) {}
+export class CreateAnswerDto extends PickType(AnswerDto, [
+  'answerer',
+  'answers',
+]) {}
