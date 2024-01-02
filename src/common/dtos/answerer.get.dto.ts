@@ -8,7 +8,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { DEFAULT_PAGINATE } from 'src/utils/constants';
+import { DEFAULT_PAGINATE, SORT_ORDER } from 'src/utils/constants';
 import { AnswerDto, DiaryDto } from './diary.dto';
 
 class AnswerWithPermission extends PickType(AnswerDto, [
@@ -65,4 +65,7 @@ export class PaginateAnswererDto {
   @IsNumber()
   @IsIn(DEFAULT_PAGINATE)
   take: number;
+
+  @IsIn(SORT_ORDER)
+  sortOrder: string;
 }
