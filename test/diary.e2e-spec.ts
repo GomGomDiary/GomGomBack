@@ -287,7 +287,7 @@ describe('Diary Controller (e2e)', () => {
     });
 
     it('diaryId param이 존재하지 않을 경우 404를 반환한다.', async () => {
-      const query = 'start=0&take=5';
+      const query = 'start=0&take=5&sortOrder=asc';
       const nonExistentDiaryId = '1'.repeat(24);
       const result = await request(app.getHttpServer()).get(
         `/v1/diary/answerers/${nonExistentDiaryId}?${query}`,
@@ -305,11 +305,13 @@ describe('Diary Controller (e2e)', () => {
     });
 
     it.each([
-      { start: 10, take: 5, expected: 5 },
-      { start: 0, take: 10, expected: 10 },
+      { start: 0, take: 5, sortOrder: 'asc', expected: 5 },
+      { start: 10, take: 5, sortOrder: 'asc', expected: 5 },
+      { start: 0, take: 10, sortOrder: 'desc', expected: 10 },
+      { start: 10, take: 10, sortOrder: 'desc', expected: 10 },
     ])(
-      'start = $start, take = $take일 때 answerList의 길이는 $expected여야 한다.',
-      async ({ start, take, expected }) => {
+      'start = $start, take = $take, sortOrder = $sortOrder일 때, answerList의 길이는 $expected여야 한다.',
+      async ({ start, take, sortOrder, expected }) => {
         const promises = Array.from({ length: 20 }, (_, i) => {
           return request(app.getHttpServer())
             .post(`/v1/diary/answer/${diaryId}`)
@@ -321,7 +323,7 @@ describe('Diary Controller (e2e)', () => {
         });
         await Promise.all(promises);
         const result = await request(app.getHttpServer()).get(
-          `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}`,
+          `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}&sortOrder=${sortOrder}`,
         );
 
         expect(result.statusCode).toBe(200);
@@ -329,9 +331,47 @@ describe('Diary Controller (e2e)', () => {
       },
     );
 
+    it.each([
+      { start: 0, take: 5, sortOrder: 'asc' },
+      { start: 10, take: 10, sortOrder: 'desc' },
+    ])(
+      'sortOrder = $sortOrder일 때, answerList의 순서가 createdAt 기준으로 정렬되어야 한다.',
+      async ({ start, take, sortOrder }) => {
+        const promises = Array.from({ length: 20 }, (_, i) => {
+          return request(app.getHttpServer())
+            .post(`/v1/diary/answer/${diaryId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+              answers: ['yoyoo', '7', 'food', 'hobby', 'nodejs'],
+              answerer: `client${i + 1}`,
+            });
+        });
+        await Promise.all(promises);
+        const result = await request(app.getHttpServer()).get(
+          `/v1/diary/answerers/${diaryId}?start=${start}&take=${take}&sortOrder=${sortOrder}`,
+        );
+
+        expect(result.statusCode).toBe(200);
+
+        const isOrdered = result.body.answererList
+          .slice(1)
+          .every((item: any, i: number) => {
+            const previousDate = new Date(
+              result.body.answererList[i].createdAt,
+            );
+            const currentDate = new Date(item.createdAt);
+
+            return sortOrder === 'asc'
+              ? currentDate >= previousDate
+              : currentDate <= previousDate;
+          });
+        expect(isOrdered).toBe(true);
+      },
+    );
+
     it('response는 AnswererGetDto와 validation시 에러가 없어야 한다.', async () => {
       const result = await request(app.getHttpServer()).get(
-        `/v1/diary/answerers/${diaryId}?start=0&take=5`,
+        `/v1/diary/answerers/${diaryId}?start=0&take=5&sortOrder=asc`,
       );
       const resultJson = JSON.parse(result.text);
       const dtoObject = plainToClass(AnswererGetDto, resultJson);
@@ -348,16 +388,15 @@ describe('Diary Controller (e2e)', () => {
     beforeEach(async () => {
       ({ diaryId } = await createDiaryWithAnswer(app, diaryData));
     });
-
-    it('diaryId param이 존재하지 않을 경우 404를 반환한다.', async () => {
-      const query = 'start=0&take=5';
-      const nonExistentDiaryId = '1'.repeat(24);
-      const result = await request(app.getHttpServer()).get(
-        `/v1/diary/answerers/${nonExistentDiaryId}?${query}`,
-      );
-
-      expect(result.statusCode).toBe(404);
-    });
+    // it('diaryId param이 존재하지 않을 경우 404를 반환한다.', async () => {
+    //   const query = 'start=0&take=5&sortOrder=asc';
+    //   const nonExistentDiaryId = '1'.repeat(24);
+    //   const result = await request(app.getHttpServer()).get(
+    //     `/v1/diary/answerers/${nonExistentDiaryId}?${query}`,
+    //   );
+    //
+    //   expect(result.statusCode).toBe(404);
+    // });
 
     it('response는 ChallengeGetDto와 validation시 에러가 없어야 한다.', async () => {
       const result = await request(app.getHttpServer()).get(
