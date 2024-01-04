@@ -33,16 +33,16 @@ export class HistoryService {
   }
 
   async findOne(historyIdDto: HistoryIdDto, clientId: Types.ObjectId) {
-    const diaryHistoryItem = await this.historyRepository.findOne(
+    const historyItem = await this.historyRepository.findOne(
       historyIdDto,
       clientId,
     );
-    if (!diaryHistoryItem) {
+    if (!historyItem) {
       throw new NotFoundException(
         `${clientId} 유저의 ${historyIdDto.historyId} history가 존재하지 않습니다`,
       );
     }
 
-    return diaryHistoryItem;
+    return historyItem;
   }
 }

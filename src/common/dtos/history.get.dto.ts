@@ -5,9 +5,9 @@ import { Types } from 'mongoose';
 import { MongoIdTransfrom } from 'src/common/decorators/mongoIdTransform.decorator';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
-import { DiaryHistory } from 'src/models/diaryHistory.schema';
+import { HistoryDto } from './history.dto';
 
-export class HistoryItemGetDto extends OmitType(DiaryHistory, [
+export class HistoryItemGetDto extends OmitType(HistoryDto, [
   'updatedAt',
   'countersign',
 ]) {
@@ -20,7 +20,7 @@ export class HistoryItemGetDto extends OmitType(DiaryHistory, [
   countersign: string;
 }
 
-export class HistoryGetDto extends PickType(DiaryHistory, [
+export class HistoryGetDto extends PickType(HistoryDto, [
   '_id',
   'createdAt',
   'numberOfAnswerers',

@@ -1,7 +1,7 @@
 import { PickType } from '@nestjs/swagger';
-import { Diary } from '../../models/diary.schema';
+import { DiaryDto } from './diary.dto';
 
-export class DiaryPostDto extends PickType(Diary, [
+export class CreateDiaryDto extends PickType(DiaryDto, [
   'question',
   'questioner',
   'challenge',

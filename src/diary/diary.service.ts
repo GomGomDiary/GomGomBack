@@ -6,13 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
-import { DiaryPostDto } from '../common/dtos/diary.post.dto';
+import { CreateDiaryDto } from '../common/dtos/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { AnswerPostDto } from '../common/dtos/answer.post.dto';
-import { Answer, Diary } from '../models/diary.schema';
-import { QuestionShowDto } from '../common/dtos/question.get.dto';
+import { CreateAnswerDto } from '../common/dtos/answer.post.dto';
+import { Answer } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
@@ -21,6 +20,8 @@ import {
   CustomInternalServerError,
 } from 'src/common/errors/customError';
 import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
+import { DiaryDto } from 'src/common/dtos/diary.dto';
+import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
 
 @Injectable()
 export class DiaryService {
@@ -102,7 +103,9 @@ export class DiaryService {
     return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
   }
 
-  async getQuestion(diaryId: string): Promise<Pick<Diary, '_id' | 'question'>> {
+  async getQuestion(
+    diaryId: string,
+  ): Promise<Pick<DiaryDto, '_id' | 'question'>> {
     const question = await this.diaryRepository.findQuestion(diaryId);
     if (!question) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');
@@ -115,7 +118,7 @@ export class DiaryService {
     clientId,
     res,
   }: {
-    body: DiaryPostDto;
+    body: CreateDiaryDto;
     clientId: string;
     res: Response;
   }) {
@@ -171,7 +174,7 @@ export class DiaryService {
   }: {
     diaryId: string;
     answerId: string;
-  }) {
+  }): Promise<AnswerGetDto> {
     const diary = await this.diaryRepository.findDiaryWithAnswerId(
       diaryId,
       answerId,
@@ -217,8 +220,8 @@ export class DiaryService {
     res,
   }: {
     diaryId: string;
-    clientId: string;
-    answer: AnswerPostDto;
+    clientId: string | undefined;
+    answer: CreateAnswerDto;
     res: Response;
   }) {
     if (diaryId === clientId) {

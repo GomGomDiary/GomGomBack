@@ -1,11 +1,11 @@
 import { Diary } from '../../../models/diary.schema';
-import { DiaryPostDto } from '../../dtos/diary.post.dto';
+import { CreateDiaryDto } from '../../dtos/diary.post.dto';
 
 export interface DiaryInterfaceRepository {
   checkDuplication(diaryId: string, clientId: string): Promise<boolean>;
   checkOwnership(id: string): Promise<boolean>;
-  create(diary: DiaryPostDto): Promise<Diary>;
-  createWithId(id: string, body: DiaryPostDto): Promise<Diary>;
+  create(diary: CreateDiaryDto): Promise<Diary>;
+  createWithId(id: string, body: CreateDiaryDto): Promise<Diary>;
   existAsAnswerer(id: string): Promise<boolean>;
   existAsDiaryAnswerer(diaryId: string, cookieId: string): Promise<boolean>;
   findDiaryWithoutAnswers(diaryId: string): Promise<Diary>;

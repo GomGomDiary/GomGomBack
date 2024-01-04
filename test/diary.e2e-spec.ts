@@ -9,7 +9,7 @@ import { clientId1_Answer, diaryData } from './utils/constants';
 import { createDiary } from './utils/createDiary';
 import { createDiaryWithAnswer } from './utils/createDiaryWithAnswer';
 import { AnswererGetDto } from 'src/common/dtos/answerer.get.dto';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { QuestionShowDto } from 'src/common/dtos/question.get.dto';
 import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
@@ -215,7 +215,7 @@ describe('Diary Controller (e2e)', () => {
         .get(`/v1/diary/question/${diaryId}`)
         .set('Authorization', `Bearer ${token}`);
       const resultJson = JSON.parse(result.text);
-      const dtoObject = plainToClass(QuestionShowDto, resultJson);
+      const dtoObject = plainToInstance(QuestionShowDto, resultJson);
       const errors = await validate(dtoObject);
 
       expect(result.statusCode).toBe(200);

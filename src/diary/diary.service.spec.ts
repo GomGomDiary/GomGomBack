@@ -4,13 +4,13 @@ import { DiaryRepository } from '../common/repositories/diary.repository';
 import httpMocks from 'node-mocks-http';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { AnswerPostDto } from 'src/common/dtos/answer.post.dto';
+import { CreateAnswerDto } from 'src/common/dtos/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
   let cacheService: DeepMocked<CacheRepository>;
-  let diaryRepository;
+  let diaryRepository: any;
   // let diaryRepository: DeepMocked<DiaryRepository>;
 
   const mockDiaryRepository = {
@@ -174,7 +174,7 @@ describe('DiaryService', () => {
       it('BadRequestException을 throw한다.', async () => {
         const diaryId = '1234';
         const clientId = '1234';
-        const answer: AnswerPostDto = {
+        const answer: CreateAnswerDto = {
           answerer: 'answerer',
           answers: ['1', '2'],
         };
@@ -195,7 +195,7 @@ describe('DiaryService', () => {
       it('ConflictException을 throw한다.', async () => {
         const diaryId = '1234';
         const clientId = '2345';
-        const answer: AnswerPostDto = {
+        const answer: CreateAnswerDto = {
           answerer: 'answerer',
           answers: ['1', '2'],
         };
@@ -216,7 +216,7 @@ describe('DiaryService', () => {
     describe('question 배열과 answer 배열이 다를 때', () => {
       it('BadRequestException을 throw한다.', async () => {
         const diaryId = '1234';
-        const answer: AnswerPostDto = {
+        const answer: CreateAnswerDto = {
           answerer: 'answerer',
           answers: ['1', '2', '3'],
         };
@@ -240,7 +240,7 @@ describe('DiaryService', () => {
     describe('정상적인 동작일 때', () => {
       it('save 메서드를 호출한다', async () => {
         const diaryId = '1234';
-        const answer: AnswerPostDto = {
+        const answer: CreateAnswerDto = {
           answerer: 'answerer',
           answers: ['1', '2'],
         };
@@ -268,7 +268,7 @@ describe('DiaryService', () => {
 
       it('cache del를 호출한다', async () => {
         const diaryId = '1234';
-        const answer: AnswerPostDto = {
+        const answer: CreateAnswerDto = {
           answerer: 'answerer',
           answers: ['1', '2'],
         };

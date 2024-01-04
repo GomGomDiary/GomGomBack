@@ -8,10 +8,7 @@ import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Diary, DiarySchema } from 'src/models/diary.schema';
-import {
-  DiaryHistorySchema,
-  DiaryHistory,
-} from 'src/models/diaryHistory.schema';
+import { HistorySchema, History } from 'src/models/history.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { CustomInternalServerError } from 'src/common/errors/customError';
@@ -27,13 +24,13 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
     MongooseModule.forFeatureAsync([
       {
         name: Diary.name,
-        inject: [getModelToken(DiaryHistory.name)],
+        inject: [getModelToken(History.name)],
         imports: [
           MongooseModule.forFeature([
-            { name: DiaryHistory.name, schema: DiaryHistorySchema },
+            { name: History.name, schema: HistorySchema },
           ]),
         ],
-        useFactory: async (diaryHistoryModel) => {
+        useFactory: async (historyModel) => {
           const schema = DiarySchema;
           schema.pre('updateOne', async function () {
             const retentionDiary = await this.model
@@ -54,13 +51,7 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
             retentionDiary.createdAt = retentionDiary.updatedAt;
             const numberOfAnswerers = retentionDiary.answerList.length;
 
-            const refinedRetentionDiary = {
-              ...retentionDiary,
-            } as Partial<Diary>;
-            delete refinedRetentionDiary._id;
-            delete refinedRetentionDiary.updatedAt;
-
-            await diaryHistoryModel.create({
+            await historyModel.create({
               ...retentionDiary,
               diaryId,
               numberOfAnswerers,

@@ -1,44 +1,150 @@
-// import { Exclude } from 'class-transformer';
-// import { Answer, Diary } from '../../entity/diary.schema';
-//
-// export class DiaryDto {
-//   @Exclude() private _id: string;
-//   @Exclude() _question: string[];
-//   @Exclude() private _questioner: string;
-//   @Exclude() _challenge: string;
-//   @Exclude() private _countersign: string;
-//   @Exclude() private _answerList: Answer[];
-//
-//   constructor(diary: Diary) {
-//     this._id = diary._id;
-//     this._question = diary.question;
-//     this._questioner = diary.questioner;
-//     this._challenge = diary.challenge;
-//     this._countersign = diary.countersign;
-//     this._answerList = diary.answerList;
-//   }
-//
-//   get id() {
-//     return this._id;
-//   }
-//
-//   get question() {
-//     return this._question;
-//   }
-//
-//   get questioner() {
-//     return this._questioner;
-//   }
-//
-//   get challenge() {
-//     return this._challenge;
-//   }
-//
-//   get countersign() {
-//     return this._countersign;
-//   }
-//
-//   get answerList() {
-//     return this._answerList;
-//   }
-// }
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  Length,
+} from 'class-validator';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Types } from 'mongoose';
+import { toKoreaTime } from 'src/utils/toKoreaTime';
+
+export class AnswerDto {
+  @ApiProperty({
+    example: '634ba08de9664d0e9b7a82f8',
+    description: 'id',
+    required: true,
+  })
+  @Type(() => Types.ObjectId)
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
+  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Expose()
+  _id: Types.ObjectId;
+
+  @ApiProperty({
+    example: 'yoyoo',
+    description: 'nickname',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 10)
+  @Expose()
+  answerer: string;
+
+  @ApiProperty({
+    example: ['answer1', 'answer2', 'answer3'],
+    description: 'answer list',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayMinSize(3)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
+  @Expose()
+  answers: string[];
+
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  @Expose()
+  createdAt: Date;
+
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  @Expose()
+  updatedAt: Date;
+}
+
+export class DiaryDto {
+  @ApiProperty({
+    example: '634ba08de9664d0e9b7a82f8',
+    description: 'id',
+    required: true,
+  })
+  @Type(() => Types.ObjectId)
+  @TransformObjectIdToString('_id', { toPlainOnly: true })
+  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Expose()
+  _id: Types.ObjectId;
+
+  @ApiProperty({
+    example: ['question1', 'question2', 'question3'],
+    description: 'question list',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayMinSize(3)
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
+  @Expose()
+  question: string[];
+
+  @ApiProperty({
+    example: 'yoyoo',
+    description: 'nickname',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 10)
+  @Expose()
+  questioner: string;
+
+  @ApiProperty({
+    example: '내 생일',
+    description: '암호',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 50)
+  @Expose()
+  challenge: string;
+
+  @ApiProperty({
+    example: '0120',
+    description: '암호에 대한 답',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 50)
+  @Exclude({ toPlainOnly: true })
+  @Expose()
+  countersign: string;
+
+  @ApiProperty({
+    example: [
+      {
+        answerer: 'yoon',
+        _id: '654ba13be9664d0e9b7a82fa',
+        createdAt: '2023-11-08T14:54:51.929Z',
+        updatedAt: '2023-11-08T14:54:51.929Z',
+      },
+      {
+        answerer: 'metamong',
+        _id: '654ba1a2e9664d0e9b7a8304',
+        createdAt: '2023-11-08T14:56:34.596Z',
+        updatedAt: '2023-11-08T14:56:34.596Z',
+      },
+    ],
+    description: 'answerList',
+    required: true,
+  })
+  @Type(() => AnswerDto)
+  @Expose()
+  answerList: AnswerDto[];
+
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  @Expose()
+  createdAt: Date;
+
+  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
+  @Expose()
+  updatedAt: Date;
+}
