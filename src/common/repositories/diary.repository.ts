@@ -172,18 +172,29 @@ export class DiaryRepository {
               _id: 1,
               questioner: 1,
               answerList: {
-                $slice: [
-                  {
-                    $sortArray: {
-                      input: '$answerList',
-                      sortBy: {
-                        createdAt: sortOrder,
+                $map: {
+                  input: {
+                    $slice: [
+                      {
+                        $sortArray: {
+                          input: '$answerList',
+                          sortBy: {
+                            createdAt: sortOrder,
+                          },
+                        },
                       },
-                    },
+                      start,
+                      take,
+                    ],
                   },
-                  start,
-                  take,
-                ],
+                  as: 'answer',
+                  in: {
+                    _id: '$$answer._id',
+                    answerer: '$$answer.answerer',
+                    createdAt: '$$answer.createdAt',
+                    updatedAt: '$$answer.updatedAt',
+                  },
+                },
               },
               answerCount: { $size: '$answerList' },
             },
