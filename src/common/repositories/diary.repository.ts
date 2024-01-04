@@ -160,7 +160,8 @@ export class DiaryRepository {
   async findDiaryWithoutAnswers(
     diaryId: string,
     start: number,
-    end: number,
+    take: number,
+    sortOrder: -1 | 1,
   ): Promise<DiaryWithAnswerCount> {
     try {
       return (
@@ -172,7 +173,20 @@ export class DiaryRepository {
               questioner: 1,
               answerList: {
                 $map: {
-                  input: { $slice: ['$answerList', start, end] },
+                  input: {
+                    $slice: [
+                      {
+                        $sortArray: {
+                          input: '$answerList',
+                          sortBy: {
+                            createdAt: sortOrder,
+                          },
+                        },
+                      },
+                      start,
+                      take,
+                    ],
+                  },
                   as: 'answer',
                   in: {
                     _id: '$$answer._id',
@@ -192,7 +206,7 @@ export class DiaryRepository {
         information: {
           diaryId,
           start,
-          end,
+          end: take,
         },
         where: 'findDiaryWithoutAnswers',
         err,

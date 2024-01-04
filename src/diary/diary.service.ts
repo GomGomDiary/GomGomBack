@@ -194,10 +194,12 @@ export class DiaryService {
   }
 
   async getAnswerers(diaryId: string, query: PaginateAnswererDto) {
+    const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
     const diary = await this.diaryRepository.findDiaryWithoutAnswers(
       diaryId,
       query.start,
       query.take,
+      sortOrder,
     );
     if (!diary) {
       throw new NotFoundException('Diary가 존재하지 않습니다.');

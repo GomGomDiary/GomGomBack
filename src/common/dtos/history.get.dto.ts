@@ -64,5 +64,3 @@ export class PaginateHistoryDto extends PickType(PaginateAnswererDto, [
   @MongoIdTransfrom({ toClassOnly: true })
   next: Types.ObjectId | undefined;
 }
-
-// export class HistoryGetListDto extends HistoryGetDto[] {}
