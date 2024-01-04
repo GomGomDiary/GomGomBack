@@ -67,5 +67,5 @@ export class PaginateAnswererDto {
   take: number;
 
   @IsIn(SORT_ORDER)
-  sortOrder: string;
+  sortOrder = 'desc';
 }
