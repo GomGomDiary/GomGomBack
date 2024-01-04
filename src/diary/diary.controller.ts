@@ -168,17 +168,15 @@ export class DiaryController {
   })
   @ApiQuery({
     name: 'start',
-    type: Number,
-    required: true,
   })
   @ApiQuery({
     name: 'take',
-    type: Number,
-    required: true,
+  })
+  @ApiQuery({
+    name: 'sortOrder',
   })
   @ApiParam({
     name: 'diaryId',
-    required: true,
   })
   @UseInterceptors(HttpCacheInterceptor)
   @CacheTTL(CACHE_TTL)
