@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
-import { CreateDiaryDto } from '../dtos/diary.post.dto';
+import { CreateDiaryDto } from '../dtos/request/diary.post.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,

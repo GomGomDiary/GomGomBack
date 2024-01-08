@@ -4,8 +4,8 @@ import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { MongoIdTransfrom } from 'src/common/decorators/mongoIdTransform.decorator';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
-import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
-import { HistoryDto } from './history.dto';
+import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
+import { HistoryDto } from '../history.dto';
 
 export class HistoryItemGetDto extends OmitType(HistoryDto, [
   'updatedAt',
@@ -48,7 +48,7 @@ export class HistoryGetListDto {
   @Expose()
   @Type(() => Types.ObjectId)
   @TransformObjectIdToString('nextDiaryId', { toPlainOnly: true })
-  @Transform((value) => value.obj.next, { toClassOnly: true })
+  @MongoIdTransfrom({ toClassOnly: true })
   next: Types.ObjectId;
 }
 

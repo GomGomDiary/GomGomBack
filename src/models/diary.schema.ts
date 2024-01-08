@@ -19,56 +19,56 @@ const options: SchemaOptions = {
 
 @Schema(options)
 export class Answer {
-  @ApiProperty({
-    example: '634ba08de9664d0e9b7a82f8',
-    description: 'id',
-    required: true,
-  })
-  @Type(() => Types.ObjectId)
-  @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj._id, { toClassOnly: true })
+  // @ApiProperty({
+  //   example: '634ba08de9664d0e9b7a82f8',
+  //   description: 'id',
+  //   required: true,
+  // })
+  // @Type(() => Types.ObjectId)
+  // @TransformObjectIdToString('_id', { toPlainOnly: true })
+  // @Transform((value) => value.obj._id, { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
 
-  @ApiProperty({
-    example: 'yoyoo',
-    description: 'nickname',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsString()
-  @Length(1, 10)
+  // @ApiProperty({
+  //   example: 'yoyoo',
+  //   description: 'nickname',
+  //   required: true,
+  // })
+  // @IsNotEmpty()
+  // @IsString()
+  // @Length(1, 10)
+  // @Expose()
   @Prop()
-  @Expose()
   answerer: string;
 
-  @ApiProperty({
-    example: ['answer1', 'answer2', 'answer3'],
-    description: 'answer list',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(3)
-  @ArrayMaxSize(10)
-  @IsString({ each: true })
-  @Length(1, 100, { each: true })
+  // @ApiProperty({
+  //   example: ['answer1', 'answer2', 'answer3'],
+  //   description: 'answer list',
+  //   required: true,
+  // })
+  // @IsNotEmpty()
+  // @IsArray()
+  // @ArrayMinSize(3)
+  // @ArrayMaxSize(10)
+  // @IsString({ each: true })
+  // @Length(1, 100, { each: true })
+  // @Expose()
   @Prop()
-  @Expose()
   answers: string[];
 
-  @ApiProperty({
-    example: '2022-01-01T00:00:00.000',
-    description: 'createdAt',
-  })
+  // @ApiProperty({
+  //   example: '2022-01-01T00:00:00.000',
+  //   description: 'createdAt',
+  // })
+  // @Expose()
+  // @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   @Prop()
-  @Expose()
-  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   createdAt: Date;
 
+  // @Expose()
+  // @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   @Prop()
-  @Expose()
-  @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   updatedAt: Date;
 }
 

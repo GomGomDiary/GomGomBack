@@ -9,7 +9,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { DEFAULT_PAGINATE, SORT_ORDER } from 'src/utils/constants';
-import { AnswerDto, DiaryDto } from './diary.dto';
+import { AnswerDto, DiaryDto } from '../diary.dto';
 
 class AnswerWithPermission extends PickType(AnswerDto, [
   '_id',

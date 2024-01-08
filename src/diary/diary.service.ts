@@ -6,22 +6,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
-import { CreateDiaryDto } from '../common/dtos/diary.post.dto';
+import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { CreateAnswerDto } from '../common/dtos/answer.post.dto';
+import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
 import { Answer } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
+import { DiaryIdDto } from 'src/common/dtos/request/diaryId.dto';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from 'src/common/errors/customError';
-import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
+import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { DiaryDto } from 'src/common/dtos/diary.dto';
-import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
+import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
 
 @Injectable()
 export class DiaryService {

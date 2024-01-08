@@ -20,7 +20,7 @@ export class AnswerDto {
   })
   @Type(() => Types.ObjectId)
   @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Transform((value) => value.obj[value.key], { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
 
@@ -66,7 +66,7 @@ export class DiaryDto {
   })
   @Type(() => Types.ObjectId)
   @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @Transform((value) => value.obj[value.key], { toClassOnly: true })
   @Expose()
   _id: Types.ObjectId;
 

@@ -1,5 +1,5 @@
 import { Diary } from '../../../models/diary.schema';
-import { CreateDiaryDto } from '../../dtos/diary.post.dto';
+import { CreateDiaryDto } from '../../dtos/request/diary.post.dto';
 
 export interface DiaryInterfaceRepository {
   checkDuplication(diaryId: string, clientId: string): Promise<boolean>;

@@ -13,7 +13,7 @@ export class HistoryDto extends DiaryDto {
   @Type(() => Types.ObjectId)
   @Transform(
     (value) => {
-      return value.obj.diaryId;
+      return value.obj[value.key];
     },
     { toClassOnly: true },
   )
@@ -21,6 +21,11 @@ export class HistoryDto extends DiaryDto {
   @Expose()
   diaryId: Types.ObjectId;
 
+  @ApiProperty({
+    example: '4',
+    description: 'Answerer 수',
+    required: true,
+  })
   @Expose()
   numberOfAnswerers: number;
 }
