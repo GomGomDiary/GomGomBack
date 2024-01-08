@@ -14,8 +14,8 @@ import { validate } from 'class-validator';
 import { QuestionShowDto } from 'src/common/dtos/response/question.get.dto';
 import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
 import { DiaryTokenShowDto } from 'src/common/dtos/response/countersign.res.dto';
-import { ChallengeGetDto } from 'src/common/dtos/challenge.res.dto';
 import { HistoryGetListDto } from 'src/common/dtos/response/history.get.dto';
+import { ChallengeGetDto } from 'src/common/dtos/response/challenge.get.dto';
 
 describe('Diary Controller (e2e)', () => {
   let app: INestApplication;

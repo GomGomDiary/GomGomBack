@@ -4,8 +4,8 @@ import { DiaryRepository } from '../common/repositories/diary.repository';
 import httpMocks from 'node-mocks-http';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { CreateAnswerDto } from 'src/common/dtos/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { CreateAnswerDto } from 'src/common/dtos/request/answer.post.dto';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
