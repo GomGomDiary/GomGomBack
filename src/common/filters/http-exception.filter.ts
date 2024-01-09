@@ -30,8 +30,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     logger.warn(`[${request.method}] ${request.url}   ${user}`);
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      await sendWebhook(error, userInform);
       logger.error(error);
+      await sendWebhook(error, userInform);
     }
     if (typeof error === 'string') {
       return response.status(status).json({
