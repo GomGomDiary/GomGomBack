@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { DiaryDto } from './diary.dto';
+import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 
 export class HistoryDto extends DiaryDto {
   @ApiProperty({
@@ -11,13 +12,14 @@ export class HistoryDto extends DiaryDto {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @Transform(
-    (value) => {
-      return value.obj[value.key];
-    },
-    { toClassOnly: true },
-  )
-  @TransformObjectIdToString('diaryId', { toPlainOnly: true })
+  @TransformObjectId()
+  // @Transform(
+  //   (value) => {
+  //     return value.obj[value.key];
+  //   },
+  //   { toClassOnly: true },
+  // )
+  // @TransformObjectIdToString('diaryId', { toPlainOnly: true })
   @Expose()
   diaryId: Types.ObjectId;
 
