@@ -22,6 +22,7 @@ export class HistoryRepository {
       return await this.historyModel
         .find(query, { _id: 1, createdAt: 1, numberOfAnswerers: 1 })
         .lean<[HistoryGetDto]>()
+        .sort({ _id: 1 })
         .limit(take)
         .exec();
     } catch (err) {
