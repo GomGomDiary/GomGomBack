@@ -3,8 +3,7 @@ import { Expose, Transform, Type } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 import { Types } from 'mongoose';
 import { Chat } from 'src/models/chat.schema';
-import { TransformStringToObjectId } from '../decorators/mongoIdTransform.decorator';
-import { TransformObjectIdToString } from '../decorators/transformObjectIdToString.decorator';
+import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 
 // value.obj.* -> value.key 변환
 export class ChatDto extends Chat {
@@ -14,8 +13,7 @@ export class ChatDto extends Chat {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformStringToObjectId({ toClassOnly: true })
-  @TransformObjectIdToString('', { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   @IsNotEmpty()
   roomId: Types.ObjectId;
@@ -32,8 +30,7 @@ export class ChatDto extends Chat {
     },
     { toClassOnly: true },
   )
-  @TransformStringToObjectId({ toClassOnly: true })
-  @TransformObjectIdToString('', { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   @IsNotEmpty()
   clientId: Types.ObjectId;
