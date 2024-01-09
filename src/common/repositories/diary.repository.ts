@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Document, Model } from 'mongoose';
+import mongoose, { Document, Model, Types } from 'mongoose';
 import { CreateDiaryDto } from '../dtos/request/diary.post.dto';
 import {
   CustomInternalServerError,
@@ -49,7 +49,7 @@ export class DiaryRepository {
     }
   }
 
-  async checkOwnership(clientId: string) {
+  async checkOwnership(clientId: string | Types.ObjectId) {
     try {
       return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
     } catch (err) {

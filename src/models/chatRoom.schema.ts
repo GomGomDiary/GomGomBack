@@ -9,10 +9,10 @@ import { Types } from 'mongoose';
 })
 export class ChatRoom {
   @Prop()
-  roomId: Types.ObjectId;
+  questionerId: Types.ObjectId;
 
   @Prop()
-  owner: string;
+  answererId: Types.ObjectId;
 }
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);

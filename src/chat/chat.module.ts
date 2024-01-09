@@ -9,6 +9,7 @@ import { ChatRoomSchema } from 'src/models/chatRoom.schema';
 import { ChatMessageController } from './message/message.controller';
 import { ChatMessageService } from './message/message.service';
 import { ChatMessageRepository } from 'src/common/repositories/message.repository';
+import { DiaryModule } from 'src/diary/diary.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ChatMessageRepository } from 'src/common/repositories/message.repositor
         schema: ChatRoomSchema,
       },
     ]),
+    DiaryModule,
   ],
   providers: [
     ChatService,

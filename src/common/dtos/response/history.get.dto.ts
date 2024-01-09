@@ -2,7 +2,7 @@ import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
-import { MongoIdTransfrom } from 'src/common/decorators/mongoIdTransform.decorator';
+import { TransformStringToObjectId } from 'src/common/decorators/mongoIdTransform.decorator';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { HistoryDto } from '../history.dto';
@@ -48,7 +48,7 @@ export class HistoryGetListDto {
   @Expose()
   @Type(() => Types.ObjectId)
   @TransformObjectIdToString('nextDiaryId', { toPlainOnly: true })
-  @MongoIdTransfrom({ toClassOnly: true })
+  @TransformStringToObjectId({ toClassOnly: true })
   next: Types.ObjectId;
 }
 
@@ -61,6 +61,6 @@ export class PaginateHistoryDto extends PickType(PaginateAnswererDto, [
     required: true,
   })
   @IsOptional()
-  @MongoIdTransfrom({ toClassOnly: true })
+  @TransformStringToObjectId({ toClassOnly: true })
   next: Types.ObjectId | undefined;
 }

@@ -6,6 +6,7 @@ import {
   CustomInternalServerError,
 } from '../errors/customError';
 import { ChatRoom } from 'src/models/chatRoom.schema';
+import { CreateChatRoomDto } from '../dtos/request/chatRoom.post.dto';
 
 @Injectable()
 export class ChatRepository {
@@ -14,13 +15,18 @@ export class ChatRepository {
     private readonly chatRoomModel: Model<ChatRoom>,
   ) {}
 
-  async create(diaryId: Types.ObjectId) {
+  async create(questionerId: Types.ObjectId, dto: CreateChatRoomDto) {
     try {
-      return await this.chatRoomModel.create({ roomId: diaryId });
+      const { _id } = await this.chatRoomModel.create({
+        questionerId: questionerId,
+        ...dto,
+      });
+      return await this.chatRoomModel.findOne(_id, {}).lean().exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
-          diaryId,
+          questionerId,
+          dto,
         },
         where: 'createChatRoom',
         err,
@@ -29,15 +35,16 @@ export class ChatRepository {
     }
   }
 
-  async exist(roomId: Types.ObjectId) {
+  async exist(questionerId: Types.ObjectId, answererId: Types.ObjectId) {
     try {
       return !!(await this.chatRoomModel.exists({
-        roomId,
+        roomId: questionerId,
+        answererId,
       }));
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
-          roomId,
+          roomId: questionerId,
         },
         where: 'chatRoom exist',
         err,

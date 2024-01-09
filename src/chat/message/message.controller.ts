@@ -6,7 +6,7 @@ import { EmptyPipe } from 'src/common/pipes/empty.pipe';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
 import { Types } from 'mongoose';
 import { ChatMessageService } from './message.service';
-import { CreateChatDto } from 'src/common/dtos/request/chat.post.dto';
+import { CreateChatMessageDto } from 'src/common/dtos/request/chat.post.dto';
 import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
 import { CreateMessageDto } from 'src/common/dtos/response/chatMessage.post.dto';
 
@@ -18,7 +18,7 @@ export class ChatMessageController {
   @Post()
   @ReturnValueToDto(CreateMessageDto)
   async createChatMessage(
-    @Body() chat: CreateChatDto,
+    @Body() chat: CreateChatMessageDto,
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
     clientId: Types.ObjectId,
   ) {
