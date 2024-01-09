@@ -32,4 +32,4 @@ export class History extends Diary {
 
 export const HistorySchema = SchemaFactory.createForClass(History);
 
-HistorySchema.index({ diaryId: 1 });
+// HistorySchema.index({ diaryId: 1 });

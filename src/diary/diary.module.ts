@@ -49,10 +49,12 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
             const diaryId = retentionDiary._id;
 
             retentionDiary.createdAt = retentionDiary.updatedAt;
+            const { _id, ...rest } = retentionDiary;
+
             const numberOfAnswerers = retentionDiary.answerList.length;
 
             await historyModel.create({
-              ...retentionDiary,
+              ...rest,
               diaryId,
               numberOfAnswerers,
             });
