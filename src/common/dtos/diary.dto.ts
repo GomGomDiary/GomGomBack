@@ -7,10 +7,10 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
+import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 
 export class AnswerDto {
   @ApiProperty({
@@ -19,8 +19,7 @@ export class AnswerDto {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj[value.key], { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   _id: Types.ObjectId;
 
@@ -65,8 +64,7 @@ export class DiaryDto {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj[value.key], { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   _id: Types.ObjectId;
 

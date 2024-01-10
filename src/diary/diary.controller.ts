@@ -46,6 +46,9 @@ import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor'
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
 import { DiaryIdDto } from 'src/common/dtos/request/diaryId.dto';
+import { EmptyPipe } from 'src/common/pipes/empty.pipe';
+import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
+import { Types } from 'mongoose';
 
 @ApiTags('Diary')
 @Controller({
@@ -93,9 +96,10 @@ export class DiaryController {
   @Get(':diaryId')
   async isAnswerer(
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-    @Param() diaryIdDto: DiaryIdDto,
+    @Param('diaryId', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
+    diaryId: Types.ObjectId,
   ) {
-    return this.diaryService.checkAnswerer(clientId, diaryIdDto);
+    return this.diaryService.checkAnswerer(clientId, diaryId);
   }
 
   @ApiOperation({

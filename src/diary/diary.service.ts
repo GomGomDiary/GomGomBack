@@ -8,7 +8,7 @@ import {
 import { DiaryRepository } from '../common/repositories/diary.repository';
 import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Response } from 'express';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
 import { Answer } from '../models/diary.schema';
@@ -96,11 +96,11 @@ export class DiaryService {
     return this.diaryRepository.checkOwnership(clientId);
   }
 
-  async checkAnswerer(clientId: string, diaryIdDto: DiaryIdDto) {
+  async checkAnswerer(clientId: string, diaryId: Types.ObjectId) {
     if (!clientId) {
       return false;
     }
-    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
+    return this.diaryRepository.checkAnswerer(clientId, diaryId);
   }
 
   async getQuestion(

@@ -20,10 +20,15 @@ export const TransformStringToObjectId =
   };
 
 export const TransformObjectId: () => PropertyDecorator =
-  () => (target: object, propertyKey: string | symbol) => {
+  () => (target: object, propertyKey: string) => {
     Transform(({ type, obj }) => {
       switch (type) {
         case TransformationType.PLAIN_TO_CLASS:
+          if (!mongoose.isValidObjectId(obj[propertyKey])) {
+            throw new BadRequestException(
+              `${propertyKey}가 형식에 맞지 않습니다.`,
+            );
+          }
           return new Types.ObjectId(obj[propertyKey]);
 
         case TransformationType.CLASS_TO_PLAIN:

@@ -6,9 +6,9 @@ import {
   TransformObjectId,
   TransformStringToObjectId,
 } from 'src/common/decorators/mongoIdTransform.decorator';
-import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { HistoryDto } from '../history.dto';
+import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 
 export class HistoryItemGetDto extends OmitType(HistoryDto, [
   'updatedAt',
@@ -50,9 +50,15 @@ export class HistoryGetListDto {
 
   @Expose()
   @Type(() => Types.ObjectId)
-  // @TransformObjectIdToString('nextDiaryId', { toPlainOnly: true })
-  // @TransformStringToObjectId({ toClassOnly: true })
-  @TransformObjectId()
+  // @TransformObjectId()
+  @TransformObjectIdToString('', { toPlainOnly: true })
+  @Transform(
+    (value) => {
+      // console.log('===');
+      return value.obj.next;
+    },
+    { toClassOnly: true },
+  )
   next: Types.ObjectId;
 }
 

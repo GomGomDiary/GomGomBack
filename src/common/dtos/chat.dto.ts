@@ -5,7 +5,6 @@ import { Types } from 'mongoose';
 import { Chat } from 'src/models/chat.schema';
 import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 
-// value.obj.* -> value.key 변환
 export class ChatDto extends Chat {
   @ApiProperty({
     example: '634ba08de9664d0e9b7a82f8',
@@ -24,12 +23,12 @@ export class ChatDto extends Chat {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @Transform(
-    (value) => {
-      return value.obj[value.key];
-    },
-    { toClassOnly: true },
-  )
+  // @Transform(
+  //   (value) => {
+  //     return value.obj[value.key];
+  //   },
+  //   { toClassOnly: true },
+  // )
   @TransformObjectId()
   @Expose()
   @IsNotEmpty()

@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { Types } from 'mongoose';
-import { TransformStringToObjectId } from 'src/common/decorators/mongoIdTransform.decorator';
+import {
+  TransformObjectId,
+  TransformStringToObjectId,
+} from 'src/common/decorators/mongoIdTransform.decorator';
 
 export class HistoryIdDto {
   constructor(historyId: string | Types.ObjectId) {
@@ -18,6 +21,6 @@ export class HistoryIdDto {
     required: true,
   })
   @IsNotEmpty()
-  @TransformStringToObjectId()
+  @TransformObjectId()
   historyId: Types.ObjectId;
 }

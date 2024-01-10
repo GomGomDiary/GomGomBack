@@ -53,11 +53,21 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
 
             const numberOfAnswerers = retentionDiary.answerList.length;
 
-            await historyModel.create({
-              ...rest,
-              diaryId,
-              numberOfAnswerers,
-            });
+            try {
+              await historyModel.create({
+                ...rest,
+                diaryId,
+                numberOfAnswerers,
+              });
+            } catch (err) {
+              throw new CustomInternalServerError({
+                where: 'preUpdateOne',
+                information: {
+                  query: 'create',
+                },
+                err,
+              });
+            }
           });
           return schema;
         },

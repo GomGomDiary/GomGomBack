@@ -23,4 +23,4 @@ export class Chat {
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);
 
-ChatSchema.index({ diaryId: 1 });
+// ChatSchema.index({ diaryId: 1 });
