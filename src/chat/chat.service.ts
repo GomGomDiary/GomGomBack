@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CreateChatRoomDto } from 'src/common/dtos/request/chatRoom.post.dto';
 import { ChatRepository } from 'src/common/repositories/chat.repository';
@@ -14,7 +18,7 @@ export class ChatService {
   async createChatRoom(diaryId: Types.ObjectId, dto: CreateChatRoomDto) {
     const isExist = await this.chatRepository.exist(diaryId, dto.answererId);
     if (isExist) {
-      throw new ForbiddenException('이미 채팅방이 존재합니다.');
+      throw new ConflictException('이미 채팅방이 존재합니다.');
     }
     const isDiaryOwner = await this.diaryRepository.checkOwnership(diaryId);
     if (!isDiaryOwner) {

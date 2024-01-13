@@ -1,6 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
 import { EmptyPipe } from 'src/common/pipes/empty.pipe';
@@ -15,6 +21,15 @@ import { ChatRoomPostDto } from 'src/common/dtos/response/chatRoom.post.dto';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @ApiOperation({ summary: '채팅방 생성' })
+  @ApiResponse({
+    status: 201,
+    description: '채팅방 생성',
+    type: ChatRoomPostDto,
+  })
+  @ApiBody({
+    type: CreateChatRoomDto,
+  })
   @Post()
   @ReturnValueToDto(ChatRoomPostDto)
   async createChatRoom(

@@ -52,4 +52,18 @@ export class ChatRepository {
       throw new CustomInternalServerError(customError);
     }
   }
+
+  async findChatRoom(clientId: Types.ObjectId, roomId: Types.ObjectId) {
+    // roomId -> find chatRoom({$or : [{_id : data.roomId } && { questionerId : clientId}, { _id : data.roomId } && { answererId : clientId }])
+    const t = await this.chatRoomModel
+      .findOne({
+        $or: [
+          { $and: [{ _id: roomId }, { questionerId: clientId }] },
+          { $and: [{ _id: roomId }, { answererId: clientId }] },
+        ],
+      })
+      .lean()
+      .exec();
+    return t;
+  }
 }

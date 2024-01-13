@@ -1,14 +1,12 @@
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
-import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
-import {
-  TransformObjectId,
-  TransformStringToObjectId,
-} from 'src/common/decorators/mongoIdTransform.decorator';
-import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { HistoryDto } from '../history.dto';
 import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
+import { CursorPaginationQueryDto } from '../request/pagination.dto';
+import { IsOptional } from 'class-validator';
+import { TransformStringToObjectId } from 'src/common/decorators/mongoIdTransform.decorator';
+import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 
 export class HistoryItemGetDto extends OmitType(HistoryDto, [
   'updatedAt',
@@ -50,11 +48,9 @@ export class HistoryGetListDto {
 
   @Expose()
   @Type(() => Types.ObjectId)
-  // @TransformObjectId()
   @TransformObjectIdToString('', { toPlainOnly: true })
   @Transform(
     (value) => {
-      // console.log('===');
       return value.obj.next;
     },
     { toClassOnly: true },
@@ -62,15 +58,19 @@ export class HistoryGetListDto {
   next: Types.ObjectId;
 }
 
-export class PaginateHistoryDto extends PickType(PaginateAnswererDto, [
+export class PaginateHistoryDto extends PickType(CursorPaginationQueryDto, [
+  'next',
   'take',
-]) {
-  @ApiProperty({
-    example: '12341234',
-    description: 'mongodb id',
-    required: true,
-  })
-  @IsOptional()
-  @TransformStringToObjectId({ toClassOnly: true })
-  next: Types.ObjectId | undefined;
-}
+]) {}
+// export class PaginateHistoryDto extends PickType(PaginateAnswererDto, [
+//   'take',
+// ]) {
+//   @ApiProperty({
+//     example: '654ba13be9664d0e9b7a82fa',
+//     description: 'mongo id',
+//     required: true,
+//   })
+//   @IsOptional()
+//   @TransformStringToObjectId({ toClassOnly: true })
+//   next: Types.ObjectId | undefined;
+// }

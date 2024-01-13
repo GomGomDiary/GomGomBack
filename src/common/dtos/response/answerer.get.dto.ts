@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { DEFAULT_PAGINATE, SORT_ORDER } from 'src/utils/constants';
 import { AnswerDto, DiaryDto } from '../diary.dto';
+import { PagePaginationQueryDto } from '../request/pagination.dto';
 
 class AnswerWithPermission extends PickType(AnswerDto, [
   '_id',
@@ -46,26 +47,31 @@ export class AnswererGetDto extends PickType(DiaryDto, ['_id', 'questioner']) {
   answerCount: number;
 }
 
-@ValidatorConstraint({ name: 'IsStartMultipleOfFive', async: false })
-export class IsStartMultipleofFive implements ValidatorConstraintInterface {
-  validate(start: number, args: ValidationArguments) {
-    return start % 5 === 0;
-  }
+// @ValidatorConstraint({ name: 'IsStartMultipleOfFive', async: false })
+// export class IsStartMultipleofFive implements ValidatorConstraintInterface {
+//   validate(start: number, args: ValidationArguments) {
+//     return start % 5 === 0;
+//   }
+//
+//   defaultMessage(args: ValidationArguments) {
+//     return 'start must be a multiple of 5.';
+//   }
+// }
+//
+// export class PaginateAnswererDto {
+//   @IsNumber()
+//   @Validate(IsStartMultipleofFive)
+//   start: number;
+//
+//   @IsNumber()
+//   @IsIn(DEFAULT_PAGINATE)
+//   take: number;
+//
+//   @IsIn(SORT_ORDER)
+//   sortOrder = 'desc';
 
-  defaultMessage(args: ValidationArguments) {
-    return 'start must be a multiple of 5.';
-  }
-}
-
-export class PaginateAnswererDto {
-  @IsNumber()
-  @Validate(IsStartMultipleofFive)
-  start: number;
-
-  @IsNumber()
-  @IsIn(DEFAULT_PAGINATE)
-  take: number;
-
-  @IsIn(SORT_ORDER)
-  sortOrder = 'desc';
-}
+export class PaginateAnswererDto extends PickType(PagePaginationQueryDto, [
+  'start',
+  'take',
+  'sortOrder',
+]) {}

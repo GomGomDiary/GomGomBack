@@ -7,6 +7,7 @@ import {
   CustomInternalServerError,
 } from '../errors/customError';
 import { ChatDto } from '../dtos/chat.dto';
+import { PaginateQueryType } from 'src/utils/pagination';
 
 @Injectable()
 export class ChatMessageRepository {
@@ -15,9 +16,14 @@ export class ChatMessageRepository {
     private readonly chatModel: Model<Chat>,
   ) {}
 
-  async paginate() {
+  async paginate(query: PaginateQueryType, take = 10) {
     try {
-      return await this.chatModel.find();
+      return await this.chatModel
+        .find(query, { _id: 1, createdAt: 1, chat: 1, nickname: 1 })
+        .lean()
+        .sort([['_id', -1]])
+        .limit(take)
+        .exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
         where: 'find Chat Message',
@@ -30,7 +36,7 @@ export class ChatMessageRepository {
     }
   }
 
-  async create(data: ChatDto) {
+  async create(data: Chat) {
     try {
       const { _id } = await this.chatModel.create({ ...data });
       return await this.chatModel

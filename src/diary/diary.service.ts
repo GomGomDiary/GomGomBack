@@ -14,7 +14,6 @@ import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
 import { Answer } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { DiaryIdDto } from 'src/common/dtos/request/diaryId.dto';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
