@@ -32,7 +32,6 @@ export class ChatRepository {
       );
       const _id = chatRoom[0]._id;
       return _id;
-      // return await this.chatRoomModel.findOne(_id, {}).lean().exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -65,16 +64,26 @@ export class ChatRepository {
   }
 
   async findChatRoom(clientId: Types.ObjectId, roomId: Types.ObjectId) {
-    // roomId -> find chatRoom({$or : [{_id : data.roomId } && { questionerId : clientId}, { _id : data.roomId } && { answererId : clientId }])
-    const t = await this.chatRoomModel
-      .findOne({
-        $or: [
-          { $and: [{ _id: roomId }, { questionerId: clientId }] },
-          { $and: [{ _id: roomId }, { answererId: clientId }] },
-        ],
-      })
-      .lean()
-      .exec();
-    return t;
+    try {
+      return await this.chatRoomModel
+        .findOne({
+          $or: [
+            { $and: [{ _id: roomId }, { questionerId: clientId }] },
+            { $and: [{ _id: roomId }, { answererId: clientId }] },
+          ],
+        })
+        .lean()
+        .exec();
+    } catch (err) {
+      const customError: CustomErrorOptions = {
+        information: {
+          clientId,
+          roomId,
+        },
+        where: 'findChatRoom',
+        err,
+      };
+      throw new CustomInternalServerError(customError);
+    }
   }
 }
