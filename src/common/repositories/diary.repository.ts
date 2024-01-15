@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model, Types } from 'mongoose';
+import mongoose, { ClientSession, Document, Model, Types } from 'mongoose';
 import { CreateDiaryDto } from '../dtos/request/diary.post.dto';
 import {
   CustomInternalServerError,
@@ -259,10 +260,10 @@ export class DiaryRepository {
     }
   }
 
-  async findOne(diaryId: string) {
+  async findOne(diaryId: string, session?: ClientSession) {
     try {
       return await this.diaryModel
-        .findOne({ _id: new Types.ObjectId(diaryId) })
+        .findOne({ _id: new Types.ObjectId(diaryId) }, {}, { session })
         .lean<Diary>()
         .exec();
     } catch (err) {
@@ -359,7 +360,11 @@ export class DiaryRepository {
     }
   }
 
-  async updateOne(diaryId: string, body: CreateDiaryDto) {
+  async updateOne(
+    diaryId: string,
+    body: CreateDiaryDto,
+    session?: ClientSession,
+  ) {
     try {
       return await this.diaryModel.updateOne(
         {
@@ -368,6 +373,7 @@ export class DiaryRepository {
         {
           $set: { ...body, answerList: [] },
         },
+        { session },
       );
     } catch (err) {
       const customError: CustomErrorOptions = {

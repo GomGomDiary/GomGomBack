@@ -21,6 +21,9 @@ export class Answer {
 
   @Prop()
   updatedAt: Date;
+
+  @Prop()
+  roomId?: string;
 }
 
 const AnswerSchema = SchemaFactory.createForClass(Answer);

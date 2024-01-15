@@ -21,57 +21,9 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
       envFilePath: `./.env.${process.env.NODE_ENV}`,
     }),
     CacheModule.register(),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Diary.name,
-        inject: [getModelToken(History.name)],
-        imports: [
-          MongooseModule.forFeature([
-            { name: History.name, schema: HistorySchema },
-          ]),
-        ],
-        useFactory: async (historyModel) => {
-          const schema = DiarySchema;
-          schema.pre('updateOne', async function () {
-            const retentionDiary = await this.model
-              .findOne(this.getQuery())
-              .lean<Diary>()
-              .exec();
-            if (!retentionDiary) {
-              throw new CustomInternalServerError({
-                where: 'preUpdateOne',
-                information: {
-                  query: 'findOne',
-                },
-                err: 'retentionDiary is undefined',
-              });
-            }
-            const diaryId = retentionDiary._id;
-
-            retentionDiary.createdAt = retentionDiary.updatedAt;
-            const { _id, ...rest } = retentionDiary;
-
-            const numberOfAnswerers = retentionDiary.answerList.length;
-
-            try {
-              await historyModel.create({
-                ...rest,
-                diaryId,
-                numberOfAnswerers,
-              });
-            } catch (err) {
-              throw new CustomInternalServerError({
-                where: 'preUpdateOne',
-                information: {
-                  query: 'create',
-                },
-                err,
-              });
-            }
-          });
-          return schema;
-        },
-      },
+    MongooseModule.forFeature([
+      { name: Diary.name, schema: DiarySchema },
+      { name: History.name, schema: HistorySchema },
     ]),
     forwardRef(() => AuthModule),
   ],

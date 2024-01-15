@@ -8,10 +8,10 @@ import {
 import { DiaryRepository } from '../common/repositories/diary.repository';
 import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Response } from 'express';
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
-import { Answer } from '../models/diary.schema';
+import { Answer, Diary } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import {
@@ -21,6 +21,8 @@ import {
 import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { DiaryDto } from 'src/common/dtos/diary.dto';
 import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { History } from 'src/models/history.schema';
 
 @Injectable()
 export class DiaryService {
@@ -28,6 +30,9 @@ export class DiaryService {
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheRepository,
+    @InjectModel(Diary.name) private readonly diaryModel: Model<Diary>,
+    @InjectModel(History.name) private readonly historyModel: Model<History>,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
   private setDiaryCookies(res: Response, value: string) {
@@ -129,7 +134,31 @@ export class DiaryService {
        * -> soft delete
        */
       if (isDiaryOwner) {
-        await this.diaryRepository.updateOne(clientId, body);
+        const session = await this.connection.startSession();
+        await session.withTransaction(async () => {
+          const retentionDiary = (await this.diaryRepository.findOne(
+            clientId,
+            session,
+          )) as Diary;
+          const diaryId = retentionDiary._id;
+
+          retentionDiary.createdAt = retentionDiary.updatedAt;
+          const { _id, ...rest } = retentionDiary;
+
+          const numberOfAnswerers = retentionDiary.answerList.length;
+          await this.historyModel.create(
+            [
+              {
+                ...rest,
+                diaryId,
+                numberOfAnswerers,
+              },
+            ],
+            { session },
+          );
+          await this.diaryRepository.updateOne(clientId, body);
+        });
+        session.endSession();
         res.status(HttpStatus.NO_CONTENT);
         return;
       }
