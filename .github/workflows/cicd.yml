@@ -17,6 +17,7 @@ env:
   JWT_SECRET: 1234
   COOKIE_SECRET: 1234
   NODE_ENV: test
+  MONGO_URI: mongodb://localhost:27017/test
 
 permissions:
   id-token: write   # This is required for requesting the JWT
