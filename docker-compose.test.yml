@@ -18,6 +18,8 @@ services:
       /bin/sh -c "npm run test ; npm run test:e2e"
     depends_on:
       - mongo1
+      - mongo2
+      - mongo3
 
   mongo1:
     image: mongo:6.0
