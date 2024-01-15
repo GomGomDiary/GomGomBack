@@ -5,6 +5,7 @@ on:
       - "src/**"
       - ".aws/**"
       - "docker*"
+      - ".github/**"
 
 env:
   AWS_REGION : ap-northeast-2
