@@ -1,22 +1,20 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WsException,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { DiaryIdDto } from 'src/common/dtos/request/diaryId.dto';
-import { ChatService } from './chat.service';
 import { ChatMessageService } from './message/message.service';
 import { AuthService } from 'src/auth/auth.service';
 import { ChatRepository } from 'src/common/repositories/chat.repository';
 import { Types } from 'mongoose';
 import { CreateChatMessageDto } from 'src/common/dtos/request/chat.post.dto';
 import { EnterChatDto } from 'src/common/dtos/request/enter.chat.dto';
+import { SocketCatchExceptionFilter } from 'src/common/filters/socket-exception.filter';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -39,21 +37,28 @@ export class ChatGateway implements OnGatewayConnection {
     if (!roomId || Array.isArray(roomId) || !Types.ObjectId.isValid(roomId)) {
       return socket.disconnect();
     }
-    const token = this.authService.extractTokenFromHeader(rawToken);
-    const payload = await this.authService.verifyToken(token);
-    const clientId = payload.sub;
-    const chatRoom = await this.chatRepository.findChatRoom(
-      new Types.ObjectId(clientId),
-      new Types.ObjectId(roomId),
-    );
-    if (!chatRoom) {
+    let payload;
+    try {
+      const token = this.authService.extractTokenFromHeader(rawToken);
+      payload = await this.authService.verifyToken(token);
+      const clientId = payload.sub;
+      const chatRoom = await this.chatRepository.findChatRoom(
+        new Types.ObjectId(clientId),
+        new Types.ObjectId(roomId),
+      );
+      if (!chatRoom) {
+        throw new WsException({
+          code: 400,
+          message: '허용되지 않는 접근입니다.',
+        });
+      }
+      socket.user = clientId;
+      return true;
+    } catch (err) {
       return socket.disconnect();
     }
-    socket.user = clientId;
-    return true;
   }
 
-  // 1. handleConnection을 통해서 사용자 인증 및 정보 가져오기
   @UsePipes(
     new ValidationPipe({
       transform: true,
@@ -63,6 +68,7 @@ export class ChatGateway implements OnGatewayConnection {
     }),
   )
   @SubscribeMessage('enter_room')
+  @UseFilters(SocketCatchExceptionFilter)
   async enterChat(
     @ConnectedSocket() socket: Socket & { user: string },
     @MessageBody() data: EnterChatDto,
@@ -72,7 +78,10 @@ export class ChatGateway implements OnGatewayConnection {
       data.roomId,
     );
     if (!chatExists) {
-      throw new WsException(`채팅방이 존재하지 않습니다.`);
+      throw new WsException({
+        code: 400,
+        message: `접근할 수 없습니다.`,
+      });
     }
     socket.join(data.roomId.toString());
   }
@@ -86,6 +95,7 @@ export class ChatGateway implements OnGatewayConnection {
     }),
   )
   @SubscribeMessage('send_message')
+  @UseFilters(SocketCatchExceptionFilter)
   async sendMessage(
     @ConnectedSocket() socket: Socket & { user: string },
     @MessageBody() data: CreateChatMessageDto,
@@ -95,7 +105,10 @@ export class ChatGateway implements OnGatewayConnection {
       data.roomId,
     );
     if (!chatExists) {
-      throw new WsException(`채팅방이 존재하지 않습니다.`);
+      throw new WsException({
+        code: 404,
+        message: `채팅방이 존재하지 않습니다.`,
+      });
     }
     await this.chatMessageService.createMessage(
       new Types.ObjectId(socket.user),
