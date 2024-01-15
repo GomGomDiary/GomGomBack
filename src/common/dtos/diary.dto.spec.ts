@@ -24,6 +24,7 @@ describe('DiaryDto', () => {
         updatedAt: new Date(),
       };
       const invalidQuestionDiary: DiaryDtoType = {
+        _id: new Types.ObjectId(),
         question: ['question1', 'question2', 'question3'],
         questioner: '012345678901',
         challenge: '내 생일',
@@ -49,6 +50,7 @@ describe('DiaryDto', () => {
         updatedAt: new Date(),
       };
       const invalidQuestionDiary: DiaryDtoType = {
+        _id: new Types.ObjectId(),
         question: ['question1', 'question2'],
         questioner: '0123456789',
         challenge: '내 생일',
@@ -74,6 +76,7 @@ describe('DiaryDto', () => {
         updatedAt: new Date(),
       };
       const invalidQuestionDiary: DiaryDtoType = {
+        _id: new Types.ObjectId(),
         question: [
           'question1',
           'question2',
@@ -111,6 +114,7 @@ describe('DiaryDto', () => {
         updatedAt: new Date(),
       };
       const invalidQuestionDiary: DiaryDtoType = {
+        _id: new Types.ObjectId(),
         question: [
           '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
           'question2',

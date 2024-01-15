@@ -67,7 +67,10 @@ export class DiaryRepository {
     }
   }
 
-  async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
+  async checkAnswerer(
+    clientId: string | Types.ObjectId,
+    diaryId: mongoose.Types.ObjectId,
+  ) {
     try {
       return !!(await this.diaryModel
         .exists({

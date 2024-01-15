@@ -10,6 +10,8 @@ import { ChatMessageController } from './message/message.controller';
 import { ChatMessageService } from './message/message.service';
 import { ChatMessageRepository } from 'src/common/repositories/message.repository';
 import { DiaryModule } from 'src/diary/diary.module';
+import { DiarySchema } from 'src/models/diary.schema';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -19,8 +21,13 @@ import { DiaryModule } from 'src/diary/diary.module';
         name: 'ChatRoom',
         schema: ChatRoomSchema,
       },
+      {
+        name: 'Diary',
+        schema: DiarySchema,
+      },
     ]),
     DiaryModule,
+    AuthModule,
   ],
   providers: [
     ChatService,

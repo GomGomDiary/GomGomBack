@@ -23,7 +23,7 @@ export class Answer {
   updatedAt: Date;
 
   @Prop()
-  roomId?: string;
+  roomId?: Types.ObjectId;
 }
 
 const AnswerSchema = SchemaFactory.createForClass(Answer);

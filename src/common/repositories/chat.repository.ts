@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
@@ -15,13 +15,24 @@ export class ChatRepository {
     private readonly chatRoomModel: Model<ChatRoom>,
   ) {}
 
-  async create(questionerId: Types.ObjectId, dto: CreateChatRoomDto) {
+  async create(
+    questionerId: Types.ObjectId,
+    dto: CreateChatRoomDto,
+    session?: ClientSession,
+  ) {
     try {
-      const { _id } = await this.chatRoomModel.create({
-        questionerId: questionerId,
-        ...dto,
-      });
-      return await this.chatRoomModel.findOne(_id, {}).lean().exec();
+      const chatRoom = await this.chatRoomModel.create(
+        [
+          {
+            questionerId: questionerId,
+            ...dto,
+          },
+        ],
+        { session },
+      );
+      const _id = chatRoom[0]._id;
+      return _id;
+      // return await this.chatRoomModel.findOne(_id, {}).lean().exec();
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -38,7 +49,7 @@ export class ChatRepository {
   async exist(questionerId: Types.ObjectId, answererId: Types.ObjectId) {
     try {
       return !!(await this.chatRoomModel.exists({
-        roomId: questionerId,
+        questionerId,
         answererId,
       }));
     } catch (err) {
