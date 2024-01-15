@@ -44,7 +44,6 @@ export class ChatController {
   async createToken(
     @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
     diaryId: Types.ObjectId,
-    // @Body() dto: CreateChatRoomDto,
   ) {
     return await this.chatService.createToken(diaryId);
   }
