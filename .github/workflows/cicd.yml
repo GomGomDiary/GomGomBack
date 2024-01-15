@@ -13,6 +13,9 @@ env:
   ECS_SERVICE: gomgom_service2
   ECS_TASK_DEFINITION: ./.aws/task-definition.json
   CONTAINER_NAME: gomgom
+  JWT_SECRET: 1234
+  COOKIE_SECRET: 1234
+  NODE_ENV: test
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -24,6 +27,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+      - name : Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+
+      - name: npm test
+        run : npm run test
+
+      - name: npm e2e
+        run : npm run test:e2e
+
       - name: test using docker compose
         run: docker-compose -p gomgom_test -f docker-compose.test.yml up --build --force-recreate --abort-on-container-exit
 
