@@ -19,6 +19,9 @@ import { SocketCatchExceptionFilter } from 'src/common/filters/socket-exception.
 @WebSocketGateway({
   namespace: 'chat',
   cookie: true,
+  cors: {
+    origin: process.env.DOMAIN_URL || 'https://gomgomdiary.site',
+  },
 })
 export class ChatGateway implements OnGatewayConnection {
   constructor(
