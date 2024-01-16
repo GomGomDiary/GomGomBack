@@ -42,23 +42,27 @@ export class ChatService {
       throw new ForbiddenException('답장한 사람이 아닙니다.');
     }
     const session = await this.connection.startSession();
-    await session.withTransaction(async () => {
-      const _id = await this.chatRepository.create(diaryId, dto, session);
-      await this.diaryModel.updateOne(
-        {
-          _id: diaryId,
-          'answerList._id': dto.answererId,
-        },
-        {
-          $set: {
-            'answerList.$.roomId': _id,
+    try {
+      let _id: Types.ObjectId | null = null;
+      await session.withTransaction(async () => {
+        _id = await this.chatRepository.create(diaryId, dto, session);
+        await this.diaryModel.updateOne(
+          {
+            _id: diaryId,
+            'answerList._id': dto.answererId,
           },
-        },
-        { session },
-      );
-    });
-    session.endSession();
-    return;
+          {
+            $set: {
+              'answerList.$.roomId': _id,
+            },
+          },
+          { session },
+        );
+      });
+      return { _id };
+    } finally {
+      session.endSession();
+    }
   }
 
   async createToken(clientId: Types.ObjectId) {

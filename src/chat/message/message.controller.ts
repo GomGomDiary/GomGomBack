@@ -65,9 +65,4 @@ export class ChatMessageController {
   ) {
     return this.chatMessageService.paginateMessage(clientId, roomId, query);
   }
-
-  @Post(':roomId')
-  async createToken() {
-    return '1234';
-  }
 }

@@ -12,6 +12,7 @@ import { Types } from 'mongoose';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
 import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 import { Answer } from 'src/models/diary.schema';
+import { TransformObjectIdToString } from '../decorators/transformObjectIdToString.decorator';
 
 export class AnswerDto extends Answer {
   @ApiProperty({
@@ -58,11 +59,11 @@ export class AnswerDto extends Answer {
   updatedAt: Date;
 
   @Transform(
-    ({ value }) => {
-      if (!value) return;
-      return value.toString();
+    (value) => {
+      if (!value.obj.roomId) return;
+      return value.obj.roomId.toString();
     },
-    { toPlainOnly: true },
+    { toClassOnly: true },
   )
   @Expose()
   roomId?: Types.ObjectId;
