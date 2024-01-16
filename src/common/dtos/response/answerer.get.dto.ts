@@ -1,14 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import {
-  IsIn,
-  IsNumber,
-  Validate,
-  ValidationArguments,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-} from 'class-validator';
-import { DEFAULT_PAGINATE, SORT_ORDER } from 'src/utils/constants';
 import { AnswerDto, DiaryDto } from '../diary.dto';
 import { PagePaginationQueryDto } from '../request/pagination.dto';
 
@@ -17,6 +8,7 @@ class AnswerWithPermission extends PickType(AnswerDto, [
   'answerer',
   'createdAt',
   'updatedAt',
+  'roomId',
 ]) {}
 
 export class AnswererGetDto extends PickType(DiaryDto, ['_id', 'questioner']) {

@@ -1,12 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
 import { EmptyPipe } from 'src/common/pipes/empty.pipe';

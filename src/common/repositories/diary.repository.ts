@@ -205,6 +205,7 @@ export class DiaryRepository {
                   in: {
                     _id: '$$answer._id',
                     answerer: '$$answer.answerer',
+                    roomId: '$$answer.roomId',
                     createdAt: '$$answer.createdAt',
                     updatedAt: '$$answer.updatedAt',
                   },
