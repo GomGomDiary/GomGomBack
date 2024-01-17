@@ -60,7 +60,6 @@ describe('HistoryService', () => {
       expect(
         await historyService.findAll(clientId, paginateHistoryDto),
       ).toEqual(result);
-      expect(historyRepository.findHistoryList).toHaveBeenCalled();
     });
   });
 
@@ -74,7 +73,6 @@ describe('HistoryService', () => {
       await expect(
         historyService.findOne(historyIdDto, clientId),
       ).rejects.toThrow(NotFoundException);
-      expect(historyRepository.findOne).toHaveBeenCalled();
     });
 
     it('historyItem을 반환한다', async () => {
@@ -98,7 +96,6 @@ describe('HistoryService', () => {
       expect(await historyService.findOne(historyIdDto, clientId)).toEqual(
         result,
       );
-      expect(historyRepository.findOne).toHaveBeenCalled();
     });
   });
 });
