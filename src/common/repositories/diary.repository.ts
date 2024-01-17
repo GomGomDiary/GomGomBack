@@ -352,7 +352,7 @@ export class DiaryRepository {
 
   async save(documents: Document[]) {
     try {
-      return this.diaryModel.bulkSave(documents);
+      this.diaryModel.bulkSave(documents);
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
