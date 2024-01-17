@@ -53,8 +53,8 @@ describe('HistoryService', () => {
         next: historyList[historyList.length - 1]?._id,
       };
 
-      jest
-        .spyOn(historyRepository, 'findHistoryList')
+      historyRepository.findHistoryList = jest
+        .fn()
         .mockResolvedValue(historyList);
 
       expect(
@@ -68,7 +68,7 @@ describe('HistoryService', () => {
       const clientId = new Types.ObjectId();
       const historyIdDto: HistoryIdDto = { historyId: new Types.ObjectId() };
 
-      jest.spyOn(historyRepository, 'findOne').mockResolvedValue(null);
+      historyRepository.findOne = jest.fn().mockResolvedValue(null);
 
       await expect(
         historyService.findOne(historyIdDto, clientId),
@@ -91,7 +91,7 @@ describe('HistoryService', () => {
       const clientId = new Types.ObjectId();
       const historyIdDto: HistoryIdDto = { historyId: new Types.ObjectId() };
 
-      jest.spyOn(historyRepository, 'findOne').mockResolvedValue(result);
+      historyRepository.findOne = jest.fn().mockResolvedValue(result);
 
       expect(await historyService.findOne(historyIdDto, clientId)).toEqual(
         result,

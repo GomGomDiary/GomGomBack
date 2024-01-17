@@ -12,8 +12,6 @@ import { CreateAnswerDto } from 'src/common/dtos/request/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CreateDiaryDto } from 'src/common/dtos/request/diary.post.dto';
 
-// TODO
-// spyOn 필요 없는 부분 전부 수정
 describe('DiaryService', () => {
   let diaryService: DiaryService;
   let cacheRepository: CacheRepository;
