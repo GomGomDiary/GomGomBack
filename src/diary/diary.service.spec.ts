@@ -270,9 +270,10 @@ describe('DiaryService', () => {
         .spyOn(diaryRepository, 'checkDuplication')
         .mockResolvedValue(Promise.resolve(false));
 
-      jest.spyOn(diaryRepository, 'findById').mockResolvedValueOnce({
+      diaryRepository.findById = jest.fn().mockResolvedValueOnce({
         question: ['1', '2'],
-      } as any);
+      });
+      jest.spyOn(diaryRepository, 'findById');
 
       const postAnswer = diaryService.postAnswer({
         diaryId,
@@ -294,10 +295,12 @@ describe('DiaryService', () => {
       jest
         .spyOn(diaryRepository, 'checkDuplication')
         .mockResolvedValue(Promise.resolve(false));
-      jest.spyOn(diaryRepository, 'findById').mockResolvedValueOnce({
+      diaryRepository.findById = jest.fn().mockResolvedValueOnce({
         question: ['1', '2'],
         answerList: [],
-      } as any);
+      });
+      jest.spyOn(diaryRepository, 'findById');
+
       jest
         .spyOn(cacheRepository, 'keys')
         .mockResolvedValueOnce(['/v1/diary/1234']);
@@ -326,10 +329,11 @@ describe('DiaryService', () => {
       jest
         .spyOn(diaryRepository, 'checkDuplication')
         .mockResolvedValue(Promise.resolve(false));
-      jest.spyOn(diaryRepository, 'findById').mockResolvedValueOnce({
+      diaryRepository.findById = jest.fn().mockResolvedValueOnce({
         question: ['1', '2'],
         answerList: [],
-      } as any);
+      });
+      jest.spyOn(diaryRepository, 'findById');
       jest
         .spyOn(cacheRepository, 'keys')
         .mockResolvedValueOnce(['/v1/diary/1234']);
@@ -358,10 +362,11 @@ describe('DiaryService', () => {
       jest
         .spyOn(diaryRepository, 'checkDuplication')
         .mockResolvedValue(Promise.resolve(false));
-      jest.spyOn(diaryRepository, 'findById').mockResolvedValueOnce({
+      diaryRepository.findById = jest.fn().mockResolvedValueOnce({
         question: ['1', '2'],
         answerList: [],
-      } as any);
+      });
+      jest.spyOn(diaryRepository, 'findById');
       jest
         .spyOn(cacheRepository, 'keys')
         .mockResolvedValueOnce(['/v1/diary/1234']);
