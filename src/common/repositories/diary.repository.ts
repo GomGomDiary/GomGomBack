@@ -371,7 +371,7 @@ export class DiaryRepository {
     session?: ClientSession,
   ) {
     try {
-      return await this.diaryModel.updateOne(
+      await this.diaryModel.updateOne(
         {
           _id: new Types.ObjectId(diaryId),
         },
@@ -380,6 +380,7 @@ export class DiaryRepository {
         },
         { session },
       );
+      return;
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
