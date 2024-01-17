@@ -30,7 +30,6 @@ export class DiaryService {
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheRepository,
-    @InjectModel(Diary.name) private readonly diaryModel: Model<Diary>,
     @InjectModel(History.name) private readonly historyModel: Model<History>,
     @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}

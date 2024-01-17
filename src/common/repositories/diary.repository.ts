@@ -94,7 +94,8 @@ export class DiaryRepository {
 
   async create(diary: CreateDiaryDto) {
     try {
-      return await this.diaryModel.create(diary);
+      const { _id } = await this.diaryModel.create(diary);
+      return { _id };
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -109,10 +110,11 @@ export class DiaryRepository {
 
   async createWithId(id: string, body: CreateDiaryDto) {
     try {
-      return await this.diaryModel.create({
+      await this.diaryModel.create({
         _id: new Types.ObjectId(id),
         ...body,
       });
+      return;
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {

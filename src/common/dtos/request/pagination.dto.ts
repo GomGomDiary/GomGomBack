@@ -58,5 +58,5 @@ export class CursorPaginationQueryDto extends PickType(PagePaginationQueryDto, [
   })
   @IsOptional()
   @TransformStringToObjectId({ toClassOnly: true })
-  next: Types.ObjectId | undefined;
+  next?: Types.ObjectId | undefined;
 }
