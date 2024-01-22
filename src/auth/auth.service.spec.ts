@@ -2,35 +2,34 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { DiaryRepository } from 'src/common/repositories/diary.repository';
-import { UnauthorizedException } from '@nestjs/common';
-import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import mongoose from 'mongoose';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Types } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
+import { getModelToken } from '@nestjs/mongoose';
+import { Diary } from 'src/models/diary.schema';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let diaryRepository: any;
-  let jwtService: DeepMocked<JwtService>;
-  // let diaryRepository: DeepMocked<DiaryRepository>;
-  const mockDiaryRepository = {
-    findField: jest.fn(),
-  };
+  let diaryRepository: DiaryRepository;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        DiaryRepository,
+        JwtService,
+        ConfigService,
         {
-          provide: DiaryRepository,
-          useValue: mockDiaryRepository,
+          provide: getModelToken(Diary.name),
+          useValue: {},
         },
       ],
-    })
-      .useMocker(createMock)
-      .compile();
+    }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    diaryRepository = module.get(DiaryRepository);
-    jwtService = module.get(JwtService);
+    diaryRepository = module.get<DiaryRepository>(DiaryRepository);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -38,29 +37,56 @@ describe('AuthService', () => {
   });
 
   describe('signIn', () => {
-    it('jwt token을 반환한다.', async () => {
-      const mockUser = {
-        countersign: '1234',
-        _id: new mongoose.Types.ObjectId(),
-      };
+    it('user가 존재하지 않을 경우 NotFoundException을 반환한다', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const countersignFromClient = 'countersignFromClient';
+      const user = null;
+      diaryRepository.findField = jest.fn().mockResolvedValue(user);
 
-      diaryRepository.findField.mockResolvedValueOnce(mockUser);
-      jwtService.signAsync.mockResolvedValueOnce('jwtToken');
-
-      const result = await authService.signIn('someId', '1234');
-
-      expect(result).toEqual({ diaryToken: 'jwtToken' });
+      await expect(
+        authService.signIn(diaryId, countersignFromClient),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('countersign이 올바르지 않을 경우 UnauthorizedException을 발생시킨다.', async () => {
-      const mockUser = {
-        countersign: '1234',
-        _id: new mongoose.Types.ObjectId(),
+    it('countersign이 올바르지 않을 경우 UnauthorizedException을 반환한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const countersignFromClient = 'countersignFromClient';
+      const user = {
+        countersign: 'wrongCountersign',
       };
-      diaryRepository.findField.mockResolvedValueOnce(mockUser);
+      diaryRepository.findField = jest.fn().mockResolvedValue(user);
 
-      const signIn = authService.signIn('someId', 'wrongCountersign');
-      await expect(signIn).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(
+        authService.signIn(diaryId, countersignFromClient),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('diaryToken 반환시 signAsync를 호출한다', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const countersignFromClient = 'rightCountersign';
+      const user = {
+        countersign: 'rightCountersign',
+      };
+      diaryRepository.findField = jest.fn().mockResolvedValue(user);
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('token');
+
+      await authService.signIn(diaryId, countersignFromClient);
+
+      expect(jwtService.signAsync).toBeCalled();
+    });
+  });
+
+  describe('createToken', () => {
+    it('chat Token을 반환한다', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const payload = {
+        sub: diaryId,
+      };
+
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('token');
+
+      await authService.createToken(payload);
+      expect(jwtService.signAsync).toBeCalled();
     });
   });
 });
