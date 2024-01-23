@@ -1,6 +1,12 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
 import { EmptyPipe } from 'src/common/pipes/empty.pipe';
@@ -10,6 +16,8 @@ import { CreateChatRoomDto } from 'src/common/dtos/request/chatRoom.post.dto';
 import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
 import { ChatRoomPostDto } from 'src/common/dtos/response/chatRoom.post.dto';
 import { ChatTokenShowDto } from 'src/common/dtos/response/chat.token.res.dto';
+import { RoomIdDto } from 'src/common/dtos/request/roomId.dto';
+import { ChatNicknameGetDto } from 'src/common/dtos/response/chatNickname.get.dto';
 
 @ApiTags('Chat')
 @Controller({ path: 'chat', version: '1' })
@@ -52,5 +60,22 @@ export class ChatController {
     diaryId: Types.ObjectId,
   ) {
     return await this.chatService.createToken(diaryId);
+  }
+
+  @ApiOperation({
+    summary: '닉네임 조회',
+    description: '웹소켓 연결에 필요한 채팅 토큰을 생성합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: ChatNicknameGetDto,
+  })
+  @ApiParam({
+    name: 'roomId',
+  })
+  @Get(':roomId')
+  @ReturnValueToDto(ChatNicknameGetDto)
+  async getNickname(@Param() roomIdDto: RoomIdDto) {
+    return await this.chatService.getNickname(roomIdDto);
   }
 }

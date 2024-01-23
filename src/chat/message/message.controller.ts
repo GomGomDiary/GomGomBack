@@ -23,24 +23,23 @@ import { MessageGetListDto } from 'src/common/dtos/response/message.get.dto';
 @Controller({ path: 'chat/message', version: '1' })
 export class ChatMessageController {
   constructor(private readonly chatMessageService: ChatMessageService) {}
-
-  @ApiOperation({ summary: '채팅 메시지 생성' })
-  @ApiResponse({
-    status: 201,
-    type: CreateMessageDto,
-  })
-  @ApiBody({
-    type: CreateChatMessageDto,
-  })
-  @Post()
-  @ReturnValueToDto(CreateMessageDto)
-  async createChatMessage(
-    @Body() chat: CreateChatMessageDto,
-    @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
-    clientId: Types.ObjectId,
-  ) {
-    return await this.chatMessageService.createMessage(clientId, chat);
-  }
+  // @ApiOperation({ summary: '채팅 메시지 생성' })
+  // @ApiResponse({
+  //   status: 201,
+  //   type: CreateMessageDto,
+  // })
+  // @ApiBody({
+  //   type: CreateChatMessageDto,
+  // })
+  // @Post()
+  // @ReturnValueToDto(CreateMessageDto)
+  // async createChatMessage(
+  //   @Body() chat: CreateChatMessageDto,
+  //   @Cookie('diaryUser', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
+  //   clientId: Types.ObjectId,
+  // ) {
+  //   return await this.chatMessageService.createMessage(clientId, chat);
+  // }
 
   @ApiOperation({ summary: '채팅방 메세지 불러오기' })
   @ApiResponse({
