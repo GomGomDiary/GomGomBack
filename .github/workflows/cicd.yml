@@ -27,6 +27,7 @@ jobs:
       COOKIE_SECRET: 1234
       NODE_ENV: test
       MONGO_URI: mongodb://localhost:27017/test
+      CACHE_TTL: 3000000
 
     steps:
       - name: Checkout

@@ -19,6 +19,7 @@ export class AnswererGetDto extends PickType(DiaryDto, ['_id', 'questioner']) {
         answerer: 'yoon',
         createdAt: '2023-11-08T14:54:51.929Z',
         updatedAt: '2023-11-08T14:54:51.929Z',
+        roomId: '654ba13be9664d0e9b7a82fb',
       },
       {
         _id: '654e83cf8e4dec550733931c',

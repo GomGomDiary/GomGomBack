@@ -117,6 +117,35 @@ describe('History Controller (e2e)', () => {
       expect(targetAnswerer.roomId).toBe(chatId);
     });
 
+    it('caching이 적용되어 있을 때, roomId가 조회되어야 한다.', async () => {
+      const { diaryId, clientId1 } = await createDiaryWithAnswer(
+        app,
+        diaryData,
+      );
+      // caching처리를 위한 요청
+      await request(app.getHttpServer()).get(
+        `/v1/diary/answerers/${diaryId}?start=0&take=5&sortOrder=desc`,
+      );
+
+      const chatResult = await request(app.getHttpServer())
+        .post('/v1/chat')
+        .set('Cookie', [`diaryUser=${diaryId}`])
+        .send({
+          answererId: clientId1,
+        });
+      const chatId = chatResult.body._id;
+
+      // answererResult에서 clientId1의 _id를 가진 응답 값은 chatId라는 값을 가져야 한다.
+      const answererResult = await request(app.getHttpServer()).get(
+        `/v1/diary/answerers/${diaryId}?start=0&take=5&sortOrder=desc`,
+      );
+      const targetAnswerer = answererResult.body.answererList.find(
+        (answerer: any) => answerer._id === clientId1,
+      );
+
+      expect(targetAnswerer.roomId).toBe(chatId);
+    });
+
     it('response는 ChatRoomPostDto와 검증시 에러가 없어야 한다', async () => {
       const { diaryId, clientId1 } = await createDiaryWithAnswer(
         app,
