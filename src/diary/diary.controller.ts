@@ -45,7 +45,6 @@ import { DiaryTokenShowDto } from '../common/dtos/response/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { DiaryIdDto } from 'src/common/dtos/request/diaryId.dto';
 import { EmptyPipe } from 'src/common/pipes/empty.pipe';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
 import { Types } from 'mongoose';
@@ -182,8 +181,8 @@ export class DiaryController {
   @ApiParam({
     name: 'diaryId',
   })
-  @UseInterceptors(HttpCacheInterceptor)
-  @CacheTTL(CACHE_TTL)
+  // @UseInterceptors(HttpCacheInterceptor) // TODO 캐시 무효
+  // @CacheTTL(CACHE_TTL)
   @Get('answerers/:diaryId')
   @ReturnValueToDto(AnswererGetDto)
   async getAnswerers(
