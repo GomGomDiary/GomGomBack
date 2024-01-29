@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Chat } from 'src/models/chat.schema';
 import {
   CustomErrorOptions,
@@ -16,20 +16,32 @@ export class ChatMessageRepository {
     private readonly chatModel: Model<Chat>,
   ) {}
 
-  async paginate(query: PaginateQueryType, take = 10) {
+  async paginate(
+    query: PaginateQueryType,
+    take = 10,
+    clientId: Types.ObjectId,
+  ) {
     try {
-      return await this.chatModel
-        .find(query, {
-          _id: 1,
-          createdAt: 1,
-          chat: 1,
-          nickname: 1,
-          clientId: 1,
-        })
-        .lean()
-        .sort([['_id', -1]])
-        .limit(take)
-        .exec();
+      return await this.chatModel.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            isSender: { $eq: ['$clientId', clientId] },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            chat: 1,
+            nickname: 1,
+            clientId: 1,
+            isSender: 1,
+          },
+        },
+        { $sort: { _id: -1 } },
+        { $limit: take },
+      ]);
     } catch (err) {
       const customError: CustomErrorOptions = {
         where: 'find Chat Message',

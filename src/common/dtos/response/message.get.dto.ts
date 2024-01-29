@@ -10,7 +10,13 @@ export class MessageGetDto extends PickType(ChatDto, [
   'chat',
   'createdAt',
   'clientId',
-]) {}
+]) {
+  @ApiProperty({
+    example: true,
+  })
+  @Expose()
+  isSender: boolean;
+}
 
 export class MessageGetListDto {
   @ApiProperty({

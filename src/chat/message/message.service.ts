@@ -4,6 +4,7 @@ import { CreateChatMessageDto } from 'src/common/dtos/request/chat.post.dto';
 import { PaginateMessageDto } from 'src/common/dtos/request/message.get.dto';
 import { ChatRepository } from 'src/common/repositories/chat.repository';
 import { ChatMessageRepository } from 'src/common/repositories/message.repository';
+import { Chat } from 'src/models/chat.schema';
 import { generatePaginationQuery } from 'src/utils/pagination';
 
 @Injectable()
@@ -48,7 +49,9 @@ export class ChatMessageService {
     const messageList = await this.chatMessageRepository.paginate(
       query.paginatedQuery,
       paginateMessageDto.take,
+      clientId,
     );
+
     const result = {
       messageList,
       next: messageList[messageList.length - 1]?._id,
