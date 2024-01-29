@@ -6,7 +6,6 @@ import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from '../errors/customError';
-import { ChatDto } from '../dtos/chat.dto';
 import { PaginateQueryType } from 'src/utils/pagination';
 
 @Injectable()
@@ -22,7 +21,7 @@ export class ChatMessageRepository {
     clientId: Types.ObjectId,
   ) {
     try {
-      return await this.chatModel.aggregate([
+      const result = await this.chatModel.aggregate([
         { $match: query },
         {
           $addFields: {
@@ -42,11 +41,14 @@ export class ChatMessageRepository {
         { $sort: { _id: -1 } },
         { $limit: take },
       ]);
+      return result.reverse();
     } catch (err) {
       const customError: CustomErrorOptions = {
         where: 'find Chat Message',
         information: {
-          test: 'test',
+          query,
+          take,
+          clientId,
         },
         err,
       };

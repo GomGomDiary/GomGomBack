@@ -12,7 +12,6 @@ import { Types } from 'mongoose';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
 import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 import { Answer } from 'src/models/diary.schema';
-import { TransformObjectIdToString } from '../decorators/transformObjectIdToString.decorator';
 
 export class AnswerDto extends Answer {
   @ApiProperty({
