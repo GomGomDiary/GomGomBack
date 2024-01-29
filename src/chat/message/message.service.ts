@@ -54,7 +54,7 @@ export class ChatMessageService {
 
     const result = {
       messageList,
-      next: messageList[messageList.length - 1]?._id,
+      next: messageList[0]?._id,
     };
     return result;
   }
