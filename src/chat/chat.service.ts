@@ -113,13 +113,5 @@ export class ChatService {
       questioner,
       answerer,
     };
-
-    // questionerId -> diaryId -> nickname
-    // answererId + questionerId -> answerer in diaryId -> nickname
-
-    // const chatRoom = await this.chatRepository.findChatRoom(clientId, roomId);
-    // if (!chatRoom) {
-    //   throw new ForbiddenException('채팅방을 찾을 수 없습니다.');
-    // }
   }
 }
