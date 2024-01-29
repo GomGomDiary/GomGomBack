@@ -9,6 +9,7 @@ export class MessageGetDto extends PickType(ChatDto, [
   'nickname',
   'chat',
   'createdAt',
+  'clientId',
 ]) {}
 
 export class MessageGetListDto {
@@ -16,12 +17,14 @@ export class MessageGetListDto {
     example: [
       {
         _id: '659d5a66b055dfd3fbbb4c16',
+        clientId: '659d5a66b055dfd3fbbb4c15',
         nickname: 'nickname',
         chat: 'chat',
         createdAt: '2024-01-09T14:38:30.450Z',
       },
       {
         _id: '659d5a63b055dfd3fbbb4c11',
+        clientId: '659d5a66b055dfd3fbbb4c10',
         nickname: 'nickname',
         chat: 'chat',
         createdAt: '2024-01-09T14:38:27.534Z',

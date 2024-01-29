@@ -19,7 +19,13 @@ export class ChatMessageRepository {
   async paginate(query: PaginateQueryType, take = 10) {
     try {
       return await this.chatModel
-        .find(query, { _id: 1, createdAt: 1, chat: 1, nickname: 1 })
+        .find(query, {
+          _id: 1,
+          createdAt: 1,
+          chat: 1,
+          nickname: 1,
+          clientId: 1,
+        })
         .lean()
         .sort([['_id', -1]])
         .limit(take)
