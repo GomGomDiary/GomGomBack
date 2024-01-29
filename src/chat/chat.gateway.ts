@@ -45,6 +45,9 @@ export class ChatGateway implements OnGatewayConnection {
       const token = this.authService.extractTokenFromHeader(rawToken);
       payload = await this.authService.verifyToken(token);
       const clientId = payload.sub;
+      console.log('============ in handleConnection ==============');
+      console.log(clientId);
+      console.log('=========================================');
       const chatRoom = await this.chatRepository.findChatRoom(
         new Types.ObjectId(clientId),
         new Types.ObjectId(roomId),
@@ -76,6 +79,9 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket & { user: string },
     @MessageBody() data: EnterChatDto,
   ) {
+    console.log('============ in enter room ==============');
+    console.log(socket.user);
+    console.log('=========================================');
     const chatExists = await this.chatRepository.findChatRoom(
       new Types.ObjectId(socket.user),
       data.roomId,
