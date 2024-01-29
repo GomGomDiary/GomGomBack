@@ -15,7 +15,7 @@ import { ChatRoomPostDto } from 'src/common/dtos/response/chatRoom.post.dto';
 import { CreateMessageDto } from 'src/common/dtos/response/chatMessage.post.dto';
 import { MessageGetListDto } from 'src/common/dtos/response/message.get.dto';
 
-describe('History Controller (e2e)', () => {
+describe('Chat Controller (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -255,7 +255,7 @@ describe('History Controller (e2e)', () => {
       expect(forbiddenResult.statusCode).toBe(403);
     });
 
-    it('_id  역순으로 정렬되어야 한다.', async () => {
+    it('messageList는 오래된순으로 정렬되어야 한다.', async () => {
       const { diaryId, clientId1 } = await createDiaryWithAnswer(
         app,
         diaryData,
@@ -300,14 +300,16 @@ describe('History Controller (e2e)', () => {
         .set('Cookie', [`diaryUser=${diaryId}`]);
 
       const { messageList, next } = result.body;
+      // messageList = [ a, b, c, d];
+      // 최신순으로 정렬되어 있음. 즉 a < b < c < d
       for (let i = 0; i < messageList.length - 1; i++) {
-        expect(messageList[i]._id > messageList[i + 1]._id).toBe(true);
+        expect(messageList[i]._id < messageList[i + 1]._id).toBe(true);
       }
       expect(next).toBeDefined();
     });
 
     it.each([{ take: 5 }, { take: 10 }])(
-      'messageList는 $take개를 가져오며 _id 역순 정렬되어야 한다',
+      'messageList는 $take개를 가져오며 meesageList는 오래된순으로 정렬되어야 한다',
       async ({ take }) => {
         const { diaryId, clientId1 } = await createDiaryWithAnswer(
           app,
@@ -354,7 +356,7 @@ describe('History Controller (e2e)', () => {
 
         const { messageList, next } = result.body;
         for (let i = 0; i < messageList.length - 1; i++) {
-          expect(messageList[i]._id > messageList[i + 1]._id).toBe(true);
+          expect(messageList[i]._id < messageList[i + 1]._id).toBe(true);
         }
         expect(next).toBeDefined();
         expect(messageList.length).toBe(take);
