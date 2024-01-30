@@ -50,6 +50,7 @@ export class ChatRepository {
       return !!(await this.chatRoomModel.exists({
         questionerId,
         answererId,
+        isHistory: false,
       }));
     } catch (err) {
       const customError: CustomErrorOptions = {

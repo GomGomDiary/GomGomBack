@@ -12,6 +12,7 @@ import { HistorySchema, History } from 'src/models/history.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { CustomInternalServerError } from 'src/common/errors/customError';
+import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
     MongooseModule.forFeature([
       { name: Diary.name, schema: DiarySchema },
       { name: History.name, schema: HistorySchema },
+      { name: ChatRoom.name, schema: ChatRoomSchema },
     ]),
     forwardRef(() => AuthModule),
   ],

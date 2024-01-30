@@ -13,6 +13,11 @@ export class ChatRoom {
 
   @Prop()
   answererId: Types.ObjectId;
+
+  @Prop({
+    default: false,
+  })
+  isHistory: boolean;
 }
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);

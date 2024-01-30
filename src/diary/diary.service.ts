@@ -23,6 +23,7 @@ import { DiaryDto } from 'src/common/dtos/diary.dto';
 import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { History } from 'src/models/history.schema';
+import { ChatRoom } from 'src/models/chatRoom.schema';
 
 @Injectable()
 export class DiaryService {
@@ -31,6 +32,7 @@ export class DiaryService {
     private readonly configService: ConfigService,
     private readonly cacheService: CacheRepository,
     @InjectModel(History.name) private readonly historyModel: Model<History>,
+    @InjectModel(ChatRoom.name) private readonly chatRoomModel: Model<ChatRoom>,
     @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
@@ -134,32 +136,55 @@ export class DiaryService {
        */
       if (isDiaryOwner) {
         const session = await this.connection.startSession();
-        await session.withTransaction(async () => {
-          const retentionDiary = (await this.diaryRepository.findOne(
-            clientId,
-            session,
-          )) as Diary;
-          const diaryId = retentionDiary._id;
+        try {
+          await session.withTransaction(async () => {
+            const retentionDiary = (await this.diaryRepository.findOne(
+              clientId,
+              session,
+            )) as Diary;
+            const diaryId = retentionDiary._id;
 
-          retentionDiary.createdAt = retentionDiary.updatedAt;
-          const { _id, ...rest } = retentionDiary;
+            retentionDiary.createdAt = retentionDiary.updatedAt;
+            const answerList = retentionDiary.answerList;
+            const chatRoomUpdatePromises = answerList
+              .filter((answer) => answer?.roomId)
+              .map((answer) =>
+                this.chatRoomModel.updateOne(
+                  { _id: answer.roomId },
+                  { isHistory: true },
+                  { session },
+                ),
+              );
 
-          const numberOfAnswerers = retentionDiary.answerList.length;
-          await this.historyModel.create(
-            [
-              {
-                ...rest,
-                diaryId,
-                numberOfAnswerers,
-              },
-            ],
-            { session },
-          );
-          await this.diaryRepository.updateOne(clientId, body);
-        });
-        session.endSession();
-        res.status(HttpStatus.NO_CONTENT);
-        return;
+            const { _id, ...rest } = retentionDiary;
+
+            const numberOfAnswerers = retentionDiary.answerList.length;
+            const historyCreatePromise = this.historyModel.create(
+              [
+                {
+                  ...rest,
+                  diaryId,
+                  numberOfAnswerers,
+                },
+              ],
+              { session },
+            );
+            const diaryUpdatePromise = this.diaryRepository.updateOne(
+              clientId,
+              body,
+              session,
+            );
+            await Promise.all([
+              ...chatRoomUpdatePromises,
+              historyCreatePromise,
+              diaryUpdatePromise,
+            ]);
+          });
+          res.status(HttpStatus.NO_CONTENT);
+          return;
+        } finally {
+          session.endSession();
+        }
       }
       /**
        * if Answerer o (Questioner x)
