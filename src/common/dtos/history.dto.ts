@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform, Type } from 'class-transformer';
-import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
+import { Expose, Type } from 'class-transformer';
 import { DiaryDto } from './diary.dto';
+import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
 
 export class HistoryDto extends DiaryDto {
   @ApiProperty({
@@ -11,16 +11,15 @@ export class HistoryDto extends DiaryDto {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @Transform(
-    (value) => {
-      return value.obj.diaryId;
-    },
-    { toClassOnly: true },
-  )
-  @TransformObjectIdToString('diaryId', { toPlainOnly: true })
+  @TransformObjectId()
   @Expose()
   diaryId: Types.ObjectId;
 
+  @ApiProperty({
+    example: '4',
+    description: 'Answerer 수',
+    required: true,
+  })
   @Expose()
   numberOfAnswerers: number;
 }

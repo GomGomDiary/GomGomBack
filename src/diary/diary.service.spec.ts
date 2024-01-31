@@ -3,297 +3,515 @@ import { DiaryService } from './diary.service';
 import { DiaryRepository } from '../common/repositories/diary.repository';
 import httpMocks from 'node-mocks-http';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { CreateAnswerDto } from 'src/common/dtos/answer.post.dto';
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
+import { Diary } from 'src/models/diary.schema';
+import mongoose, { Model, Types } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
+import { History } from 'src/models/history.schema';
+import { CreateAnswerDto } from 'src/common/dtos/request/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { CreateDiaryDto } from 'src/common/dtos/request/diary.post.dto';
+import { ChatRoom } from 'src/models/chatRoom.schema';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
-  let cacheService: DeepMocked<CacheRepository>;
-  let diaryRepository: any;
-  // let diaryRepository: DeepMocked<DiaryRepository>;
-
-  const mockDiaryRepository = {
-    findField: jest.fn(),
-    checkOwnership: jest.fn(),
-    updateOne: jest.fn(),
-    findOne: jest.fn(),
-    existAsAnswerer: jest.fn(),
-    createWithId: jest.fn(),
-    create: jest.fn(),
-    checkDuplication: jest.fn(),
-    findById: jest.fn(),
-    save: jest.fn(),
-  };
+  let cacheRepository: CacheRepository;
+  let diaryRepository: DiaryRepository;
+  let connection: mongoose.Connection;
+  let historyModel: Model<History>;
+  // let diaryModel: Model<Diary>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DiaryService,
+        DiaryRepository,
+        ConfigService,
+        CacheRepository,
         {
-          provide: DiaryRepository,
-          useValue: mockDiaryRepository,
+          provide: getModelToken(Diary.name),
+          useValue: {},
+        },
+        {
+          provide: getModelToken(History.name),
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: getModelToken(ChatRoom.name),
+          useValue: {
+            updateOne: jest.fn(),
+          },
+        },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {},
+        },
+        {
+          provide: getConnectionToken('Database'),
+          useValue: {
+            startSession: jest.fn(() => ({
+              withTransaction: jest
+                .fn()
+                .mockImplementation((callback) => callback()),
+              endSession: jest.fn(),
+            })),
+          },
         },
       ],
-    })
-      .useMocker(createMock)
-      .compile();
+    }).compile();
 
     diaryService = module.get<DiaryService>(DiaryService);
+    historyModel = module.get<Model<History>>(getModelToken(History.name));
     diaryRepository = module.get<DiaryRepository>(DiaryRepository);
-    cacheService = module.get(CacheRepository);
+    cacheRepository = module.get(CacheRepository);
+    connection = module.get<mongoose.Connection>(
+      getConnectionToken('Database'),
+    );
+    // diaryModel = module.get<Model<Diary>>(getModelToken(Diary.name));
   });
 
   it('should be defined', () => {
     expect(diaryService).toBeDefined();
   });
 
-  describe('[postQuestion]', () => {
+  describe('postQuestion', () => {
     describe('Diary Owner일 때', () => {
-      it('updateOne 메서드를 호출한다.', async () => {
-        const body = {
-          question: ['질문', '일까요?'],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(true);
-
-        await diaryService.postQuestion({ body, clientId: '1234', res });
-
-        expect(diaryRepository.updateOne).toBeCalled();
-      });
-
       it('204 status code를 반환한다.', async () => {
-        const body = {
-          question: ['질문', '일까요?'],
+        const body: CreateDiaryDto = {
+          question: [],
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
         };
+        const clientId = new Types.ObjectId().toString();
         const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(true);
+        const diary: Diary = {
+          _id: new Types.ObjectId(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          question: [],
+          questioner: 'questioner',
+          challenge: 'challenge',
+          countersign: 'countersign',
+          answerList: [
+            {
+              _id: new Types.ObjectId(),
+              answerer: 'answerer',
+              answers: [],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              roomId: new Types.ObjectId(),
+            },
+          ],
+        };
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(true));
+        diaryRepository.findOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(diary));
+        diaryRepository.updateOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        // cacheRepository.del = jest
+        //   .fn()
+        //   .mockResolvedValue(Promise.resolve(void 0));
 
-        await diaryService.postQuestion({ body, clientId: '1234', res });
+        await diaryService.postQuestion({ body, clientId, res });
 
         expect(res.statusCode).toBe(204);
       });
 
-      it('cache del를 호출한다.', async () => {
-        const body = {
-          question: ['질문', '일까요?'],
+      it('create 메서드를 한 번 호출한다', async () => {
+        const body: CreateDiaryDto = {
+          question: [],
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
         };
+        const clientId = new Types.ObjectId().toString();
         const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(true);
-        cacheService.keys.mockResolvedValueOnce(['/v1/diary/1234']);
+        const diary: Diary = {
+          _id: new Types.ObjectId(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          question: [],
+          questioner: 'questioner',
+          challenge: 'challenge',
+          countersign: 'countersign',
+          answerList: [],
+        };
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(true));
+        diaryRepository.findOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(diary));
+        diaryRepository.updateOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        cacheRepository.del = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        jest.spyOn(historyModel, 'create');
 
-        await diaryService.postQuestion({ body, clientId: '1234', res });
+        await diaryService.postQuestion({ body, clientId, res });
 
-        expect(cacheService.del).toBeCalled();
+        expect(historyModel.create).toBeCalledTimes(1);
+      });
+
+      it('cache del를 한 번 호출한다.', async () => {
+        const body: CreateDiaryDto = {
+          question: [],
+          questioner: 'questioner',
+          challenge: 'challenge',
+          countersign: 'countersign',
+        };
+        const clientId = new Types.ObjectId().toString();
+        const res = httpMocks.createResponse();
+        const diary: Diary = {
+          _id: new Types.ObjectId(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          question: [],
+          questioner: 'questioner',
+          challenge: 'challenge',
+          countersign: 'countersign',
+          answerList: [],
+        };
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(true));
+        diaryRepository.findOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(diary));
+        diaryRepository.updateOne = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve([`/v1/diary/${clientId}`]));
+        cacheRepository.del = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+
+        await diaryService.postQuestion({ body, clientId, res });
+
+        expect(cacheRepository.del).toBeCalledTimes(1);
       });
     });
 
     describe('Answerer일 때', () => {
-      it('createWithId 메서드를 호출한다.', async () => {
-        const body = {
+      it('createWithId 메서드를 1번 호출한다.', async () => {
+        const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
         };
+        const clientId = new Types.ObjectId().toString();
         const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(false);
-        diaryRepository.existAsAnswerer.mockResolvedValueOnce(true);
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(false));
+        diaryRepository.existAsAnswerer = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(true));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        cacheRepository.del = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        jest.spyOn(diaryRepository, 'createWithId').mockResolvedValue(void 0);
 
-        await diaryService.postQuestion({ body, clientId: '1234', res });
+        await diaryService.postQuestion({
+          body,
+          clientId,
+          res,
+        });
 
-        expect(diaryRepository.createWithId).toBeCalled();
-      });
-
-      it('cache del를 호출한다.', async () => {
-        const body = {
-          question: ['질문', '일까요?'],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(false);
-        diaryRepository.existAsAnswerer.mockResolvedValueOnce(true);
-        cacheService.keys.mockResolvedValueOnce(['/v1/diary/1234']);
-
-        await diaryService.postQuestion({ body, clientId: '1234', res });
-
-        expect(cacheService.del).toBeCalled();
+        expect(diaryRepository.createWithId).toBeCalledTimes(1);
       });
     });
+
     describe('Newbie일 때', () => {
       it('create 메서드를 호출한다.', async () => {
-        const body = {
+        const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
         };
+        const clientId = new Types.ObjectId().toString();
         const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(false);
-        diaryRepository.existAsAnswerer.mockResolvedValueOnce(false);
-        diaryRepository.create.mockResolvedValueOnce({ _id: '1234' });
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(false));
+        diaryRepository.existAsAnswerer = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(false));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        cacheRepository.del = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        jest
+          .spyOn(diaryRepository, 'create')
+          .mockResolvedValue({ _id: new Types.ObjectId() });
 
-        await diaryService.postQuestion({ body, clientId: '1234', res });
+        await diaryService.postQuestion({ body, clientId, res });
 
-        expect(diaryRepository.create).toBeCalled();
+        expect(diaryRepository.create).toBeCalledTimes(1);
       });
 
-      it('cache del를 호출한다.', async () => {
-        const body = {
+      it('cookie를 심는지 검증한다.', async () => {
+        const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
         };
+        const clientId = new Types.ObjectId().toString();
         const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership.mockResolvedValueOnce(false);
-        diaryRepository.existAsAnswerer.mockResolvedValueOnce(false);
-        diaryRepository.create.mockResolvedValueOnce({ _id: '1234' });
-        cacheService.keys.mockResolvedValueOnce(['/v1/diary/1234']);
+        diaryRepository.checkOwnership = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(false));
+        diaryRepository.existAsAnswerer = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(false));
+        cacheRepository.keys = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        cacheRepository.del = jest
+          .fn()
+          .mockResolvedValue(Promise.resolve(void 0));
+        diaryRepository.create = jest
+          .fn()
+          .mockResolvedValue({ _id: new Types.ObjectId() });
+        jest.spyOn(res, 'cookie');
 
-        await diaryService.postQuestion({ body, clientId: '1234', res });
+        await diaryService.postQuestion({ body, clientId, res });
 
-        expect(cacheService.del).toBeCalled();
+        expect(res.cookie).toHaveBeenCalled();
       });
     });
   });
 
-  describe('[postAnswer]', () => {
-    describe('자신의 다이어리에 쓸 때', () => {
-      it('BadRequestException을 throw한다.', async () => {
-        const diaryId = '1234';
-        const clientId = '1234';
-        const answer: CreateAnswerDto = {
-          answerer: 'answerer',
-          answers: ['1', '2'],
-        };
-        const res = httpMocks.createResponse();
+  describe('postAnswer', () => {
+    it('자신의 다이어리에 답장한다면 BadRequestException을 throw한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = diaryId;
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2'],
+      };
+      const res = httpMocks.createResponse();
 
-        const postAnswer = diaryService.postAnswer({
-          diaryId,
-          clientId,
-          answer,
-          res,
-        });
-
-        await expect(postAnswer).rejects.toBeInstanceOf(BadRequestException);
+      const postAnswer = diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
       });
+
+      await expect(postAnswer).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    describe('이미 답변을 작성했을 때', () => {
-      it('ConflictException을 throw한다.', async () => {
-        const diaryId = '1234';
-        const clientId = '2345';
-        const answer: CreateAnswerDto = {
-          answerer: 'answerer',
-          answers: ['1', '2'],
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkDuplication.mockResolvedValueOnce(true);
+    it('이미 답변을 작성했다면 ConflictException을 throw한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = new Types.ObjectId().toString();
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2'],
+      };
+      const res = httpMocks.createResponse();
+      jest
+        .spyOn(diaryRepository, 'checkDuplication')
+        .mockResolvedValue(Promise.resolve(true));
 
-        const postAnswer = diaryService.postAnswer({
-          diaryId,
-          clientId,
-          answer,
-          res,
-        });
-
-        await expect(postAnswer).rejects.toBeInstanceOf(ConflictException);
+      const postAnswer = diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
       });
+
+      await expect(postAnswer).rejects.toBeInstanceOf(ConflictException);
     });
 
-    describe('question 배열과 answer 배열이 다를 때', () => {
-      it('BadRequestException을 throw한다.', async () => {
-        const diaryId = '1234';
-        const answer: CreateAnswerDto = {
-          answerer: 'answerer',
-          answers: ['1', '2', '3'],
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkDuplication.mockResolvedValueOnce(false);
-        diaryRepository.findById.mockResolvedValueOnce({
-          question: ['1', '2'],
-        });
+    it('question 배열과 answers 배열이 다르다면 BadRequestException을 throw한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = new Types.ObjectId().toString();
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2', '3'],
+      };
+      const res = httpMocks.createResponse();
+      const returnedDiaryByFindById: Diary = {
+        _id: new Types.ObjectId(diaryId),
+        question: ['1', '2'],
+        challenge: 'challenge',
+        countersign: 'countersign',
+        questioner: 'questioner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        answerList: [],
+      };
+      diaryRepository.checkDuplication = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(false));
+      diaryRepository.findById = jest
+        .fn()
+        .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
 
-        const postAnswer = diaryService.postAnswer({
-          diaryId,
-          clientId: undefined,
-          answer,
-          res,
-        });
-
-        await expect(postAnswer).rejects.toBeInstanceOf(BadRequestException);
+      const postAnswer = diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
       });
+
+      await expect(postAnswer).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    describe('정상적인 동작일 때', () => {
-      it('save 메서드를 호출한다', async () => {
-        const diaryId = '1234';
-        const answer: CreateAnswerDto = {
-          answerer: 'answerer',
-          answers: ['1', '2'],
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkDuplication.mockResolvedValueOnce(false);
-        diaryRepository.findById.mockResolvedValueOnce({
-          question: ['1', '2'],
-          answerList: [
-            {
-              answerer: 'answerer',
-              answer: ['1', '2'],
-            },
-          ],
-        });
+    it('clientId가 존재하지 않으면 res.cookie를 두 번 호출한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = undefined;
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2'],
+      };
+      const res = httpMocks.createResponse();
+      const returnedDiaryByFindById: Diary = {
+        _id: new Types.ObjectId(diaryId),
+        question: ['1', '2'],
+        challenge: 'challenge',
+        countersign: 'countersign',
+        questioner: 'questioner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        answerList: [],
+      };
+      diaryRepository.checkDuplication = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(false));
+      diaryRepository.findById = jest
+        .fn()
+        .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
 
-        await diaryService.postAnswer({
-          diaryId,
-          clientId: undefined,
-          answer,
-          res,
-        });
+      cacheRepository.keys = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+      cacheRepository.del = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(void 0));
+      diaryRepository.save = jest.fn();
+      jest.spyOn(res, 'cookie');
 
-        expect(diaryRepository.save).toBeCalled();
+      await diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
       });
 
-      it('cache del를 호출한다', async () => {
-        const diaryId = '1234';
-        const answer: CreateAnswerDto = {
-          answerer: 'answerer',
-          answers: ['1', '2'],
-        };
-        const res = httpMocks.createResponse();
-        diaryRepository.checkDuplication.mockResolvedValueOnce(false);
-        diaryRepository.findById.mockResolvedValueOnce({
-          question: ['1', '2'],
-          answerList: [
-            {
-              answerer: 'answerer',
-              answer: ['1', '2'],
-            },
-          ],
-        });
-        cacheService.keys.mockResolvedValueOnce(['/v1/diary/answerers/1234']);
+      expect(res.cookie).toBeCalledTimes(2);
+    });
 
-        await diaryService.postAnswer({
-          diaryId,
-          clientId: undefined,
-          answer,
-          res,
-        });
+    it('clientId가 존재하면 res.cookie를 호출하지 않는다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = new Types.ObjectId().toString();
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2'],
+      };
+      const res = httpMocks.createResponse();
+      const returnedDiaryByFindById: Diary = {
+        _id: new Types.ObjectId(diaryId),
+        question: ['1', '2'],
+        challenge: 'challenge',
+        countersign: 'countersign',
+        questioner: 'questioner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        answerList: [],
+      };
+      diaryRepository.checkDuplication = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(false));
+      diaryRepository.findById = jest
+        .fn()
+        .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
 
-        expect(cacheService.del).toBeCalled();
+      cacheRepository.keys = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+      cacheRepository.del = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(void 0));
+      diaryRepository.save = jest.fn();
+      jest.spyOn(res, 'cookie');
+
+      await diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
       });
+
+      expect(res.cookie).not.toHaveBeenCalled();
+    });
+
+    it('save 메서드를 호출한다.', async () => {
+      const diaryId = new Types.ObjectId().toString();
+      const clientId = new Types.ObjectId().toString();
+      const answer: CreateAnswerDto = {
+        answerer: 'answerer',
+        answers: ['1', '2'],
+      };
+      const res = httpMocks.createResponse();
+      const returnedDiaryByFindById: Diary = {
+        _id: new Types.ObjectId(diaryId),
+        question: ['1', '2'],
+        challenge: 'challenge',
+        countersign: 'countersign',
+        questioner: 'questioner',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        answerList: [],
+      };
+      diaryRepository.checkDuplication = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(false));
+      diaryRepository.findById = jest
+        .fn()
+        .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
+      cacheRepository.keys = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+      cacheRepository.del = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve(void 0));
+      jest.spyOn(diaryRepository, 'save').mockResolvedValue(void 0);
+
+      await diaryService.postAnswer({
+        diaryId,
+        clientId,
+        answer,
+        res,
+      });
+
+      expect(diaryRepository.save).toBeCalledTimes(1);
     });
   });
 });

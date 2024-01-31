@@ -12,6 +12,7 @@ import { HistorySchema, History } from 'src/models/history.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { CustomInternalServerError } from 'src/common/errors/customError';
+import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
 
 @Module({
   imports: [
@@ -21,47 +22,10 @@ import { CustomInternalServerError } from 'src/common/errors/customError';
       envFilePath: `./.env.${process.env.NODE_ENV}`,
     }),
     CacheModule.register(),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Diary.name,
-        inject: [getModelToken(History.name)],
-        imports: [
-          MongooseModule.forFeature([
-            { name: History.name, schema: HistorySchema },
-          ]),
-        ],
-        useFactory: async (historyModel) => {
-          const schema = DiarySchema;
-          schema.pre('updateOne', async function () {
-            const retentionDiary = await this.model
-              .findOne(this.getQuery())
-              .lean<Diary>()
-              .exec();
-            if (!retentionDiary) {
-              throw new CustomInternalServerError({
-                where: 'preUpdateOne',
-                information: {
-                  query: 'findOne',
-                },
-                err: 'retentionDiary is undefined',
-              });
-            }
-            const diaryId = retentionDiary._id;
-
-            retentionDiary.createdAt = retentionDiary.updatedAt;
-            const { _id, ...rest } = retentionDiary;
-
-            const numberOfAnswerers = retentionDiary.answerList.length;
-
-            await historyModel.create({
-              ...rest,
-              diaryId,
-              numberOfAnswerers,
-            });
-          });
-          return schema;
-        },
-      },
+    MongooseModule.forFeature([
+      { name: Diary.name, schema: DiarySchema },
+      { name: History.name, schema: HistorySchema },
+      { name: ChatRoom.name, schema: ChatRoomSchema },
     ]),
     forwardRef(() => AuthModule),
   ],

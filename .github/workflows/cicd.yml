@@ -3,7 +3,10 @@ on:
   push:
     paths:
       - "src/**"
+      - "test/**"
       - ".aws/**"
+      - "docker*"
+      - ".github/**"
 
 env:
   AWS_REGION : ap-northeast-2
@@ -20,11 +23,40 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: 1234
+      COOKIE_SECRET: 1234
+      NODE_ENV: test
+      MONGO_URI: mongodb://localhost:27017/test
+      CACHE_TTL: 3000000
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: test using docker compose
-        run: docker-compose -p gomgom_test -f docker-compose.test.yml up --build --force-recreate --abort-on-container-exit
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+          mongodb-replica-set: test-rs
+
+      - name : Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+
+      - name: npm test
+        run : npm run test
+
+      - name: npm e2e
+        run : npm run test:e2e
+
+      - name : npm build
+        run : npm run build
+      # - name: test using docker compose
+      #   run: docker-compose -p gomgom_test -f docker-compose.test.yml up --build --force-recreate --abort-on-container-exit
 
 
   deploy:

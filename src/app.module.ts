@@ -9,6 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { HistoryModule } from './history/history.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HistoryModule } from './history/history.module';
     AuthModule,
     CacheModule.register({}),
     HistoryModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,14 +8,14 @@ import { setUp } from 'src/utils/setUp';
 import { clientId1_Answer, diaryData } from './utils/constants';
 import { createDiary } from './utils/createDiary';
 import { createDiaryWithAnswer } from './utils/createDiaryWithAnswer';
-import { AnswererGetDto } from 'src/common/dtos/answerer.get.dto';
+import { AnswererGetDto } from 'src/common/dtos/response/answerer.get.dto';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { QuestionShowDto } from 'src/common/dtos/question.get.dto';
-import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
-import { DiaryTokenShowDto } from 'src/common/dtos/countersign.res.dto';
-import { ChallengeGetDto } from 'src/common/dtos/challenge.res.dto';
-import { HistoryGetListDto } from 'src/common/dtos/history.get.dto';
+import { QuestionShowDto } from 'src/common/dtos/response/question.get.dto';
+import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
+import { DiaryTokenShowDto } from 'src/common/dtos/response/countersign.res.dto';
+import { HistoryGetListDto } from 'src/common/dtos/response/history.get.dto';
+import { ChallengeGetDto } from 'src/common/dtos/response/challenge.get.dto';
 
 describe('Diary Controller (e2e)', () => {
   let app: INestApplication;

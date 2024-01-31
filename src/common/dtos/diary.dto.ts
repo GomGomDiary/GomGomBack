@@ -7,20 +7,20 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { TransformObjectIdToString } from 'src/common/decorators/transformObjectIdToString.decorator';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { toKoreaTime } from 'src/utils/toKoreaTime';
+import { TransformObjectId } from '../decorators/mongoIdTransform.decorator';
+import { Answer } from 'src/models/diary.schema';
 
-export class AnswerDto {
+export class AnswerDto extends Answer {
   @ApiProperty({
     example: '634ba08de9664d0e9b7a82f8',
     description: 'id',
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   _id: Types.ObjectId;
 
@@ -56,6 +56,16 @@ export class AnswerDto {
   @Transform(({ value }) => toKoreaTime(value), { toPlainOnly: true })
   @Expose()
   updatedAt: Date;
+
+  @Transform(
+    (value) => {
+      if (!value.obj.roomId) return;
+      return value.obj.roomId.toString();
+    },
+    { toClassOnly: true },
+  )
+  @Expose()
+  roomId?: Types.ObjectId;
 }
 
 export class DiaryDto {
@@ -65,8 +75,7 @@ export class DiaryDto {
     required: true,
   })
   @Type(() => Types.ObjectId)
-  @TransformObjectIdToString('_id', { toPlainOnly: true })
-  @Transform((value) => value.obj._id, { toClassOnly: true })
+  @TransformObjectId()
   @Expose()
   _id: Types.ObjectId;
 

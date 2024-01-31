@@ -8,6 +8,7 @@ export const createDiaryWithAnswer = async (
   app: INestApplication,
   diaryData: DiaryDataType,
   existedDiaryId?: string,
+  existedAnswererId?: string,
 ) => {
   /**
    * 개요
@@ -52,21 +53,36 @@ export const createDiaryWithAnswer = async (
   /**
    * answer1 생성
    */
-  const firstAnswererResponse = await request(app.getHttpServer())
-    .post(`/v1/diary/answer/${diaryId}`)
-    .set('Authorization', `Bearer ${token}`)
-    .send(clientId1_Answer);
+  let postAnswererPromise;
+  if (existedAnswererId) {
+    postAnswererPromise = request(app.getHttpServer())
+      .post(`/v1/diary/answer/${diaryId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Cookie', [`diaryUser=${existedAnswererId}`])
+      .send(clientId1_Answer);
+  } else {
+    postAnswererPromise = request(app.getHttpServer())
+      .post(`/v1/diary/answer/${diaryId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(clientId1_Answer);
+  }
+  const firstAnswererResponse = await postAnswererPromise;
 
   /**
-   * cookie 파싱
+   * answerer1 cookie 파싱
    */
-  const clientCookie = firstAnswererResponse.header['set-cookie'][0];
   // example : j%3A"6541cd0ad151bb4d862be09c" => j:"6541cd0ad151bb4d862be09c"
-  const clientId1 = clientCookie
-    .match(/diaryUser=.+?;/)[0]
-    .slice('diaryUser='.length)
-    .replace(/;/g, '');
+  let clientId1: string;
 
+  if (existedAnswererId) {
+    clientId1 = existedAnswererId;
+  } else {
+    const clientCookie = firstAnswererResponse.header['set-cookie'][0];
+    clientId1 = clientCookie
+      .match(/diaryUser=.+?;/)[0]
+      .slice('diaryUser='.length)
+      .replace(/;/g, '');
+  }
   /**
    * answer2 생성
    */

@@ -8,10 +8,10 @@ import {
   HistoryGetListDto,
   HistoryItemGetDto,
   PaginateHistoryDto,
-} from '../common/dtos/history.get.dto';
+} from '../common/dtos/response/history.get.dto';
 import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
 import { Types } from 'mongoose';
-import { HistoryIdDto } from '../common/dtos/historyId.dto';
+import { HistoryIdDto } from '../common/dtos/request/historyId.dto';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,

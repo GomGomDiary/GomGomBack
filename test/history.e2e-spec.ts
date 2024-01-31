@@ -11,7 +11,7 @@ import { plainToClass } from 'class-transformer';
 import {
   HistoryGetListDto,
   HistoryItemGetDto,
-} from 'src/common/dtos/history.get.dto';
+} from 'src/common/dtos/response/history.get.dto';
 import { validate } from 'class-validator';
 
 describe('History Controller (e2e)', () => {

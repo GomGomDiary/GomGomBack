@@ -6,22 +6,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
-import { CreateDiaryDto } from '../common/dtos/diary.post.dto';
+import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Response } from 'express';
-import mongoose from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { CreateAnswerDto } from '../common/dtos/answer.post.dto';
-import { Answer } from '../models/diary.schema';
+import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
+import { Answer, Diary } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
 } from 'src/common/errors/customError';
-import { PaginateAnswererDto } from 'src/common/dtos/answerer.get.dto';
+import { PaginateAnswererDto } from 'src/common/dtos/response/answerer.get.dto';
 import { DiaryDto } from 'src/common/dtos/diary.dto';
-import { AnswerGetDto } from 'src/common/dtos/answer.get.dto';
+import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { History } from 'src/models/history.schema';
+import { ChatRoom } from 'src/models/chatRoom.schema';
 
 @Injectable()
 export class DiaryService {
@@ -29,6 +31,9 @@ export class DiaryService {
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheRepository,
+    @InjectModel(History.name) private readonly historyModel: Model<History>,
+    @InjectModel(ChatRoom.name) private readonly chatRoomModel: Model<ChatRoom>,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
   private setDiaryCookies(res: Response, value: string) {
@@ -96,11 +101,11 @@ export class DiaryService {
     return this.diaryRepository.checkOwnership(clientId);
   }
 
-  async checkAnswerer(clientId: string, diaryIdDto: DiaryIdDto) {
+  async checkAnswerer(clientId: string, diaryId: Types.ObjectId) {
     if (!clientId) {
       return false;
     }
-    return this.diaryRepository.checkAnswerer(clientId, diaryIdDto.diaryId);
+    return this.diaryRepository.checkAnswerer(clientId, diaryId);
   }
 
   async getQuestion(
@@ -130,9 +135,56 @@ export class DiaryService {
        * -> soft delete
        */
       if (isDiaryOwner) {
-        await this.diaryRepository.updateOne(clientId, body);
-        res.status(HttpStatus.NO_CONTENT);
-        return;
+        const session = await this.connection.startSession();
+        try {
+          await session.withTransaction(async () => {
+            const retentionDiary = (await this.diaryRepository.findOne(
+              clientId,
+              session,
+            )) as Diary;
+            const diaryId = retentionDiary._id;
+
+            retentionDiary.createdAt = retentionDiary.updatedAt;
+            const answerList = retentionDiary.answerList;
+            const chatRoomUpdatePromises = answerList
+              .filter((answer) => answer?.roomId)
+              .map((answer) =>
+                this.chatRoomModel.updateOne(
+                  { _id: answer.roomId },
+                  { isHistory: true },
+                  { session },
+                ),
+              );
+
+            const { _id, ...rest } = retentionDiary;
+
+            const numberOfAnswerers = retentionDiary.answerList.length;
+            const historyCreatePromise = this.historyModel.create(
+              [
+                {
+                  ...rest,
+                  diaryId,
+                  numberOfAnswerers,
+                },
+              ],
+              { session },
+            );
+            const diaryUpdatePromise = this.diaryRepository.updateOne(
+              clientId,
+              body,
+              session,
+            );
+            await Promise.all([
+              ...chatRoomUpdatePromises,
+              historyCreatePromise,
+              diaryUpdatePromise,
+            ]);
+          });
+          res.status(HttpStatus.NO_CONTENT);
+          return;
+        } finally {
+          session.endSession();
+        }
       }
       /**
        * if Answerer o (Questioner x)

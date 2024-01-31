@@ -11,13 +11,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { DiaryService } from './diary.service';
-import { CreateDiaryDto as CreateDiaryDto } from '../common/dtos/diary.post.dto';
+import { CreateDiaryDto as CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Cookie } from 'src/common/decorators/cookie.decorator';
 import { Response } from 'express';
 import { MongoDBIdPipe } from 'src/common/pipes/cookieObjectId.pipe';
-import { CreateAnswerDto } from '../common/dtos/answer.post.dto';
+import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { CountersignPostDto } from '../common/dtos/counstersign.post.dto';
+import { CountersignPostDto } from '../common/dtos/request/counstersign.post.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import {
   ApiBadRequestResponse,
@@ -33,19 +33,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { QuestionShowDto } from '../common/dtos/question.get.dto';
+import { QuestionShowDto } from '../common/dtos/response/question.get.dto';
 import {
   AnswererGetDto,
   PaginateAnswererDto,
-} from '../common/dtos/answerer.get.dto';
-import { AnswerGetDto } from '../common/dtos/answer.get.dto';
+} from '../common/dtos/response/answerer.get.dto';
+import { AnswerGetDto } from '../common/dtos/response/answer.get.dto';
 import { ReturnValueToDto } from 'src/common/decorators/returnValueToDto';
-import { ChallengeGetDto } from '../common/dtos/challenge.res.dto';
-import { DiaryTokenShowDto } from '../common/dtos/countersign.res.dto';
+import { ChallengeGetDto } from '../common/dtos/response/challenge.get.dto';
+import { DiaryTokenShowDto } from '../common/dtos/response/countersign.res.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/cache.interceptor';
 import { CACHE_TTL } from 'src/utils/constants';
 import { AnswerGuard } from 'src/auth/guards/cookie.guard';
-import { DiaryIdDto } from 'src/common/dtos/diaryId.dto';
+import { EmptyPipe } from 'src/common/pipes/empty.pipe';
+import { ParseMongoIdPipe } from 'src/common/pipes/mongoIdParse.pipe';
+import { Types } from 'mongoose';
 
 @ApiTags('Diary')
 @Controller({
@@ -93,9 +95,10 @@ export class DiaryController {
   @Get(':diaryId')
   async isAnswerer(
     @Cookie('diaryUser', MongoDBIdPipe) clientId: string,
-    @Param() diaryIdDto: DiaryIdDto,
+    @Param('diaryId', MongoDBIdPipe, EmptyPipe, ParseMongoIdPipe)
+    diaryId: Types.ObjectId,
   ) {
-    return this.diaryService.checkAnswerer(clientId, diaryIdDto);
+    return this.diaryService.checkAnswerer(clientId, diaryId);
   }
 
   @ApiOperation({
@@ -178,8 +181,8 @@ export class DiaryController {
   @ApiParam({
     name: 'diaryId',
   })
-  @UseInterceptors(HttpCacheInterceptor)
-  @CacheTTL(CACHE_TTL)
+  // @UseInterceptors(HttpCacheInterceptor) // TODO 캐시 무효
+  // @CacheTTL(CACHE_TTL)
   @Get('answerers/:diaryId')
   @ReturnValueToDto(AnswererGetDto)
   async getAnswerers(

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Diary } from '../../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Document, Model } from 'mongoose';
-import { CreateDiaryDto } from '../dtos/diary.post.dto';
+import mongoose, { ClientSession, Document, Model, Types } from 'mongoose';
+import { CreateDiaryDto } from '../dtos/request/diary.post.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,
@@ -31,8 +31,8 @@ export class DiaryRepository {
     try {
       return !!(await this.diaryModel
         .findOne({
-          _id: diaryId,
-          'answerList._id': clientId,
+          _id: new Types.ObjectId(diaryId),
+          'answerList._id': new Types.ObjectId(clientId),
         })
         .lean()
         .exec());
@@ -49,9 +49,12 @@ export class DiaryRepository {
     }
   }
 
-  async checkOwnership(clientId: string) {
+  async checkOwnership(clientId: string | Types.ObjectId) {
     try {
-      return !!(await this.diaryModel.exists({ _id: clientId }).lean().exec());
+      return !!(await this.diaryModel
+        .exists({ _id: new Types.ObjectId(clientId) })
+        .lean()
+        .exec());
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -64,10 +67,16 @@ export class DiaryRepository {
     }
   }
 
-  async checkAnswerer(clientId: string, diaryId: mongoose.Types.ObjectId) {
+  async checkAnswerer(
+    clientId: string | Types.ObjectId,
+    diaryId: mongoose.Types.ObjectId,
+  ) {
     try {
       return !!(await this.diaryModel
-        .exists({ _id: diaryId, 'answerList._id': clientId })
+        .exists({
+          _id: new Types.ObjectId(diaryId),
+          'answerList._id': new Types.ObjectId(clientId),
+        })
         .lean()
         .exec());
     } catch (err) {
@@ -85,7 +94,8 @@ export class DiaryRepository {
 
   async create(diary: CreateDiaryDto) {
     try {
-      return await this.diaryModel.create(diary);
+      const { _id } = await this.diaryModel.create(diary);
+      return { _id };
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -100,7 +110,11 @@ export class DiaryRepository {
 
   async createWithId(id: string, body: CreateDiaryDto) {
     try {
-      return await this.diaryModel.create({ _id: id, ...body });
+      await this.diaryModel.create({
+        _id: new Types.ObjectId(id),
+        ...body,
+      });
+      return;
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -122,7 +136,9 @@ export class DiaryRepository {
       return false;
     }
     try {
-      return !!(await this.diaryModel.exists({ 'answerList._id': id }).exec());
+      return !!(await this.diaryModel
+        .exists({ 'answerList._id': new Types.ObjectId(id) })
+        .exec());
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -140,8 +156,8 @@ export class DiaryRepository {
     try {
       return !!(await this.diaryModel
         .exists({
-          _id: diaryId,
-          'answerList._id': cookieId,
+          _id: new Types.ObjectId(diaryId),
+          'answerList._id': new Types.ObjectId(cookieId),
         })
         .exec());
     } catch (err) {
@@ -191,6 +207,7 @@ export class DiaryRepository {
                   in: {
                     _id: '$$answer._id',
                     answerer: '$$answer.answerer',
+                    roomId: '$$answer.roomId',
                     createdAt: '$$answer.createdAt',
                     updatedAt: '$$answer.updatedAt',
                   },
@@ -220,15 +237,15 @@ export class DiaryRepository {
       return await this.diaryModel
         .findOne(
           {
-            _id: diaryId,
-            'answerList._id': answerId,
+            _id: new Types.ObjectId(diaryId),
+            'answerList._id': new Types.ObjectId(answerId),
           },
           {
             questioner: 1,
             question: 1,
             answerList: {
               $elemMatch: {
-                _id: answerId,
+                _id: new Types.ObjectId(answerId),
               },
             },
           },
@@ -248,10 +265,10 @@ export class DiaryRepository {
     }
   }
 
-  async findOne(diaryId: string) {
+  async findOne(diaryId: string, session?: ClientSession) {
     try {
       return await this.diaryModel
-        .findOne({ _id: diaryId })
+        .findOne({ _id: new Types.ObjectId(diaryId) }, {}, { session })
         .lean<Diary>()
         .exec();
     } catch (err) {
@@ -271,7 +288,7 @@ export class DiaryRepository {
       return await this.diaryModel
         .findOne(
           {
-            _id: diaryId,
+            _id: new Types.ObjectId(diaryId),
           },
           {
             question: 1,
@@ -315,7 +332,7 @@ export class DiaryRepository {
       return await this.diaryModel
         .findOne(
           {
-            _id: diaryId,
+            _id: new Types.ObjectId(diaryId),
           },
           field,
         )
@@ -335,7 +352,7 @@ export class DiaryRepository {
 
   async save(documents: Document[]) {
     try {
-      return this.diaryModel.bulkSave(documents);
+      this.diaryModel.bulkSave(documents);
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
@@ -348,16 +365,22 @@ export class DiaryRepository {
     }
   }
 
-  async updateOne(diaryId: string, body: CreateDiaryDto) {
+  async updateOne(
+    diaryId: string,
+    body: CreateDiaryDto,
+    session?: ClientSession,
+  ) {
     try {
-      return await this.diaryModel.updateOne(
+      await this.diaryModel.updateOne(
         {
-          _id: diaryId,
+          _id: new Types.ObjectId(diaryId),
         },
         {
           $set: { ...body, answerList: [] },
         },
+        { session },
       );
+      return;
     } catch (err) {
       const customError: CustomErrorOptions = {
         information: {
