@@ -146,6 +146,32 @@ describe('Chat Controller (e2e)', () => {
       expect(targetAnswerer.roomId).toBe(chatId);
     });
 
+    it('히스토리 생성 후 동일한 answerer와 다시 새로 채팅방을 생성한다.', async () => {
+      // 다이어리 생성 및 채팅방 생성
+      const { diaryId, clientId1 } = await createDiaryWithAnswer(
+        app,
+        diaryData,
+      );
+      // 채팅방 생성
+      await request(app.getHttpServer())
+        .post('/v1/chat')
+        .set('Cookie', [`diaryUser=${diaryId}`])
+        .send({
+          answererId: clientId1,
+        });
+      // clientId1을 답변으로 하는 다이어리 재생성
+      await createDiaryWithAnswer(app, diaryData, diaryId, clientId1);
+
+      const result = await request(app.getHttpServer())
+        .post('/v1/chat')
+        .set('Cookie', [`diaryUser=${diaryId}`])
+        .send({
+          answererId: clientId1,
+        });
+
+      expect(result.statusCode).toBe(201);
+    });
+
     it('response는 ChatRoomPostDto와 검증시 에러가 없어야 한다', async () => {
       const { diaryId, clientId1 } = await createDiaryWithAnswer(
         app,

@@ -11,6 +11,7 @@ import { History } from 'src/models/history.schema';
 import { CreateAnswerDto } from 'src/common/dtos/request/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CreateDiaryDto } from 'src/common/dtos/request/diary.post.dto';
+import { ChatRoom } from 'src/models/chatRoom.schema';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
@@ -35,6 +36,12 @@ describe('DiaryService', () => {
           provide: getModelToken(History.name),
           useValue: {
             create: jest.fn(),
+          },
+        },
+        {
+          provide: getModelToken(ChatRoom.name),
+          useValue: {
+            updateOne: jest.fn(),
           },
         },
         {
@@ -88,7 +95,16 @@ describe('DiaryService', () => {
           questioner: 'questioner',
           challenge: 'challenge',
           countersign: 'countersign',
-          answerList: [],
+          answerList: [
+            {
+              _id: new Types.ObjectId(),
+              answerer: 'answerer',
+              answers: [],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              roomId: new Types.ObjectId(),
+            },
+          ],
         };
         diaryRepository.checkOwnership = jest
           .fn()
@@ -102,9 +118,9 @@ describe('DiaryService', () => {
         cacheRepository.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
+        // cacheRepository.del = jest
+        //   .fn()
+        //   .mockResolvedValue(Promise.resolve(void 0));
 
         await diaryService.postQuestion({ body, clientId, res });
 

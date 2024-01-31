@@ -69,8 +69,20 @@ export class ChatRepository {
       return await this.chatRoomModel
         .findOne({
           $or: [
-            { $and: [{ _id: roomId }, { questionerId: clientId }] },
-            { $and: [{ _id: roomId }, { answererId: clientId }] },
+            {
+              $and: [
+                { _id: roomId },
+                { questionerId: clientId },
+                { isHistory: false },
+              ],
+            },
+            {
+              $and: [
+                { _id: roomId },
+                { answererId: clientId },
+                { isHistory: false },
+              ],
+            },
           ],
         })
         .lean()
