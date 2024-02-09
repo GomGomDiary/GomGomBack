@@ -3,6 +3,7 @@ import {
   ConflictException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { DiaryRepository } from '../common/repositories/diary.repository';
@@ -374,6 +375,12 @@ export class DiaryService {
   }
 
   async postUpdatingSignal(body: any) {
+    const queueName = this.configService.get<string>('QUEUE_NAME');
+    if (!queueName) {
+      throw new InternalServerErrorException(
+        'queueName이 정의되지 않았습니다.',
+      );
+    }
     const keys = await this.cacheService.keys();
     const message = body;
 
@@ -382,7 +389,7 @@ export class DiaryService {
     console.log(message);
     console.log(randomId);
     try {
-      await this.sqsService.send('test.fifo', {
+      await this.sqsService.send(queueName, {
         id: 'id',
         body: message,
         groupId: 'test',
