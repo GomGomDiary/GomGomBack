@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
-import { MongooseModule, getModelToken } from '@nestjs/mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
 import { DiaryRepository } from '../common/repositories/diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
@@ -11,8 +11,8 @@ import { Diary, DiarySchema } from 'src/models/diary.schema';
 import { HistorySchema, History } from 'src/models/history.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
-import { CustomInternalServerError } from 'src/common/errors/customError';
 import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
+import { SqsModule } from '@ssut/nestjs-sqs';
 
 @Module({
   imports: [
@@ -20,6 +20,16 @@ import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
     ConfigModule.forRoot({
       load: [config],
       envFilePath: `./.env.${process.env.NODE_ENV}`,
+    }),
+    SqsModule.register({
+      consumers: [],
+      producers: [
+        {
+          name: process.env.QUEUE_NAME as string,
+          region: 'ap-northeast-2',
+          queueUrl: process.env.QUEUE_URL as string,
+        },
+      ],
     }),
     CacheModule.register(),
     MongooseModule.forFeature([
@@ -31,6 +41,6 @@ import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
   ],
   controllers: [DiaryController],
   providers: [DiaryService, DiaryRepository, CacheRepository],
-  exports: [DiaryRepository],
+  exports: [DiaryRepository, DiaryService],
 })
 export class DiaryModule {}

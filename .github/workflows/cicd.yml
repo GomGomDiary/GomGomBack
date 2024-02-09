@@ -29,6 +29,8 @@ jobs:
       NODE_ENV: test
       MONGO_URI: mongodb://localhost:27017/test
       CACHE_TTL: 3000000
+      QUEUE_NAME: test.fifo
+      QUEUE_URL:  http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/test.fifo
 
     steps:
       - name: Checkout
@@ -40,10 +42,24 @@ jobs:
           mongodb-version: 6.0
           mongodb-replica-set: test-rs
 
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@main
+        with:
+          image-tag: 'latest'
+          install-awslocal: 'true'
+      - name: Run Tests against LocalStack
+        run: |
+          awslocal sqs create-queue --queue-name test.fifo --attributes FifoQueue=true
+          echo "$(awslocal sqs list-queues)"
+
+      - name: Check env
+        run: env
+
       - name : Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
       - name: Install dependencies
         run: npm install
 

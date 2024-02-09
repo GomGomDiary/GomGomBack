@@ -41,6 +41,8 @@
     "@opentelemetry/sdk-node": "^0.45.1",
     "@opentelemetry/sdk-trace-base": "^1.18.1",
     "@opentelemetry/semantic-conventions": "^1.18.1",
+    "@ssut/nestjs-sqs": "^2.2.0",
+    "aws-sdk": "^2.1553.0",
     "cache-manager": "^5.3.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
