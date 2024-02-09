@@ -24,6 +24,8 @@ import { AnswerGetDto } from 'src/common/dtos/response/answer.get.dto';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { History } from 'src/models/history.schema';
 import { ChatRoom } from 'src/models/chatRoom.schema';
+import { SqsService } from '@ssut/nestjs-sqs';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class DiaryService {
@@ -31,6 +33,7 @@ export class DiaryService {
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheRepository,
+    private readonly sqsService: SqsService,
     @InjectModel(History.name) private readonly historyModel: Model<History>,
     @InjectModel(ChatRoom.name) private readonly chatRoomModel: Model<ChatRoom>,
     @InjectConnection() private readonly connection: mongoose.Connection,
@@ -127,8 +130,10 @@ export class DiaryService {
     clientId: string;
     res: Response;
   }) {
+    let diaryId = clientId;
     try {
       const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
+      // TODO 3가지 경우 전부 맞게 들어가는지 체크
       /**
        * if Questioner
        * update Diary
@@ -200,8 +205,8 @@ export class DiaryService {
        * create Diary && set cookie
        */
       const diary = await this.diaryRepository.create(body);
-
-      this.setDiaryCookies(res, diary._id.toString());
+      diaryId = diary._id.toString();
+      this.setDiaryCookies(res, diaryId);
     } finally {
       /**
        * Delete cache
@@ -217,6 +222,7 @@ export class DiaryService {
         }
       }
       await Promise.all(promises);
+      // TODO sqs send
     }
   }
 
@@ -276,7 +282,7 @@ export class DiaryService {
     diaryId: string;
     clientId: string | undefined;
     answer: CreateAnswerDto;
-    res: Response;
+    res?: Response;
   }) {
     if (diaryId === clientId) {
       throw new BadRequestException('자신의 다이어리엔 쓸 수 없습니다.');
@@ -294,7 +300,7 @@ export class DiaryService {
     /**
      * if Newbie
      */
-    if (!clientId) {
+    if (!clientId && !!res) {
       id = new mongoose.Types.ObjectId();
 
       /**
@@ -367,8 +373,24 @@ export class DiaryService {
     return challengeWithQuestioner;
   }
 
-  async postUpdatingSignal() {
+  async postUpdatingSignal(body: any) {
     const keys = await this.cacheService.keys();
+    const message = body;
+
+    const randomId = randomUUID();
+    console.log('=== pass producer ===');
+    console.log(message);
+    console.log(randomId);
+    try {
+      await this.sqsService.send('test.fifo', {
+        id: 'id',
+        body: message,
+        groupId: 'test',
+        deduplicationId: randomId,
+      });
+    } catch (err) {
+      console.log(err);
+    }
     return keys;
   }
 }

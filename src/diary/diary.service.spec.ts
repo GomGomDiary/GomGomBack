@@ -12,9 +12,12 @@ import { CreateAnswerDto } from 'src/common/dtos/request/answer.post.dto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CreateDiaryDto } from 'src/common/dtos/request/diary.post.dto';
 import { ChatRoom } from 'src/models/chatRoom.schema';
+import { SqsService } from '@ssut/nestjs-sqs';
+import { SQS_OPTIONS } from '@ssut/nestjs-sqs/dist/sqs.constants';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
+  let sqsService: SqsService;
   let cacheRepository: CacheRepository;
   let diaryRepository: DiaryRepository;
   let connection: mongoose.Connection;
@@ -28,6 +31,10 @@ describe('DiaryService', () => {
         DiaryRepository,
         ConfigService,
         CacheRepository,
+        {
+          provide: SqsService,
+          useValue: {},
+        },
         {
           provide: getModelToken(Diary.name),
           useValue: {},
@@ -65,6 +72,7 @@ describe('DiaryService', () => {
     diaryService = module.get<DiaryService>(DiaryService);
     historyModel = module.get<Model<History>>(getModelToken(History.name));
     diaryRepository = module.get<DiaryRepository>(DiaryRepository);
+    sqsService = module.get<SqsService>(SqsService);
     cacheRepository = module.get(CacheRepository);
     connection = module.get<mongoose.Connection>(
       getConnectionToken('Database'),

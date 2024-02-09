@@ -15,6 +15,8 @@ env:
   ECS_SERVICE: gomgom_service2
   ECS_TASK_DEFINITION: ./.aws/task-definition.json
   CONTAINER_NAME: gomgom
+  QUEUE_NAME: test.fifo
+  QUEUE_URL:  http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/test.fifo
 
 permissions:
   id-token: write   # This is required for requesting the JWT
