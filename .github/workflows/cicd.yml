@@ -52,6 +52,9 @@ jobs:
           awslocal sqs create-queue --queue-name test.fifo --attributes FifoQueue=true
           echo "$(awslocal sqs list-queues)"
 
+      - name: Check env
+        run: env
+
       - name : Use Node.js
         uses: actions/setup-node@v4
         with:
