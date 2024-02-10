@@ -21,6 +21,7 @@
     "test:solo": "jest --config ./test/jest-solo.json"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.509.0",
     "@nestjs/cache-manager": "^2.1.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^3.1.1",
