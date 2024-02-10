@@ -13,6 +13,12 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { CacheRepository } from '../common/repositories/cache.repository';
 import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
 import { SqsModule } from '@ssut/nestjs-sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
+
+const sqsClient = new SQSClient({
+  region: 'ap-northeast-2',
+  endpoint: process.env.QUEUE_URL,
+});
 
 @Module({
   imports: [
@@ -28,6 +34,7 @@ import { SqsModule } from '@ssut/nestjs-sqs';
           name: process.env.QUEUE_NAME as string,
           region: 'ap-northeast-2',
           queueUrl: process.env.QUEUE_URL as string,
+          sqs: sqsClient,
         },
       ],
     }),

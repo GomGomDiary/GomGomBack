@@ -223,7 +223,27 @@ export class DiaryService {
         }
       }
       await Promise.all(promises);
-      // TODO sqs send
+      const queueName = this.configService.get<string>('QUEUE_NAME');
+      if (!queueName) {
+        throw new InternalServerErrorException(
+          'queueName이 정의되지 않았습니다.',
+        );
+      }
+      const message = {
+        diaryId,
+        type: 'aiPostAnswer',
+      };
+      const randomId = randomUUID();
+      try {
+        await this.sqsService.send(queueName, {
+          id: 'id',
+          body: message,
+          groupId: 'gomgom',
+          deduplicationId: randomId,
+        });
+      } catch (err) {
+        console.log(JSON.stringify(err));
+      }
     }
   }
 
@@ -375,19 +395,16 @@ export class DiaryService {
   }
 
   async postUpdatingSignal(body: any) {
+    const keys = await this.cacheService.keys();
     const queueName = this.configService.get<string>('QUEUE_NAME');
     if (!queueName) {
       throw new InternalServerErrorException(
         'queueName이 정의되지 않았습니다.',
       );
     }
-    const keys = await this.cacheService.keys();
     const message = body;
 
     const randomId = randomUUID();
-    console.log('=== pass producer ===');
-    console.log(message);
-    console.log(randomId);
     try {
       await this.sqsService.send(queueName, {
         id: 'id',
