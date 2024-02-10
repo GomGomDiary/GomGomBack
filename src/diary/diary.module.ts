@@ -15,9 +15,6 @@ import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
 import { SqsModule } from '@ssut/nestjs-sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
 
-console.log('===');
-console.log(process.env.QUEUE_URL);
-
 const sqsClient = new SQSClient({
   region: 'ap-northeast-2',
   endpoint: process.env.QUEUE_URL,

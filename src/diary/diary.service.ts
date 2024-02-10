@@ -235,18 +235,15 @@ export class DiaryService {
       };
       const randomId = randomUUID();
       try {
-        console.log('=== pass 1 ===');
         await this.sqsService.send(queueName, {
           id: 'id',
           body: message,
           groupId: 'gomgom',
           deduplicationId: randomId,
         });
-        console.log('=== pass 2 ===');
       } catch (err) {
         console.log(JSON.stringify(err));
       }
-      // TODO sqs send
     }
   }
 
