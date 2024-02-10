@@ -11,7 +11,7 @@
 ## 기술 스택
 ### Backend
 
-<img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=NestJS&logoColor=white"><img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white">
+<img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=NestJS&logoColor=white"> <img src="https://img.shields.io/badge/Typescript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white">
 
 ### Database
   
@@ -19,21 +19,21 @@
 
 ### Infra
   
-<img src="https://img.shields.io/badge/Amazon ECS-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+<img src="https://img.shields.io/badge/Amazon ECS-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white"> <img src="https://img.shields.io/badge/AWS Lambda-FF9900?style=for-the-badge&logo=aws lambda&logoColor=white"> <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
 
 
 ### CI/CD
 
-<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"><img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/github action-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
 
 ### Monitoring
 
-<img src="https://img.shields.io/badge/Honeycomb-1E8CBE?style=for-the-badge&logo=honeycomb&logoColor=white"><img src="https://img.shields.io/badge/OpenTelemetry-000000?style=for-the-badge&logo=OpenTelemetry&logoColor=white"><img src="https://img.shields.io/badge/Amazon Cloudwatch-FF4F8B?style=for-the-badge&logo=Amazon Cloudwatch&logoColor=white">
+<img src="https://img.shields.io/badge/Honeycomb-1E8CBE?style=for-the-badge&logo=honeycomb&logoColor=white"> <img src="https://img.shields.io/badge/OpenTelemetry-000000?style=for-the-badge&logo=OpenTelemetry&logoColor=white"> <img src="https://img.shields.io/badge/Amazon Cloudwatch-FF4F8B?style=for-the-badge&logo=Amazon Cloudwatch&logoColor=white">
 
 
 ### Load Testing
 
-<img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white"><img src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white">
+<img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white"> <img src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white">
 
 
 ## TIL
