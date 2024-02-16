@@ -625,27 +625,8 @@ export class DiaryService {
     return challengeWithQuestioner;
   }
 
-  async postUpdatingSignal(body: any) {
+  async postUpdatingSignal() {
     const keys = await this.cacheService.keys();
-    const queueName = this.configService.get<string>('QUEUE_NAME');
-    if (!queueName) {
-      throw new InternalServerErrorException(
-        'queueName이 정의되지 않았습니다.',
-      );
-    }
-    const message = body;
-
-    const randomId = randomUUID();
-    try {
-      await this.sqsService.send(queueName, {
-        id: 'id',
-        body: message,
-        groupId: 'test',
-        deduplicationId: randomId,
-      });
-    } catch (err) {
-      console.log(err);
-    }
     return keys;
   }
 }
