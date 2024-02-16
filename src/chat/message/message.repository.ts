@@ -5,7 +5,7 @@ import { Chat } from 'src/models/chat.schema';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
-} from '../errors/customError';
+} from '../../common/errors/customError';
 import { PaginateQueryType } from 'src/utils/pagination';
 
 @Injectable()

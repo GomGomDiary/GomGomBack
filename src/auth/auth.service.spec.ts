@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { DiaryRepository } from 'src/common/repositories/diary.repository';
+import { DiaryRepository } from 'src/diary/diary.repository';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';

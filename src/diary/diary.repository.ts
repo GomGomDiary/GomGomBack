@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Diary } from '../../models/diary.schema';
+import { Diary } from '../models/diary.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { ClientSession, Document, Model, Types } from 'mongoose';
-import { CreateDiaryDto } from '../dtos/request/diary.post.dto';
+import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import {
   CustomInternalServerError,
   CustomErrorOptions,
-} from '../errors/customError';
+} from '../common/errors/customError';
 
 interface DiaryWithAnswerCount extends Diary {
   answerCount: number;

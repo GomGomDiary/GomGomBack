@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { DiaryController } from './diary.controller';
 import { DiaryService } from './diary.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiaryRepository } from '../common/repositories/diary.repository';
+import { DiaryRepository } from './diary.repository';
 import { ConfigModule } from '@nestjs/config';
 import config from 'src/config';
 import { AuthModule } from 'src/auth/auth.module';
@@ -10,10 +10,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { Diary, DiarySchema } from 'src/models/diary.schema';
 import { HistorySchema, History } from 'src/models/history.schema';
 import { CacheModule } from '@nestjs/cache-manager';
-import { CacheRepository } from '../common/repositories/cache.repository';
 import { ChatRoom, ChatRoomSchema } from 'src/models/chatRoom.schema';
 import { SqsModule } from '@ssut/nestjs-sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
+import { CustomCacheModule } from 'src/cache/cache.module';
 
 const sqsClient = new SQSClient({
   region: 'ap-northeast-2',
@@ -38,6 +38,7 @@ const sqsClient = new SQSClient({
         },
       ],
     }),
+    CustomCacheModule,
     CacheModule.register(),
     MongooseModule.forFeature([
       { name: Diary.name, schema: DiarySchema },
@@ -47,7 +48,7 @@ const sqsClient = new SQSClient({
     forwardRef(() => AuthModule),
   ],
   controllers: [DiaryController],
-  providers: [DiaryService, DiaryRepository, CacheRepository],
+  providers: [DiaryService, DiaryRepository],
   exports: [DiaryRepository, DiaryService],
 })
 export class DiaryModule {}

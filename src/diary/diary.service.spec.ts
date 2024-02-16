@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiaryService } from './diary.service';
-import { DiaryRepository } from '../common/repositories/diary.repository';
+import { DiaryRepository } from './diary.repository';
 import httpMocks from 'node-mocks-http';
-import { CacheRepository } from '../common/repositories/cache.repository';
 import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Diary } from 'src/models/diary.schema';
 import mongoose, { Model, Types } from 'mongoose';
@@ -13,15 +12,16 @@ import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CreateDiaryDto } from 'src/common/dtos/request/diary.post.dto';
 import { ChatRoom } from 'src/models/chatRoom.schema';
 import { SqsService } from '@ssut/nestjs-sqs';
-import { SQS_OPTIONS } from '@ssut/nestjs-sqs/dist/sqs.constants';
+import { CacheService } from 'src/cache/cache.service';
 
 describe('DiaryService', () => {
   let diaryService: DiaryService;
   let sqsService: SqsService;
-  let cacheRepository: CacheRepository;
+  let cacheService: CacheService;
   let diaryRepository: DiaryRepository;
   let connection: mongoose.Connection;
   let historyModel: Model<History>;
+  let configService: ConfigService;
   // let diaryModel: Model<Diary>;
 
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('DiaryService', () => {
         DiaryService,
         DiaryRepository,
         ConfigService,
-        CacheRepository,
+        CacheService,
         {
           provide: SqsService,
           useValue: {},
@@ -73,10 +73,11 @@ describe('DiaryService', () => {
     historyModel = module.get<Model<History>>(getModelToken(History.name));
     diaryRepository = module.get<DiaryRepository>(DiaryRepository);
     sqsService = module.get<SqsService>(SqsService);
-    cacheRepository = module.get(CacheRepository);
+    cacheService = module.get(CacheService);
     connection = module.get<mongoose.Connection>(
       getConnectionToken('Database'),
     );
+    configService = module.get<ConfigService>(ConfigService);
     // diaryModel = module.get<Model<Diary>>(getModelToken(Diary.name));
   });
 
@@ -123,9 +124,10 @@ describe('DiaryService', () => {
         diaryRepository.updateOne = jest
           .fn()
           .mockResolvedValue(Promise.resolve(void 0));
-        cacheRepository.keys = jest
+        cacheService.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
+        configService.get = jest.fn().mockReturnValueOnce('1234');
         // cacheRepository.del = jest
         //   .fn()
         //   .mockResolvedValue(Promise.resolve(void 0));
@@ -163,57 +165,16 @@ describe('DiaryService', () => {
         diaryRepository.updateOne = jest
           .fn()
           .mockResolvedValue(Promise.resolve(void 0));
-        cacheRepository.keys = jest
+        cacheService.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
+        // cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
+        configService.get = jest.fn().mockReturnValueOnce('1234');
         jest.spyOn(historyModel, 'create');
 
         await diaryService.postQuestion({ body, clientId, res });
 
         expect(historyModel.create).toBeCalledTimes(1);
-      });
-
-      it('cache del를 한 번 호출한다.', async () => {
-        const body: CreateDiaryDto = {
-          question: [],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-        };
-        const clientId = new Types.ObjectId().toString();
-        const res = httpMocks.createResponse();
-        const diary: Diary = {
-          _id: new Types.ObjectId(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          question: [],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-          answerList: [],
-        };
-        diaryRepository.checkOwnership = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(true));
-        diaryRepository.findOne = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(diary));
-        diaryRepository.updateOne = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
-        cacheRepository.keys = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve([`/v1/diary/${clientId}`]));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
-
-        await diaryService.postQuestion({ body, clientId, res });
-
-        expect(cacheRepository.del).toBeCalledTimes(1);
       });
     });
 
@@ -233,12 +194,11 @@ describe('DiaryService', () => {
         diaryRepository.existAsAnswerer = jest
           .fn()
           .mockResolvedValue(Promise.resolve(true));
-        cacheRepository.keys = jest
+        cacheService.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
+        cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
+        configService.get = jest.fn().mockReturnValueOnce('1234');
         jest.spyOn(diaryRepository, 'createWithId').mockResolvedValue(void 0);
 
         await diaryService.postQuestion({
@@ -267,12 +227,11 @@ describe('DiaryService', () => {
         diaryRepository.existAsAnswerer = jest
           .fn()
           .mockResolvedValue(Promise.resolve(false));
-        cacheRepository.keys = jest
+        cacheService.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
+        cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
+        configService.get = jest.fn().mockReturnValue('1234');
         jest
           .spyOn(diaryRepository, 'create')
           .mockResolvedValue({ _id: new Types.ObjectId() });
@@ -282,7 +241,7 @@ describe('DiaryService', () => {
         expect(diaryRepository.create).toBeCalledTimes(1);
       });
 
-      it('cookie를 심는지 검증한다.', async () => {
+      it('cookie를 심어야 한다.', async () => {
         const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
@@ -297,15 +256,15 @@ describe('DiaryService', () => {
         diaryRepository.existAsAnswerer = jest
           .fn()
           .mockResolvedValue(Promise.resolve(false));
-        cacheRepository.keys = jest
+        cacheService.keys = jest
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheRepository.del = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
+        cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
         diaryRepository.create = jest
           .fn()
           .mockResolvedValue({ _id: new Types.ObjectId() });
+        configService.get = jest.fn().mockReturnValue('1234');
+
         jest.spyOn(res, 'cookie');
 
         await diaryService.postQuestion({ body, clientId, res });
@@ -417,12 +376,10 @@ describe('DiaryService', () => {
         .fn()
         .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
 
-      cacheRepository.keys = jest
+      cacheService.keys = jest
         .fn()
         .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-      cacheRepository.del = jest
-        .fn()
-        .mockResolvedValue(Promise.resolve(void 0));
+      cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
       diaryRepository.save = jest.fn();
       jest.spyOn(res, 'cookie');
 
@@ -461,12 +418,10 @@ describe('DiaryService', () => {
         .fn()
         .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
 
-      cacheRepository.keys = jest
+      cacheService.keys = jest
         .fn()
         .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-      cacheRepository.del = jest
-        .fn()
-        .mockResolvedValue(Promise.resolve(void 0));
+      cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
       diaryRepository.save = jest.fn();
       jest.spyOn(res, 'cookie');
 
@@ -504,12 +459,10 @@ describe('DiaryService', () => {
       diaryRepository.findById = jest
         .fn()
         .mockResolvedValueOnce(Promise.resolve(returnedDiaryByFindById));
-      cacheRepository.keys = jest
+      cacheService.keys = jest
         .fn()
         .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-      cacheRepository.del = jest
-        .fn()
-        .mockResolvedValue(Promise.resolve(void 0));
+      cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
       jest.spyOn(diaryRepository, 'save').mockResolvedValue(void 0);
 
       await diaryService.postAnswer({

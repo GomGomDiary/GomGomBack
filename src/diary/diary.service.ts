@@ -4,9 +4,10 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DiaryRepository } from '../common/repositories/diary.repository';
+import { DiaryRepository } from './diary.repository';
 import { CreateDiaryDto } from '../common/dtos/request/diary.post.dto';
 import { Response } from 'express';
 import mongoose, { Model, Types } from 'mongoose';
@@ -14,7 +15,6 @@ import { ConfigService } from '@nestjs/config';
 import { CreateAnswerDto } from '../common/dtos/request/answer.post.dto';
 import { Answer, Diary } from '../models/diary.schema';
 import { ANSWERERS } from 'src/utils/constants';
-import { CacheRepository } from '../common/repositories/cache.repository';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
@@ -27,18 +27,22 @@ import { History } from 'src/models/history.schema';
 import { ChatRoom } from 'src/models/chatRoom.schema';
 import { SqsService } from '@ssut/nestjs-sqs';
 import { randomUUID } from 'crypto';
+import { CacheService } from 'src/cache/cache.service';
+import { ClientSession } from 'mongoose';
 
 @Injectable()
 export class DiaryService {
   constructor(
     private readonly diaryRepository: DiaryRepository,
     private readonly configService: ConfigService,
-    private readonly cacheService: CacheRepository,
+    private readonly cacheService: CacheService,
     private readonly sqsService: SqsService,
     @InjectModel(History.name) private readonly historyModel: Model<History>,
     @InjectModel(ChatRoom.name) private readonly chatRoomModel: Model<ChatRoom>,
     @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
+
+  private readonly logger = new Logger();
 
   private setDiaryCookies(res: Response, value: string) {
     /**
@@ -122,6 +126,207 @@ export class DiaryService {
     return question;
   }
 
+  private async getRetentionDiary(clientId: string, session: ClientSession) {
+    const retentionDiary = (await this.diaryRepository.findOne(
+      clientId,
+      session,
+    )) as Diary;
+    retentionDiary.createdAt = retentionDiary.updatedAt;
+    return retentionDiary;
+  }
+
+  private updateChatRoomsPromises(
+    answerList: Answer[],
+    session: ClientSession,
+  ) {
+    const promises = answerList
+      .filter((answer) => answer?.roomId)
+      .map((answer) =>
+        this.chatRoomModel.updateOne(
+          { _id: answer.roomId },
+          { isHistory: true },
+          { session },
+        ),
+      );
+    return promises;
+  }
+
+  private createHistoryPromise(
+    retentionDiary: Diary,
+    diaryId: Types.ObjectId,
+    session: ClientSession,
+  ) {
+    const { _id, ...rest } = retentionDiary;
+    const numberOfAnswerers = retentionDiary.answerList.length;
+    return this.historyModel.create(
+      [
+        {
+          ...rest,
+          diaryId,
+          numberOfAnswerers,
+        },
+      ],
+      { session },
+    );
+  }
+
+  private async handleDiaryOwner(
+    clientId: string,
+    body: CreateDiaryDto,
+    res: Response,
+  ) {
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const retentionDiary = await this.getRetentionDiary(clientId, session);
+        const diaryId = retentionDiary._id;
+
+        const chatRoomUpdatePromises = this.updateChatRoomsPromises(
+          retentionDiary.answerList,
+          session,
+        );
+
+        const historyCreatePromise = this.createHistoryPromise(
+          retentionDiary,
+          diaryId,
+          session,
+        );
+
+        const diaryUpdatePromise = this.diaryRepository.updateOne(
+          clientId,
+          body,
+          session,
+        );
+
+        await Promise.all([
+          ...chatRoomUpdatePromises,
+          historyCreatePromise,
+          diaryUpdatePromise,
+        ]);
+      });
+      res.status(HttpStatus.NO_CONTENT);
+      return;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  // private async handleDiaryOwner(
+  //   clientId: string,
+  //   body: CreateDiaryDto,
+  //   res: Response,
+  // ) {
+  //   const session = await this.connection.startSession();
+  //   try {
+  //     await session.withTransaction(async () => {
+  //       const retentionDiary = (await this.diaryRepository.findOne(
+  //         clientId,
+  //         session,
+  //       )) as Diary;
+  //       const diaryId = retentionDiary._id;
+  //
+  //       retentionDiary.createdAt = retentionDiary.updatedAt;
+  //       const answerList = retentionDiary.answerList;
+  //       const chatRoomUpdatePromises = answerList
+  //         .filter((answer) => answer?.roomId)
+  //         .map((answer) =>
+  //           this.chatRoomModel.updateOne(
+  //             { _id: answer.roomId },
+  //             { isHistory: true },
+  //             { session },
+  //           ),
+  //         );
+  //
+  //       const { _id, ...rest } = retentionDiary;
+  //       const numberOfAnswerers = retentionDiary.answerList.length;
+  //       const historyCreatePromise = this.historyModel.create(
+  //         [
+  //           {
+  //             ...rest,
+  //             diaryId,
+  //             numberOfAnswerers,
+  //           },
+  //         ],
+  //         { session },
+  //       );
+  //       const diaryUpdatePromise = this.diaryRepository.updateOne(
+  //         clientId,
+  //         body,
+  //         session,
+  //       );
+  //
+  //       await Promise.all([
+  //         ...chatRoomUpdatePromises,
+  //         historyCreatePromise,
+  //         diaryUpdatePromise,
+  //       ]);
+  //     });
+  //     res.status(HttpStatus.NO_CONTENT);
+  //     return;
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     const customError: CustomErrorOptions = {
+  //       information: {
+  //         clientId,
+  //         body,
+  //       },
+  //       where: 'handleDiaryOwner',
+  //       err,
+  //     };
+  //     throw new InternalServerErrorException(customError);
+  //   } finally {
+  //     session.endSession();
+  //   }
+  // }
+
+  private async handleAnswerer(clientId: string, body: CreateDiaryDto) {
+    await this.diaryRepository.createWithId(clientId, body);
+  }
+
+  private async handleNewbie(body: CreateDiaryDto, res: Response) {
+    const diary = await this.diaryRepository.create(body);
+    const diaryId = diary._id.toString();
+    this.setDiaryCookies(res, diaryId);
+    return diaryId;
+  }
+
+  private async handleCache(clientId: string) {
+    const keys = await this.cacheService.keys();
+    const promises: Promise<void>[] = [];
+    for (const key of keys) {
+      if (key.includes(`${clientId}`)) {
+        promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+      }
+    }
+    await Promise.all(promises);
+  }
+
+  private async handleQueue(diaryId: string) {
+    const queueName = this.configService.get<string>('QUEUE_NAME');
+    console.log(queueName);
+    if (!queueName) {
+      throw new InternalServerErrorException(
+        'queueName이 정의되지 않았습니다.',
+      );
+    }
+    const message = {
+      diaryId,
+      type: 'aiPostAnswer',
+    };
+    const randomId = randomUUID();
+    try {
+      await this.sqsService.send(queueName, {
+        id: 'id',
+        body: message,
+        groupId: 'gomgom',
+        deduplicationId: randomId,
+      });
+    } catch (err) {
+      console.log('=== error ===');
+      console.log(JSON.stringify(err));
+    }
+  }
+
   async postQuestion({
     body,
     clientId,
@@ -134,118 +339,146 @@ export class DiaryService {
     let diaryId = clientId;
     try {
       const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
-      // TODO 3가지 경우 전부 맞게 들어가는지 체크
-      /**
-       * if Questioner
-       * update Diary
-       * -> soft delete
-       */
       if (isDiaryOwner) {
-        const session = await this.connection.startSession();
-        try {
-          await session.withTransaction(async () => {
-            const retentionDiary = (await this.diaryRepository.findOne(
-              clientId,
-              session,
-            )) as Diary;
-            const diaryId = retentionDiary._id;
-
-            retentionDiary.createdAt = retentionDiary.updatedAt;
-            const answerList = retentionDiary.answerList;
-            const chatRoomUpdatePromises = answerList
-              .filter((answer) => answer?.roomId)
-              .map((answer) =>
-                this.chatRoomModel.updateOne(
-                  { _id: answer.roomId },
-                  { isHistory: true },
-                  { session },
-                ),
-              );
-
-            const { _id, ...rest } = retentionDiary;
-
-            const numberOfAnswerers = retentionDiary.answerList.length;
-            const historyCreatePromise = this.historyModel.create(
-              [
-                {
-                  ...rest,
-                  diaryId,
-                  numberOfAnswerers,
-                },
-              ],
-              { session },
-            );
-            const diaryUpdatePromise = this.diaryRepository.updateOne(
-              clientId,
-              body,
-              session,
-            );
-            await Promise.all([
-              ...chatRoomUpdatePromises,
-              historyCreatePromise,
-              diaryUpdatePromise,
-            ]);
-          });
-          res.status(HttpStatus.NO_CONTENT);
-          return;
-        } finally {
-          session.endSession();
-        }
-      }
-      /**
-       * if Answerer o (Questioner x)
-       * create Diary
-       */
-      const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
-      if (isAnswerer) {
-        await this.diaryRepository.createWithId(clientId, body);
+        await this.handleDiaryOwner(clientId, body, res);
         return;
       }
-      /**
-       * if Newbie (Questioner x, Answerer x)
-       * create Diary && set cookie
-       */
-      const diary = await this.diaryRepository.create(body);
-      diaryId = diary._id.toString();
-      this.setDiaryCookies(res, diaryId);
+      const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
+      if (isAnswerer) {
+        await this.handleAnswerer(clientId, body);
+        return;
+      }
+      diaryId = await this.handleNewbie(body, res);
     } finally {
-      /**
-       * Delete cache
-       * /${ANSWERERS}/${clientId}
-       * /${ANSWER}/${clientId}/*
-       */
-      const keys = await this.cacheService.keys();
-
-      const promises: Promise<void>[] = [];
-      for (const key of keys) {
-        if (key.includes(`${clientId}`)) {
-          promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
-        }
-      }
-      await Promise.all(promises);
-      const queueName = this.configService.get<string>('QUEUE_NAME');
-      if (!queueName) {
-        throw new InternalServerErrorException(
-          'queueName이 정의되지 않았습니다.',
-        );
-      }
-      const message = {
-        diaryId,
-        type: 'aiPostAnswer',
-      };
-      const randomId = randomUUID();
-      try {
-        await this.sqsService.send(queueName, {
-          id: 'id',
-          body: message,
-          groupId: 'gomgom',
-          deduplicationId: randomId,
-        });
-      } catch (err) {
-        console.log(JSON.stringify(err));
-      }
+      await this.handleCache(clientId);
+      await this.handleQueue(diaryId);
     }
   }
+
+  // async postQuestion({
+  //   body,
+  //   clientId,
+  //   res,
+  // }: {
+  //   body: CreateDiaryDto;
+  //   clientId: string;
+  //   res: Response;
+  // }) {
+  //   let diaryId = clientId;
+  //   try {
+  //     const isDiaryOwner = await this.diaryRepository.checkOwnership(clientId);
+  //     // TODO 3가지 경우 전부 맞게 들어가는지 체크
+  //     /**
+  //      * if Questioner
+  //      * update Diary
+  //      * -> soft delete
+  //      */
+  //     if (isDiaryOwner) {
+  //       const session = await this.connection.startSession();
+  //       try {
+  //         await session.withTransaction(async () => {
+  //           const retentionDiary = (await this.diaryRepository.findOne(
+  //             clientId,
+  //             session,
+  //           )) as Diary;
+  //           const diaryId = retentionDiary._id;
+  //
+  //           retentionDiary.createdAt = retentionDiary.updatedAt;
+  //           const answerList = retentionDiary.answerList;
+  //           const chatRoomUpdatePromises = answerList
+  //             .filter((answer) => answer?.roomId)
+  //             .map((answer) =>
+  //               this.chatRoomModel.updateOne(
+  //                 { _id: answer.roomId },
+  //                 { isHistory: true },
+  //                 { session },
+  //               ),
+  //             );
+  //
+  //           const { _id, ...rest } = retentionDiary;
+  //
+  //           const numberOfAnswerers = retentionDiary.answerList.length;
+  //           const historyCreatePromise = this.historyModel.create(
+  //             [
+  //               {
+  //                 ...rest,
+  //                 diaryId,
+  //                 numberOfAnswerers,
+  //               },
+  //             ],
+  //             { session },
+  //           );
+  //           const diaryUpdatePromise = this.diaryRepository.updateOne(
+  //             clientId,
+  //             body,
+  //             session,
+  //           );
+  //           await Promise.all([
+  //             ...chatRoomUpdatePromises,
+  //             historyCreatePromise,
+  //             diaryUpdatePromise,
+  //           ]);
+  //         });
+  //         res.status(HttpStatus.NO_CONTENT);
+  //         return;
+  //       } finally {
+  //         session.endSession();
+  //       }
+  //     }
+  //     /**
+  //      * if Answerer o (Questioner x)
+  //      * create Diary
+  //      */
+  //     const isAnswerer = await this.diaryRepository.existAsAnswerer(clientId);
+  //     if (isAnswerer) {
+  //       await this.diaryRepository.createWithId(clientId, body);
+  //       return;
+  //     }
+  //     /**
+  //      * if Newbie (Questioner x, Answerer x)
+  //      * create Diary && set cookie
+  //      */
+  //     const diary = await this.diaryRepository.create(body);
+  //     diaryId = diary._id.toString();
+  //     this.setDiaryCookies(res, diaryId);
+  //   } finally {
+  //     /**
+  //      * Delete cache
+  //      * /${ANSWERERS}/${clientId}
+  //      * /${ANSWER}/${clientId}/*
+  //      */
+  //     const keys = await this.cacheService.keys();
+  //
+  //     const promises: Promise<void>[] = [];
+  //     for (const key of keys) {
+  //       if (key.includes(`${clientId}`)) {
+  //         promises.push(this.cacheService.del(key.replace('/v1/diary/', '')));
+  //       }
+  //     }
+  //     await Promise.all(promises);
+  //     const queueName = this.configService.get<string>('QUEUE_NAME');
+  //     if (!queueName) {
+  //       throw new InternalServerErrorException(
+  //         'queueName이 정의되지 않았습니다.',
+  //       );
+  //     }
+  //     const message = {
+  //       diaryId,
+  //       type: 'aiPostAnswer',
+  //     };
+  //     const randomId = randomUUID();
+  //     try {
+  //       await this.sqsService.send(queueName, {
+  //         id: 'id',
+  //         body: message,
+  //         groupId: 'gomgom',
+  //         deduplicationId: randomId,
+  //       });
+  //     } catch (err) {
+  //       console.log(JSON.stringify(err));
+  //     }
+  //   }
+  // }
 
   async getAnswer({
     diaryId,

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { HistoryRepository } from '../common/repositories/history.repository';
+import { HistoryRepository } from './history.repository';
 import { Types } from 'mongoose';
 import { PaginateHistoryDto } from '../common/dtos/response/history.get.dto';
 import { generatePaginationQuery } from 'src/utils/pagination';
