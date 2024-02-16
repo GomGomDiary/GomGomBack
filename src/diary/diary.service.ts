@@ -303,7 +303,6 @@ export class DiaryService {
 
   private async handleQueue(diaryId: string) {
     const queueName = this.configService.get<string>('QUEUE_NAME');
-    console.log(queueName);
     if (!queueName) {
       throw new InternalServerErrorException(
         'queueName이 정의되지 않았습니다.',
