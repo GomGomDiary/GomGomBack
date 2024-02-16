@@ -18,7 +18,7 @@ export class CacheService {
     return await this.cacheService.store.keys();
   }
 
-  async set(key: string, value: any) {
-    await this.cacheService.set(`/v1/diary/${key}`, value);
-  }
+  // async set(key: string, value: any) {
+  //   await this.cacheService.set(`/v1/diary/${key}`, value);
+  // }
 }

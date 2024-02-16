@@ -87,7 +87,7 @@ describe('DiaryService', () => {
 
   describe('postQuestion', () => {
     describe('Diary Owner일 때', () => {
-      it('204 status code를 반환한다.', async () => {
+      it('handleDiaryOwner 메서드를 호출한다.', async () => {
         const body: CreateDiaryDto = {
           question: [],
           questioner: 'questioner',
@@ -128,58 +128,17 @@ describe('DiaryService', () => {
           .fn()
           .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
         configService.get = jest.fn().mockReturnValueOnce('1234');
-        // cacheRepository.del = jest
-        //   .fn()
-        //   .mockResolvedValue(Promise.resolve(void 0));
 
         await diaryService.postQuestion({ body, clientId, res });
 
-        expect(res.statusCode).toBe(204);
-      });
-
-      it('create 메서드를 한 번 호출한다', async () => {
-        const body: CreateDiaryDto = {
-          question: [],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-        };
-        const clientId = new Types.ObjectId().toString();
-        const res = httpMocks.createResponse();
-        const diary: Diary = {
-          _id: new Types.ObjectId(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          question: [],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-          answerList: [],
-        };
-        diaryRepository.checkOwnership = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(true));
-        diaryRepository.findOne = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(diary));
-        diaryRepository.updateOne = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(void 0));
-        cacheService.keys = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        // cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
-        configService.get = jest.fn().mockReturnValueOnce('1234');
-        jest.spyOn(historyModel, 'create');
-
-        await diaryService.postQuestion({ body, clientId, res });
-
+        expect(diaryRepository.updateOne).toBeCalledTimes(1);
         expect(historyModel.create).toBeCalledTimes(1);
+        expect(res.statusCode).toBe(204);
       });
     });
 
     describe('Answerer일 때', () => {
-      it('createWithId 메서드를 1번 호출한다.', async () => {
+      it('handleAnswerer 메서드를 호출한다.', async () => {
         const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
@@ -212,7 +171,7 @@ describe('DiaryService', () => {
     });
 
     describe('Newbie일 때', () => {
-      it('create 메서드를 호출한다.', async () => {
+      it('handleNewbie 메서드를 호출한다.', async () => {
         const body: CreateDiaryDto = {
           question: ['질문', '일까요?'],
           questioner: 'questioner',
@@ -235,40 +194,11 @@ describe('DiaryService', () => {
         jest
           .spyOn(diaryRepository, 'create')
           .mockResolvedValue({ _id: new Types.ObjectId() });
-
-        await diaryService.postQuestion({ body, clientId, res });
-
-        expect(diaryRepository.create).toBeCalledTimes(1);
-      });
-
-      it('cookie를 심어야 한다.', async () => {
-        const body: CreateDiaryDto = {
-          question: ['질문', '일까요?'],
-          questioner: 'questioner',
-          challenge: 'challenge',
-          countersign: 'countersign',
-        };
-        const clientId = new Types.ObjectId().toString();
-        const res = httpMocks.createResponse();
-        diaryRepository.checkOwnership = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(false));
-        diaryRepository.existAsAnswerer = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(false));
-        cacheService.keys = jest
-          .fn()
-          .mockResolvedValue(Promise.resolve(['/v1/diary/1234']));
-        cacheService.del = jest.fn().mockResolvedValue(Promise.resolve(void 0));
-        diaryRepository.create = jest
-          .fn()
-          .mockResolvedValue({ _id: new Types.ObjectId() });
-        configService.get = jest.fn().mockReturnValue('1234');
-
         jest.spyOn(res, 'cookie');
 
         await diaryService.postQuestion({ body, clientId, res });
 
+        expect(diaryRepository.create).toBeCalledTimes(1);
         expect(res.cookie).toHaveBeenCalled();
       });
     });

@@ -322,7 +322,6 @@ export class DiaryService {
         deduplicationId: randomId,
       });
     } catch (err) {
-      console.log('=== error ===');
       console.log(JSON.stringify(err));
     }
   }
