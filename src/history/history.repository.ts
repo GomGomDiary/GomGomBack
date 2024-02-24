@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { History } from 'src/models/history.schema';
-import { HistoryGetDto } from '../dtos/response/history.get.dto';
-import { HistoryIdDto } from '../dtos/request/historyId.dto';
+import { HistoryGetDto } from '../common/dtos/response/history.get.dto';
+import { HistoryIdDto } from '../common/dtos/request/historyId.dto';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
-} from '../errors/customError';
+} from '../common/errors/customError';
 import { PaginateQueryType } from 'src/utils/pagination';
 
 @Injectable()

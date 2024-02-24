@@ -9,8 +9,8 @@ import mongoose, { Model, Types } from 'mongoose';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateChatRoomDto } from 'src/common/dtos/request/chatRoom.post.dto';
 import { RoomIdDto } from 'src/common/dtos/request/roomId.dto';
-import { ChatRepository } from 'src/common/repositories/chat.repository';
-import { DiaryRepository } from 'src/common/repositories/diary.repository';
+import { ChatRepository } from 'src/chat/chat.repository';
+import { DiaryRepository } from 'src/diary/diary.repository';
 import { ChatRoom } from 'src/models/chatRoom.schema';
 import { Diary } from 'src/models/diary.schema';
 
@@ -114,4 +114,13 @@ export class ChatService {
       answerer,
     };
   }
+
+  // async test() {
+  //   const result = await this.bardService.generateResponse(
+  //     '사람은 언제 죽는다고 생각해?',
+  //   );
+  //
+  //   console.log(result);
+  //   return '1234';
+  // }
 }

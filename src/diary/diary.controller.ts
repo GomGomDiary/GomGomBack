@@ -106,8 +106,8 @@ export class DiaryController {
     description: '다이어리 업데이트를 요청하는 시그널을 보냅니다.',
   })
   @Post('updating-signal')
-  async postUpdatingSignal(@Body() body: any) {
-    return this.diaryService.postUpdatingSignal(body);
+  async postUpdatingSignal() {
+    return this.diaryService.postUpdatingSignal();
   }
 
   @ApiOperation({

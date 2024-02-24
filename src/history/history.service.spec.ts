@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HistoryService } from './history.service';
-import { HistoryRepository } from '../common/repositories/history.repository';
+import { HistoryRepository } from './history.repository';
 import { Types } from 'mongoose';
 import {
   HistoryGetDto,

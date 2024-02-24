@@ -4,9 +4,9 @@ import { ClientSession, Model, Types } from 'mongoose';
 import {
   CustomErrorOptions,
   CustomInternalServerError,
-} from '../errors/customError';
+} from '../common/errors/customError';
 import { ChatRoom } from 'src/models/chatRoom.schema';
-import { CreateChatRoomDto } from '../dtos/request/chatRoom.post.dto';
+import { CreateChatRoomDto } from '../common/dtos/request/chatRoom.post.dto';
 
 @Injectable()
 export class ChatRepository {

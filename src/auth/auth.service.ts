@@ -6,7 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { DiaryRepository } from 'src/common/repositories/diary.repository';
+import { DiaryRepository } from 'src/diary/diary.repository';
 
 @Injectable()
 export class AuthService {

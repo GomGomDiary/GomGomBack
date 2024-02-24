@@ -2,8 +2,8 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CreateChatMessageDto } from 'src/common/dtos/request/chat.post.dto';
 import { PaginateMessageDto } from 'src/common/dtos/request/message.get.dto';
-import { ChatRepository } from 'src/common/repositories/chat.repository';
-import { ChatMessageRepository } from 'src/common/repositories/message.repository';
+import { ChatRepository } from 'src/chat/chat.repository';
+import { ChatMessageRepository } from 'src/chat/message/message.repository';
 import { Chat } from 'src/models/chat.schema';
 import { generatePaginationQuery } from 'src/utils/pagination';
 
