@@ -74,6 +74,12 @@ jobs:
       - name: npm e2e
         run : npm run test:e2e
 
+      - name: visualize test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: success() || failure()
+        with:
+          files: test-results/**/*.xml
+
       - name : npm build
         run : npm run build
       # - name: test using docker compose

@@ -90,7 +90,7 @@
       [
         "jest-junit",
         {
-          "outputDirectory": "./test-results/junit"
+          "outputDirectory": "./test-results/unit"
         }
       ]
     ],
